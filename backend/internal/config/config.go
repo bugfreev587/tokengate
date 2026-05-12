@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -1275,6 +1276,9 @@ func load(allowMissingJWTSecret bool) (*Config, error) {
 	if err := viper.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("unmarshal config error: %w", err)
 	}
+	if err := applyConnectionURLCompatibility(&cfg); err != nil {
+		return nil, err
+	}
 
 	cfg.RunMode = NormalizeRunMode(cfg.RunMode)
 	cfg.Server.Mode = strings.ToLower(strings.TrimSpace(cfg.Server.Mode))
@@ -1396,6 +1400,110 @@ func load(allowMissingJWTSecret bool) (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+func applyConnectionURLCompatibility(cfg *Config) error {
+	if raw := strings.TrimSpace(os.Getenv("DATABASE_URL")); raw != "" {
+		if err := applyDatabaseURL(raw, &cfg.Database); err != nil {
+			return fmt.Errorf("parse DATABASE_URL: %w", err)
+		}
+	}
+	if raw := strings.TrimSpace(os.Getenv("REDIS_URL")); raw != "" {
+		if err := applyRedisURL(raw, &cfg.Redis); err != nil {
+			return fmt.Errorf("parse REDIS_URL: %w", err)
+		}
+	}
+	return nil
+}
+
+func applyDatabaseURL(raw string, cfg *DatabaseConfig) error {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return err
+	}
+	switch strings.ToLower(strings.TrimSpace(u.Scheme)) {
+	case "postgres", "postgresql":
+	default:
+		return fmt.Errorf("unsupported scheme %q", u.Scheme)
+	}
+	if host := strings.TrimSpace(u.Hostname()); host != "" {
+		cfg.Host = host
+	}
+	if cfg.Host == "" {
+		return fmt.Errorf("missing host")
+	}
+	if portText := strings.TrimSpace(u.Port()); portText != "" {
+		port, err := strconv.Atoi(portText)
+		if err != nil {
+			return fmt.Errorf("invalid port %q", portText)
+		}
+		cfg.Port = port
+	} else if cfg.Port == 0 {
+		cfg.Port = 5432
+	}
+	if u.User != nil {
+		if username := strings.TrimSpace(u.User.Username()); username != "" {
+			cfg.User = username
+		}
+		if password, ok := u.User.Password(); ok {
+			cfg.Password = password
+		}
+	}
+	if dbName := strings.TrimPrefix(strings.TrimSpace(u.Path), "/"); dbName != "" {
+		cfg.DBName = dbName
+	}
+	if sslmode := strings.TrimSpace(u.Query().Get("sslmode")); sslmode != "" {
+		cfg.SSLMode = sslmode
+	}
+	return nil
+}
+
+func applyRedisURL(raw string, cfg *RedisConfig) error {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return err
+	}
+	switch strings.ToLower(strings.TrimSpace(u.Scheme)) {
+	case "redis", "rediss":
+	default:
+		return fmt.Errorf("unsupported scheme %q", u.Scheme)
+	}
+	if host := strings.TrimSpace(u.Hostname()); host != "" {
+		cfg.Host = host
+	}
+	if cfg.Host == "" {
+		return fmt.Errorf("missing host")
+	}
+	if portText := strings.TrimSpace(u.Port()); portText != "" {
+		port, err := strconv.Atoi(portText)
+		if err != nil {
+			return fmt.Errorf("invalid port %q", portText)
+		}
+		cfg.Port = port
+	} else if cfg.Port == 0 {
+		cfg.Port = 6379
+	}
+	if u.User != nil {
+		if password, ok := u.User.Password(); ok {
+			cfg.Password = password
+		}
+	}
+	if dbText := strings.TrimPrefix(strings.TrimSpace(u.Path), "/"); dbText != "" {
+		db, err := strconv.Atoi(dbText)
+		if err != nil {
+			return fmt.Errorf("invalid redis db %q", dbText)
+		}
+		cfg.DB = db
+	}
+	if dbQuery := strings.TrimSpace(u.Query().Get("db")); dbQuery != "" {
+		db, err := strconv.Atoi(dbQuery)
+		if err != nil {
+			return fmt.Errorf("invalid redis db query %q", dbQuery)
+		}
+		cfg.DB = db
+	}
+	cfg.EnableTLS = strings.EqualFold(u.Scheme, "rediss")
+	return nil
 }
 
 func setDefaults() {

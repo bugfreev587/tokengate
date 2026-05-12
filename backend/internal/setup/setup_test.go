@@ -87,3 +87,56 @@ func TestWriteConfigFileKeepsDefaultUserConcurrency(t *testing.T) {
 		t.Fatalf("config missing default user concurrency, got:\n%s", string(data))
 	}
 }
+
+func TestApplyDatabaseURLFromEnv(t *testing.T) {
+	t.Setenv("DATABASE_URL", "postgres://railway:secret@db.railway.internal:6543/tokengate?sslmode=require")
+
+	cfg := DatabaseConfig{}
+	if err := applyDatabaseURLFromEnv(&cfg); err != nil {
+		t.Fatalf("applyDatabaseURLFromEnv() error = %v", err)
+	}
+
+	if cfg.Host != "db.railway.internal" {
+		t.Fatalf("Host = %q, want %q", cfg.Host, "db.railway.internal")
+	}
+	if cfg.Port != 6543 {
+		t.Fatalf("Port = %d, want %d", cfg.Port, 6543)
+	}
+	if cfg.User != "railway" {
+		t.Fatalf("User = %q, want %q", cfg.User, "railway")
+	}
+	if cfg.Password != "secret" {
+		t.Fatalf("Password = %q, want %q", cfg.Password, "secret")
+	}
+	if cfg.DBName != "tokengate" {
+		t.Fatalf("DBName = %q, want %q", cfg.DBName, "tokengate")
+	}
+	if cfg.SSLMode != "require" {
+		t.Fatalf("SSLMode = %q, want %q", cfg.SSLMode, "require")
+	}
+}
+
+func TestApplyRedisURLFromEnv(t *testing.T) {
+	t.Setenv("REDIS_URL", "rediss://:secret@redis.railway.internal:6380/5")
+
+	cfg := RedisConfig{}
+	if err := applyRedisURLFromEnv(&cfg); err != nil {
+		t.Fatalf("applyRedisURLFromEnv() error = %v", err)
+	}
+
+	if cfg.Host != "redis.railway.internal" {
+		t.Fatalf("Host = %q, want %q", cfg.Host, "redis.railway.internal")
+	}
+	if cfg.Port != 6380 {
+		t.Fatalf("Port = %d, want %d", cfg.Port, 6380)
+	}
+	if cfg.Password != "secret" {
+		t.Fatalf("Password = %q, want %q", cfg.Password, "secret")
+	}
+	if cfg.DB != 5 {
+		t.Fatalf("DB = %d, want %d", cfg.DB, 5)
+	}
+	if !cfg.EnableTLS {
+		t.Fatalf("EnableTLS = false, want true")
+	}
+}

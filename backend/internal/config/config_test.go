@@ -367,6 +367,33 @@ func TestLoadDefaultDatabaseSSLMode(t *testing.T) {
 	}
 }
 
+func TestLoadDatabaseConfigFromDatabaseURL(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("DATABASE_URL", "postgres://railway:secret@db.railway.internal:6543/tokengate?sslmode=require")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "db.railway.internal", cfg.Database.Host)
+	require.Equal(t, 6543, cfg.Database.Port)
+	require.Equal(t, "railway", cfg.Database.User)
+	require.Equal(t, "secret", cfg.Database.Password)
+	require.Equal(t, "tokengate", cfg.Database.DBName)
+	require.Equal(t, "require", cfg.Database.SSLMode)
+}
+
+func TestLoadRedisConfigFromRedisURL(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("REDIS_URL", "rediss://:secret@redis.railway.internal:6380/3")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "redis.railway.internal", cfg.Redis.Host)
+	require.Equal(t, 6380, cfg.Redis.Port)
+	require.Equal(t, "secret", cfg.Redis.Password)
+	require.Equal(t, 3, cfg.Redis.DB)
+	require.True(t, cfg.Redis.EnableTLS)
+}
+
 func TestValidateLinuxDoFrontendRedirectURL(t *testing.T) {
 	resetViperWithJWTSecret(t)
 

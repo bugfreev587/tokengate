@@ -7,6 +7,8 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -531,6 +533,82 @@ func getEnvIntOrDefault(key string, defaultValue int) int {
 	return defaultValue
 }
 
+func applyDatabaseURLFromEnv(cfg *DatabaseConfig) error {
+	raw := strings.TrimSpace(os.Getenv("DATABASE_URL"))
+	if raw == "" {
+		return nil
+	}
+	u, err := url.Parse(raw)
+	if err != nil {
+		return fmt.Errorf("parse DATABASE_URL: %w", err)
+	}
+	switch strings.ToLower(strings.TrimSpace(u.Scheme)) {
+	case "postgres", "postgresql":
+	default:
+		return fmt.Errorf("parse DATABASE_URL: unsupported scheme %q", u.Scheme)
+	}
+	if host := strings.TrimSpace(u.Hostname()); host != "" {
+		cfg.Host = host
+	}
+	if cfg.Host == "" {
+		return fmt.Errorf("parse DATABASE_URL: missing host")
+	}
+	if portText := strings.TrimSpace(u.Port()); portText != "" {
+		port, err := strconv.Atoi(portText)
+		if err != nil {
+			return fmt.Errorf("parse DATABASE_URL: invalid port %q", portText)
+		}
+		cfg.Port = port
+	} else if cfg.Port == 0 {
+		cfg.Port = 5432
+	}
+	if u.User != nil {
+		if username := strings.TrimSpace(u.User.Username()); username != "" {
+			cfg.User = username
+		}
+		if password, ok := u.User.Password(); ok {
+			cfg.Password = password
+		}
+	}
+	if dbName := strings.TrimPrefix(strings.TrimSpace(u.Path), "/"); dbName != "" {
+		cfg.DBName = dbName
+	}
+	if sslmode := strings.TrimSpace(u.Query().Get("sslmode")); sslmode != "" {
+		cfg.SSLMode = sslmode
+	}
+	return nil
+}
+
+func applyRedisURLFromEnv(cfg *RedisConfig) error {
+	raw := strings.TrimSpace(os.Getenv("REDIS_URL"))
+	if raw == "" {
+		return nil
+	}
+	opt, err := redis.ParseURL(raw)
+	if err != nil {
+		return fmt.Errorf("parse REDIS_URL: %w", err)
+	}
+	host, portText, err := net.SplitHostPort(opt.Addr)
+	if err != nil {
+		host = opt.Addr
+		portText = ""
+	}
+	cfg.Host = host
+	if portText != "" {
+		port, err := strconv.Atoi(portText)
+		if err != nil {
+			return fmt.Errorf("parse REDIS_URL: invalid port %q", portText)
+		}
+		cfg.Port = port
+	} else if cfg.Port == 0 {
+		cfg.Port = 6379
+	}
+	cfg.Password = opt.Password
+	cfg.DB = opt.DB
+	cfg.EnableTLS = opt.TLSConfig != nil
+	return nil
+}
+
 // AutoSetupFromEnv performs automatic setup using environment variables
 // This is designed for Docker deployment where all config is passed via env vars
 func AutoSetupFromEnv() error {
@@ -574,6 +652,12 @@ func AutoSetupFromEnv() error {
 			ExpireHour: getEnvIntOrDefault("JWT_EXPIRE_HOUR", 24),
 		},
 		Timezone: tz,
+	}
+	if err := applyDatabaseURLFromEnv(&cfg.Database); err != nil {
+		return err
+	}
+	if err := applyRedisURLFromEnv(&cfg.Redis); err != nil {
+		return err
 	}
 
 	// Generate JWT secret if not provided

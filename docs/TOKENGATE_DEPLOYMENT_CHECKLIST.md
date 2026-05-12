@@ -77,24 +77,15 @@ Minimum backend environment variables to verify the first deployment:
 - `TOTP_ENCRYPTION_KEY`
 - `ADMIN_EMAIL`
 - `ADMIN_PASSWORD`
-- `DATABASE_HOST`
-- `DATABASE_PORT`
-- `DATABASE_USER`
-- `DATABASE_PASSWORD`
-- `DATABASE_DBNAME`
-- `DATABASE_SSLMODE`
-- `REDIS_HOST`
-- `REDIS_PORT`
-- `REDIS_PASSWORD`
-- `REDIS_DB`
-- `REDIS_ENABLE_TLS`
+- `DATABASE_URL`
+- `REDIS_URL`
 
 If you want the first deployment to behave like the public product, keep `RUN_MODE=standard`.
 
 Notes:
 
-- The auto-setup path reads `DATABASE_*` and `REDIS_*` variables directly.
-- If Railway gives you connection values in another naming format, map them into the variables above.
+- The backend now supports Railway-style `DATABASE_URL` and `REDIS_URL` directly.
+- If you prefer more explicit configuration, the split `DATABASE_*` and `REDIS_*` variables still work too.
 - `ADMIN_PASSWORD` can be left empty, but for the first public-style verification it is better to set it explicitly.
 
 ## First Verification Path
