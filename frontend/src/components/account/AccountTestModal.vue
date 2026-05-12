@@ -310,16 +310,31 @@ const supportsOpenAIImageTest = computed(() => {
 
 const supportsImageTest = computed(() => supportsGeminiImageTest.value || supportsOpenAIImageTest.value)
 
+const normalizeApiBase = (value?: string | null) => {
+  const raw = (value || '').trim()
+  if (!raw) return ''
+
+  try {
+    const url = new URL(raw, window.location.origin)
+    url.pathname = url.pathname.replace(/\/+$/, '')
+    return `${url.origin}${url.pathname}`
+  } catch {
+    return raw.replace(/\/+$/, '')
+  }
+}
+
 const resolvedAdminApiBase = computed(() => {
   const candidates = [
-    appStore.apiBaseUrl,
     import.meta.env.VITE_API_BASE_URL as string | undefined,
+    appStore.apiBaseUrl,
     '/api/v1'
   ]
 
   for (const candidate of candidates) {
-    const normalized = (candidate || '').trim().replace(/\/+$/, '')
-    if (normalized) return normalized
+    const normalized = normalizeApiBase(candidate)
+    if (!normalized) continue
+    if (normalized === window.location.origin) continue
+    return normalized
   }
 
   return '/api/v1'
