@@ -1,6 +1,23 @@
 <template>
   <AppLayout>
     <div class="space-y-6">
+      <div class="card p-5">
+        <div class="grid gap-4 md:grid-cols-3">
+          <div>
+            <p class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">{{ t('userSubscriptions.explainer.planAccessLabel') }}</p>
+            <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">{{ t('userSubscriptions.explainer.planAccessDesc') }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">{{ t('userSubscriptions.explainer.includedUsageLabel') }}</p>
+            <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">{{ t('userSubscriptions.explainer.includedUsageDesc') }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">{{ t('userSubscriptions.explainer.modelPricingLabel') }}</p>
+            <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">{{ t('userSubscriptions.explainer.modelPricingDesc') }}</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Loading State -->
       <div v-if="loading" class="flex justify-center py-12">
         <div
@@ -98,7 +115,7 @@
             <div v-if="subscription.group?.daily_limit_usd" class="space-y-2">
               <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {{ t('userSubscriptions.daily') }}
+                  {{ t('userSubscriptions.dailyIncluded') }}
                 </span>
                 <span class="text-sm text-gray-500 dark:text-dark-400">
                   ${{ (subscription.daily_usage_usd || 0).toFixed(2) }} / ${{
@@ -139,7 +156,7 @@
             <div v-if="subscription.group?.weekly_limit_usd" class="space-y-2">
               <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {{ t('userSubscriptions.weekly') }}
+                  {{ t('userSubscriptions.weeklyIncluded') }}
                 </span>
                 <span class="text-sm text-gray-500 dark:text-dark-400">
                   ${{ (subscription.weekly_usage_usd || 0).toFixed(2) }} / ${{
@@ -180,7 +197,7 @@
             <div v-if="subscription.group?.monthly_limit_usd" class="space-y-2">
               <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {{ t('userSubscriptions.monthly') }}
+                  {{ t('userSubscriptions.monthlyIncluded') }}
                 </span>
                 <span class="text-sm text-gray-500 dark:text-dark-400">
                   ${{ (subscription.monthly_usage_usd || 0).toFixed(2) }} / ${{
@@ -230,7 +247,7 @@
                 <span class="text-4xl text-emerald-600 dark:text-emerald-400">∞</span>
                 <div>
                   <p class="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                    {{ t('userSubscriptions.unlimited') }}
+                    {{ t('userSubscriptions.flexibleUsage') }}
                   </p>
                   <p class="text-xs text-emerald-600/70 dark:text-emerald-400/70">
                     {{ t('userSubscriptions.unlimitedDesc') }}

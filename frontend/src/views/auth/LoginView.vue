@@ -10,6 +10,29 @@
           {{ t('auth.signInToAccount') }}
         </p>
       </div>
+
+      <div class="rounded-2xl border border-primary-100 bg-primary-50/70 p-4 dark:border-primary-900/40 dark:bg-primary-950/30">
+        <p class="text-sm font-semibold text-primary-900 dark:text-primary-200">
+          {{ t('auth.productContextTitle') }}
+        </p>
+        <p class="mt-1 text-sm text-primary-700 dark:text-primary-300">
+          {{ t('auth.productContextDescription') }}
+        </p>
+        <ul class="mt-3 space-y-2 text-sm text-primary-800 dark:text-primary-200">
+          <li class="flex items-start gap-2">
+            <Icon name="checkCircle" size="sm" class="mt-0.5 text-primary-600 dark:text-primary-300" />
+            <span>{{ t('auth.productContextBullets.apiKeys') }}</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <Icon name="checkCircle" size="sm" class="mt-0.5 text-primary-600 dark:text-primary-300" />
+            <span>{{ t('auth.productContextBullets.billing') }}</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <Icon name="checkCircle" size="sm" class="mt-0.5 text-primary-600 dark:text-primary-300" />
+            <span>{{ t('auth.productContextBullets.models') }}</span>
+          </li>
+        </ul>
+      </div>
       <!-- Login Form -->
       <form @submit.prevent="handleLogin" class="space-y-5">
         <!-- Email Input -->
@@ -132,6 +155,15 @@
         />
 
         <div v-if="showOAuthLogin" class="space-y-3 pt-1">
+          <div class="rounded-xl border border-gray-200/80 bg-white/70 p-4 dark:border-dark-700 dark:bg-dark-900/50">
+            <p class="text-sm font-medium text-gray-900 dark:text-white">
+              {{ t('auth.alternativeAccessTitle') }}
+            </p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-dark-400">
+              {{ t('auth.alternativeAccessHint') }}
+            </p>
+          </div>
+
           <div class="flex items-center gap-3">
             <div class="h-px flex-1 bg-gray-200 dark:bg-dark-700"></div>
             <span class="text-xs text-gray-500 dark:text-dark-400">
@@ -212,7 +244,7 @@ import { extractI18nErrorMessage } from '@/utils/apiError'
 import { clearAllAffiliateReferralCodes } from '@/utils/oauthAffiliate'
 
 const { t } = useI18n()
-const LOGIN_AGREEMENT_STORAGE_KEY = 'sub2api_login_agreement_consent'
+const LOGIN_AGREEMENT_STORAGE_KEY = 'tokengate_login_agreement_consent'
 
 // ==================== Router & Stores ====================
 

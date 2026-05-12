@@ -39,13 +39,20 @@
                 <span class="settings-tab-label">{{
                   t(`admin.settings.tabs.${tab.key}`)
                 }}</span>
+                <span
+                  v-if="tab.badgeKey"
+                  class="settings-tab-badge"
+                  :class="tab.badgeTone === 'ops' ? 'settings-tab-badge-ops' : 'settings-tab-badge-advanced'"
+                >
+                  {{ t(`admin.settings.tabBadges.${tab.badgeKey}`) }}
+                </span>
               </button>
             </div>
           </nav>
         </div>
 
-        <!-- Tab: Security — Admin API Key -->
-        <div v-show="activeTab === 'security'" class="space-y-6">
+        <!-- Tab: Gateway — Admin API Key -->
+        <div v-show="activeTab === 'gateway'" class="space-y-6">
           <!-- Admin API Key Settings -->
           <div class="card">
             <div
@@ -199,7 +206,7 @@
             </div>
           </div>
         </div>
-        <!-- /Tab: Security — Admin API Key -->
+        <!-- /Tab: Gateway — Admin API Key -->
 
         <!-- Tab: Gateway -->
         <div v-show="activeTab === 'gateway'" class="space-y-6">
@@ -1353,6 +1360,26 @@
 
         <!-- Tab: Security — Registration, Turnstile, LinuxDo -->
         <div v-show="activeTab === 'security'" class="space-y-6">
+          <div class="rounded-2xl border border-primary-100 bg-primary-50/70 p-5 dark:border-primary-900/40 dark:bg-primary-950/30">
+            <h2 class="text-base font-semibold text-primary-950 dark:text-primary-100">
+              {{ t("admin.settings.sectionGuides.security.title") }}
+            </h2>
+            <p class="mt-1 text-sm text-primary-800 dark:text-primary-200">
+              {{ t("admin.settings.sectionGuides.security.description") }}
+            </p>
+            <div class="mt-3 grid gap-2 md:grid-cols-3">
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.security.items.registration") }}
+              </div>
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.security.items.signIn") }}
+              </div>
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.security.items.protection") }}
+              </div>
+            </div>
+          </div>
+
           <!-- Registration Settings -->
           <div class="card">
             <div
@@ -1647,7 +1674,7 @@
             </div>
           </div>
 
-          <!-- LinuxDo Connect OAuth 登录 -->
+          <!-- LinuxDo sign-in -->
           <div class="card">
             <div
               class="border-b border-gray-100 px-6 py-4 dark:border-dark-700"
@@ -1765,19 +1792,19 @@
             </div>
           </div>
 
-          <!-- GitHub / Google 邮箱快捷登录 -->
+          <!-- GitHub / Google sign-in -->
           <div class="card">
             <div
               class="border-b border-gray-100 px-6 py-4 dark:border-dark-700"
             >
               <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                {{ localText("邮箱快捷登录", "Email OAuth Sign-in") }}
+                {{ localText("GitHub / Google 登录", "GitHub / Google Sign-In") }}
               </h2>
               <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 {{
                   localText(
-                    "开启 GitHub 或 Google 邮箱授权登录后，系统会读取已验证邮箱，存在则直接登录，不存在则自动注册。",
-                    "After GitHub or Google email OAuth is enabled, the system reads a verified email, signs in matching users, and auto-registers missing users.",
+                    "开启后，系统会读取 GitHub 或 Google 返回的已验证邮箱；已有账户会直接登录，未命中的邮箱则可自动注册新账户。",
+                    "When enabled, TokenGate reads the verified email returned by GitHub or Google, signs in matching users, and can auto-register new users when no account exists.",
                   )
                 }}
               </p>
@@ -1991,7 +2018,7 @@
             </div>
           </div>
 
-          <!-- WeChat Connect OAuth 登录 -->
+          <!-- WeChat sign-in -->
           <div class="card">
             <div
               class="border-b border-gray-100 px-6 py-4 dark:border-dark-700"
@@ -2333,7 +2360,7 @@
             </div>
           </div>
 
-          <!-- Generic OIDC OAuth 登录 -->
+          <!-- OIDC / SSO sign-in -->
           <div class="card">
             <div
               class="border-b border-gray-100 px-6 py-4 dark:border-dark-700"
@@ -2746,6 +2773,26 @@
 
         <!-- Tab: Users -->
         <div v-show="activeTab === 'users'" class="space-y-6">
+          <div class="rounded-2xl border border-primary-100 bg-primary-50/70 p-5 dark:border-primary-900/40 dark:bg-primary-950/30">
+            <h2 class="text-base font-semibold text-primary-950 dark:text-primary-100">
+              {{ t("admin.settings.sectionGuides.users.title") }}
+            </h2>
+            <p class="mt-1 text-sm text-primary-800 dark:text-primary-200">
+              {{ t("admin.settings.sectionGuides.users.description") }}
+            </p>
+            <div class="mt-3 grid gap-2 md:grid-cols-3">
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.users.items.balance") }}
+              </div>
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.users.items.access") }}
+              </div>
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.users.items.signups") }}
+              </div>
+            </div>
+          </div>
+
           <!-- Default Settings -->
           <div class="card">
             <div
@@ -3923,6 +3970,26 @@
 
         <!-- Tab: General -->
         <div v-show="activeTab === 'general'" class="space-y-6">
+          <div class="rounded-2xl border border-primary-100 bg-primary-50/70 p-5 dark:border-primary-900/40 dark:bg-primary-950/30">
+            <h2 class="text-base font-semibold text-primary-950 dark:text-primary-100">
+              {{ t("admin.settings.sectionGuides.general.title") }}
+            </h2>
+            <p class="mt-1 text-sm text-primary-800 dark:text-primary-200">
+              {{ t("admin.settings.sectionGuides.general.description") }}
+            </p>
+            <div class="mt-3 grid gap-2 md:grid-cols-3">
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.general.items.brand") }}
+              </div>
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.general.items.api") }}
+              </div>
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.general.items.mode") }}
+              </div>
+            </div>
+          </div>
+
           <!-- Site Settings -->
           <div class="card">
             <div
@@ -5196,6 +5263,26 @@
         <!-- Tab: Email -->
         <!-- Tab: Payment -->
         <div v-show="activeTab === 'payment'" class="space-y-6">
+          <div class="rounded-2xl border border-primary-100 bg-primary-50/70 p-5 dark:border-primary-900/40 dark:bg-primary-950/30">
+            <h2 class="text-base font-semibold text-primary-950 dark:text-primary-100">
+              {{ t("admin.settings.sectionGuides.payment.title") }}
+            </h2>
+            <p class="mt-1 text-sm text-primary-800 dark:text-primary-200">
+              {{ t("admin.settings.sectionGuides.payment.description") }}
+            </p>
+            <div class="mt-3 grid gap-2 md:grid-cols-3">
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.payment.items.balance") }}
+              </div>
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.payment.items.plans") }}
+              </div>
+              <div class="rounded-xl bg-white/80 px-3 py-2 text-sm text-primary-900 dark:bg-dark-900/60 dark:text-primary-100">
+                {{ t("admin.settings.sectionGuides.payment.items.providers") }}
+              </div>
+            </div>
+          </div>
+
           <!-- Payment System Settings -->
           <div class="card">
             <div
@@ -5253,7 +5340,7 @@
                       v-model="form.payment_product_name_prefix"
                       type="text"
                       class="input"
-                      placeholder="Sub2API"
+                      placeholder="TokenGate"
                     />
                   </div>
                   <div>
@@ -5275,7 +5362,7 @@
                       class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 dark:border-dark-600 dark:bg-dark-800 dark:text-gray-300"
                     >
                       {{
-                        (form.payment_product_name_prefix || "Sub2API") +
+                        (form.payment_product_name_prefix || "TokenGate") +
                         " 100 " +
                         (form.payment_product_name_suffix || "CNY")
                       }}
@@ -6209,14 +6296,14 @@ type SettingsTab =
 const activeTab = ref<SettingsTab>("general");
 const settingsTabs = [
   { key: "general" as SettingsTab, icon: "home" as const },
-  { key: "agreement" as SettingsTab, icon: "document" as const },
-  { key: "features" as SettingsTab, icon: "bolt" as const },
   { key: "security" as SettingsTab, icon: "shield" as const },
   { key: "users" as SettingsTab, icon: "user" as const },
-  { key: "gateway" as SettingsTab, icon: "server" as const },
   { key: "payment" as SettingsTab, icon: "creditCard" as const },
-  { key: "email" as SettingsTab, icon: "mail" as const },
-  { key: "backup" as SettingsTab, icon: "database" as const },
+  { key: "gateway" as SettingsTab, icon: "server" as const, badgeKey: "advanced" as const, badgeTone: "advanced" as const },
+  { key: "agreement" as SettingsTab, icon: "document" as const, badgeKey: "advanced" as const, badgeTone: "advanced" as const },
+  { key: "features" as SettingsTab, icon: "bolt" as const, badgeKey: "advanced" as const, badgeTone: "advanced" as const },
+  { key: "email" as SettingsTab, icon: "mail" as const, badgeKey: "advanced" as const, badgeTone: "advanced" as const },
+  { key: "backup" as SettingsTab, icon: "database" as const, badgeKey: "ops" as const, badgeTone: "ops" as const },
 ];
 
 const settingsTabKeyboardActions = {
@@ -6453,9 +6540,9 @@ const form = reactive<SettingsForm>({
   default_subscriptions: [],
   force_email_on_third_party_signup: false,
   default_user_rpm_limit: 0,
-  site_name: "Sub2API",
+  site_name: "TokenGate",
   site_logo: "",
-  site_subtitle: "Subscription to API Conversion Platform",
+  site_subtitle: "Plans, balance, and transparent AI API billing",
   api_base_url: "",
   contact_info: "",
   doc_url: "",
@@ -9114,5 +9201,17 @@ watch(
 
 .settings-tab-label {
   @apply min-w-0 overflow-hidden text-ellipsis whitespace-nowrap leading-none;
+}
+
+.settings-tab-badge {
+  @apply hidden rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] md:inline-flex;
+}
+
+.settings-tab-badge-advanced {
+  @apply bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300;
+}
+
+.settings-tab-badge-ops {
+  @apply bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300;
 }
 </style>

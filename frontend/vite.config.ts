@@ -39,6 +39,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const backendUrl = env.VITE_DEV_PROXY_TARGET || 'http://localhost:8080'
   const devPort = Number(env.VITE_DEV_PORT || 3000)
+  const buildTarget = env.VITE_BUILD_TARGET || (process.env.VERCEL ? 'standalone' : 'embedded')
+  const outDir = buildTarget === 'standalone' ? 'dist' : '../backend/internal/web/dist'
 
   return {
     plugins: [
@@ -61,7 +63,9 @@ export default defineConfig(({ mode }) => {
     __INTLIFY_JIT_COMPILATION__: true
   },
   build: {
-    outDir: '../backend/internal/web/dist',
+    // `embedded`: backend serves the built frontend bundle.
+    // `standalone`: Vercel/static hosting keeps artifacts inside the frontend workspace.
+    outDir,
     emptyOutDir: true,
     rollupOptions: {
       output: {

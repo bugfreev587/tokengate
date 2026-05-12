@@ -37,27 +37,27 @@
         </div>
       </div>
 
-      <!-- Group quota info (compact) -->
+      <!-- Plan summary -->
       <div class="mb-3 grid grid-cols-2 gap-x-3 gap-y-1 rounded-lg bg-gray-50 px-3 py-2 text-xs dark:bg-dark-700/50">
         <div class="flex items-center justify-between">
-          <span class="text-gray-400 dark:text-dark-500">{{ t('payment.planCard.rate') }}</span>
+          <span class="text-gray-400 dark:text-dark-500">{{ t('payment.planCard.billingRate') }}</span>
           <span class="font-medium text-gray-700 dark:text-gray-300">{{ rateDisplay }}</span>
         </div>
         <div v-if="plan.daily_limit_usd != null" class="flex items-center justify-between">
-          <span class="text-gray-400 dark:text-dark-500">{{ t('payment.planCard.dailyLimit') }}</span>
+          <span class="text-gray-400 dark:text-dark-500">{{ t('payment.planCard.dailyIncluded') }}</span>
           <span class="font-medium text-gray-700 dark:text-gray-300">${{ plan.daily_limit_usd }}</span>
         </div>
         <div v-if="plan.weekly_limit_usd != null" class="flex items-center justify-between">
-          <span class="text-gray-400 dark:text-dark-500">{{ t('payment.planCard.weeklyLimit') }}</span>
+          <span class="text-gray-400 dark:text-dark-500">{{ t('payment.planCard.weeklyIncluded') }}</span>
           <span class="font-medium text-gray-700 dark:text-gray-300">${{ plan.weekly_limit_usd }}</span>
         </div>
         <div v-if="plan.monthly_limit_usd != null" class="flex items-center justify-between">
-          <span class="text-gray-400 dark:text-dark-500">{{ t('payment.planCard.monthlyLimit') }}</span>
+          <span class="text-gray-400 dark:text-dark-500">{{ t('payment.planCard.monthlyIncluded') }}</span>
           <span class="font-medium text-gray-700 dark:text-gray-300">${{ plan.monthly_limit_usd }}</span>
         </div>
         <div v-if="plan.daily_limit_usd == null && plan.weekly_limit_usd == null && plan.monthly_limit_usd == null" class="flex items-center justify-between">
-          <span class="text-gray-400 dark:text-dark-500">{{ t('payment.planCard.quota') }}</span>
-          <span class="font-medium text-gray-700 dark:text-gray-300">{{ t('payment.planCard.unlimited') }}</span>
+          <span class="text-gray-400 dark:text-dark-500">{{ t('payment.planCard.includedUsage') }}</span>
+          <span class="font-medium text-gray-700 dark:text-gray-300">{{ t('payment.planCard.flexible') }}</span>
         </div>
         <div v-if="modelScopeLabels.length > 0" class="col-span-2 flex items-center justify-between">
           <span class="text-gray-400 dark:text-dark-500">{{ t('payment.planCard.models') }}</span>

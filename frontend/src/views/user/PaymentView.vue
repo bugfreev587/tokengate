@@ -1,6 +1,31 @@
 <template>
   <AppLayout>
     <div class="mx-auto max-w-4xl space-y-6">
+      <div class="grid gap-4 md:grid-cols-3">
+        <div class="card p-5 md:col-span-1">
+          <p class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">{{ t('payment.summary.balanceLabel') }}</p>
+          <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">${{ (user?.balance || 0).toFixed(2) }}</p>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.summary.balanceHint') }}</p>
+        </div>
+        <div class="card p-5 md:col-span-2">
+          <p class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">{{ t('payment.summary.howBillingWorksLabel') }}</p>
+          <div class="mt-2 grid gap-3 sm:grid-cols-3">
+            <div>
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('payment.summary.stepOneTitle') }}</p>
+              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.summary.stepOneDesc') }}</p>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('payment.summary.stepTwoTitle') }}</p>
+              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.summary.stepTwoDesc') }}</p>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('payment.summary.stepThreeTitle') }}</p>
+              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.summary.stepThreeDesc') }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div v-if="loading" class="flex items-center justify-center py-20">
         <div class="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
       </div>
@@ -36,6 +61,10 @@
               <p class="text-xs font-medium text-gray-400 dark:text-gray-500">{{ t('payment.rechargeAccount') }}</p>
               <p class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ user?.username || '' }}</p>
               <p class="mt-0.5 text-sm font-medium text-green-600 dark:text-green-400">{{ t('payment.currentBalance') }}: {{ user?.balance?.toFixed(2) || '0.00' }}</p>
+            </div>
+            <div class="card p-5">
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('payment.balanceExplainer.title') }}</p>
+              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.balanceExplainer.desc') }}</p>
             </div>
             <div v-if="enabledMethods.length === 0" class="card py-16 text-center">
               <p class="text-gray-500 dark:text-gray-400">{{ t('payment.notAvailable') }}</p>
@@ -91,6 +120,23 @@
           </template>
           <!-- Subscribe Tab -->
           <template v-else-if="activeTab === 'subscription'">
+            <div v-if="!selectedPlan" class="card p-5">
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('payment.planExplainer.title') }}</p>
+              <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                <div>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('payment.planExplainer.stepOneTitle') }}</p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.planExplainer.stepOneDesc') }}</p>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('payment.planExplainer.stepTwoTitle') }}</p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.planExplainer.stepTwoDesc') }}</p>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('payment.planExplainer.stepThreeTitle') }}</p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.planExplainer.stepThreeDesc') }}</p>
+                </div>
+              </div>
+            </div>
             <!-- Subscription confirm (inline, replaces plan list) -->
             <template v-if="selectedPlan">
               <div class="card p-5">
@@ -116,26 +162,26 @@
                 <!-- Rate + Limits grid -->
                 <div class="mt-3 grid grid-cols-2 gap-3">
                   <div>
-                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('payment.planCard.rate') }}</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('payment.planCard.billingRate') }}</span>
                     <div class="flex items-baseline">
                       <span :class="['text-lg font-bold', planTextClass]">×{{ selectedPlan.rate_multiplier ?? 1 }}</span>
                     </div>
                   </div>
                   <div v-if="selectedPlan.daily_limit_usd != null">
-                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('payment.planCard.dailyLimit') }}</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('payment.planCard.dailyIncluded') }}</span>
                     <div class="text-lg font-semibold text-gray-800 dark:text-gray-200">${{ selectedPlan.daily_limit_usd }}</div>
                   </div>
                   <div v-if="selectedPlan.weekly_limit_usd != null">
-                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('payment.planCard.weeklyLimit') }}</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('payment.planCard.weeklyIncluded') }}</span>
                     <div class="text-lg font-semibold text-gray-800 dark:text-gray-200">${{ selectedPlan.weekly_limit_usd }}</div>
                   </div>
                   <div v-if="selectedPlan.monthly_limit_usd != null">
-                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('payment.planCard.monthlyLimit') }}</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('payment.planCard.monthlyIncluded') }}</span>
                     <div class="text-lg font-semibold text-gray-800 dark:text-gray-200">${{ selectedPlan.monthly_limit_usd }}</div>
                   </div>
                   <div v-if="selectedPlan.daily_limit_usd == null && selectedPlan.weekly_limit_usd == null && selectedPlan.monthly_limit_usd == null">
-                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('payment.planCard.quota') }}</span>
-                    <div class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ t('payment.planCard.unlimited') }}</div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ t('payment.planCard.includedUsage') }}</span>
+                    <div class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ t('payment.planCard.flexible') }}</div>
                   </div>
                 </div>
               </div>
@@ -193,8 +239,8 @@
                         <span :class="['shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-medium', platformBadgeLightClass(sub.group?.platform || '')]">{{ platformLabel(sub.group?.platform || '') }}</span>
                       </div>
                       <div class="flex flex-wrap gap-x-3 text-[11px] text-gray-400 dark:text-gray-500">
-                        <span>{{ t('payment.planCard.rate') }}: ×{{ sub.group?.rate_multiplier ?? 1 }}</span>
-                        <span v-if="sub.group?.daily_limit_usd == null && sub.group?.weekly_limit_usd == null && sub.group?.monthly_limit_usd == null">{{ t('payment.planCard.quota') }}: {{ t('payment.planCard.unlimited') }}</span>
+                        <span>{{ t('payment.planCard.billingRate') }}: ×{{ sub.group?.rate_multiplier ?? 1 }}</span>
+                        <span v-if="sub.group?.daily_limit_usd == null && sub.group?.weekly_limit_usd == null && sub.group?.monthly_limit_usd == null">{{ t('payment.planCard.includedUsage') }}: {{ t('payment.planCard.flexible') }}</span>
                         <span v-if="sub.expires_at">{{ t('userSubscriptions.daysRemaining', { days: getDaysRemaining(sub.expires_at) }) }}</span>
                         <span v-else>{{ t('userSubscriptions.noExpiration') }}</span>
                       </div>

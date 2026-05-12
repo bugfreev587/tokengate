@@ -10,88 +10,53 @@ export default {
     login: 'Login',
     getStarted: 'Get Started',
     goToDashboard: 'Go to Dashboard',
-    // User-focused value proposition
-    heroSubtitle: 'One Key, All AI Models',
-    heroDescription: 'No need to manage multiple subscriptions. Access Claude, GPT, Gemini and more with a single API key',
+    viewPricing: 'See Billing',
+    heroBadge: 'Subscription-Native AI API Gateway',
+    heroSubtitle: 'Sell and consume AI access with plans, balance, and transparent pricing',
+    heroDescription: 'TokenGate helps builders expose text, image, and video generation through one API while keeping subscriptions, wallet balance, and usage-based billing in the same product surface.',
+    heroStats: {
+      tokensLabel: 'Text pricing',
+      tokensValue: 'Per 1M tokens',
+      tokensDesc: 'Publish separate input and output pricing for each text model family.',
+      billingLabel: 'Media pricing',
+      billingValue: 'Per image / video unit',
+      billingDesc: 'Keep image and video billing in their native units instead of forcing fake token math.',
+      balanceLabel: 'Commercial layer',
+      balanceValue: 'Plans + balance',
+      balanceDesc: 'Combine recurring plans with wallet balance and overage billing in one developer workflow.'
+    },
     tags: {
-      subscriptionToApi: 'Subscription to API',
-      stickySession: 'Session Persistence',
-      realtimeBilling: 'Pay As You Go'
-    },
-    // Pain points section
-    painPoints: {
-      title: 'Sound Familiar?',
-      items: {
-        expensive: {
-          title: 'High Subscription Costs',
-          desc: 'Paying for multiple AI subscriptions that add up every month'
-        },
-        complex: {
-          title: 'Account Chaos',
-          desc: 'Managing scattered accounts and API keys across different platforms'
-        },
-        unstable: {
-          title: 'Service Interruptions',
-          desc: 'Single accounts hitting rate limits and disrupting your workflow'
-        },
-        noControl: {
-          title: 'No Usage Control',
-          desc: "Can't track where your money goes or limit team member usage"
-        }
-      }
-    },
-    // Solutions section
-    solutions: {
-      title: 'We Solve These Problems',
-      subtitle: 'Three simple steps to stress-free AI access'
+      subscriptionToApi: 'Plans + API keys',
+      stickySession: 'Provider routing',
+      realtimeBilling: 'Transparent billing'
     },
     features: {
-      unifiedGateway: 'One-Click Access',
-      unifiedGatewayDesc: 'Get a single API key to call all connected AI models. No separate applications needed.',
-      multiAccount: 'Always Reliable',
-      multiAccountDesc: 'Smart routing across multiple upstream accounts with automatic failover. Say goodbye to errors.',
-      balanceQuota: 'Pay What You Use',
-      balanceQuotaDesc: 'Usage-based billing with quota limits. Full visibility into team consumption.'
+      unifiedGateway: 'Unified API Surface',
+      unifiedGatewayDesc: 'Route text, image, and video workloads through one developer-facing gateway instead of stitching providers together in every app.',
+      multiAccount: 'Operationally Reliable',
+      multiAccountDesc: 'Use account pools, provider fallback, and routing rules so upstream changes do not directly break your customer experience.',
+      balanceQuota: 'Commercially Ready',
+      balanceQuotaDesc: 'Ship plans, wallet balance, usage logs, and spend controls without building a separate billing system around your AI stack.'
     },
-    // Comparison section
-    comparison: {
-      title: 'Why Choose Us?',
-      headers: {
-        feature: 'Comparison',
-        official: 'Official Subscriptions',
-        us: 'Our Platform'
-      },
-      items: {
-        pricing: {
-          feature: 'Pricing',
-          official: 'Fixed monthly fee, pay even if unused',
-          us: 'Pay only for what you use'
-        },
-        models: {
-          feature: 'Model Selection',
-          official: 'Single provider only',
-          us: 'Switch between models freely'
-        },
-        management: {
-          feature: 'Account Management',
-          official: 'Manage each service separately',
-          us: 'Unified key, one dashboard'
-        },
-        stability: {
-          feature: 'Stability',
-          official: 'Single account rate limits',
-          us: 'Multi-account pool, auto-failover'
-        },
-        control: {
-          feature: 'Usage Control',
-          official: 'Not available',
-          us: 'Quotas & detailed analytics'
-        }
+    pricing: {
+      eyebrow: 'Billing model',
+      title: 'Pricing that users can actually understand',
+      description: 'TokenGate separates usage units from billing units. Text models are shown in per-million-token pricing, image and video products keep native unit pricing, and everything settles against a simple wallet balance underneath.',
+      cards: {
+        textTitle: 'Text models',
+        textValue: '$ / 1M tokens',
+        textDesc: 'Show input and output prices directly, so developers can compare GPT, Claude, and Gemini classes without hidden conversion.',
+        mediaTitle: 'Image and video',
+        mediaValue: 'Native units',
+        mediaDesc: 'Bill image generations and video jobs in the units those products are actually sold in.',
+        plansTitle: 'Plans and balance',
+        plansValue: 'Included spend',
+        plansDesc: 'Use plans for recurring access and included usage, then let wallet balance handle top-ups and overages.'
       }
     },
     providers: {
-      title: 'Supported AI Models',
-      description: 'One API, Multiple Choices',
+      title: 'Model Families You Can Package',
+      description: 'One commercial layer across multiple provider types',
       supported: 'Supported',
       soon: 'Soon',
       claude: 'Claude',
@@ -99,10 +64,9 @@ export default {
       antigravity: 'Antigravity',
       more: 'More'
     },
-    // CTA section
     cta: {
-      title: 'Ready to Get Started?',
-      description: 'Sign up now and get free trial credits to experience seamless AI access',
+      title: 'Start with your own product first',
+      description: 'Run your internal AI workload through TokenGate, tighten the pricing model, then open it up to external customers when the workflow feels right.',
       button: 'Sign Up Free'
     },
     footer: {
@@ -182,8 +146,8 @@ export default {
 
   // Setup Wizard
   setup: {
-    title: 'Sub2API Setup',
-    description: 'Configure your Sub2API instance',
+    title: 'TokenGate Setup',
+    description: 'Configure your TokenGate instance',
     database: {
       title: 'Database Configuration',
       description: 'Connect to your PostgreSQL database',
@@ -370,8 +334,8 @@ export default {
     expand: 'Expand',
     logout: 'Logout',
     github: 'GitHub',
-    mySubscriptions: 'My Subscriptions',
-    buySubscription: 'Recharge / Subscription',
+    mySubscriptions: 'Plans',
+    buySubscription: 'Billing',
     docs: 'Docs',
     myOrders: 'My Orders',
     orderManagement: 'Orders',
@@ -388,11 +352,11 @@ export default {
   // Auth
   auth: {
     welcomeBack: 'Welcome Back',
-    signInToAccount: 'Sign in to your account to continue',
+    signInToAccount: 'Sign in to access your API keys, usage, and billing',
     signIn: 'Sign In',
     signingIn: 'Signing in...',
     createAccount: 'Create Account',
-    signUpToStart: 'Sign up to start using {siteName}',
+    signUpToStart: 'Create your account to launch plans, balance, and API access with {siteName}',
     signUp: 'Sign up',
     processing: 'Processing...',
     continue: 'Continue',
@@ -461,9 +425,20 @@ export default {
     invitationCodeInvalid: 'Invalid or used invitation code',
     invitationCodeValidating: 'Validating invitation code...',
     invitationCodeInvalidCannotRegister: 'Invalid invitation code. Please check and try again',
-    oauthOrContinue: 'or continue with email',
+    oauthOrContinue: 'or use another sign-in method',
+    productContextTitle: 'Built for AI products, not generic logins',
+    productContextDescription:
+      'TokenGate combines API access, usage tracking, and subscription-ready billing in one customer account.',
+    productContextBullets: {
+      apiKeys: 'Create and manage API keys for your apps and workflows.',
+      billing: 'Track available balance, included usage, and overage spend in one place.',
+      models: 'Use transparent pricing across text, image, and video model families.'
+    },
+    alternativeAccessTitle: 'Alternative sign-in methods',
+    alternativeAccessHint:
+      'Use GitHub, Google, WeChat, LinuxDo, or an OIDC provider only if your workspace has them configured.',
     linuxdo: {
-      signIn: 'Continue with Linux.do',
+      signIn: 'Continue with LinuxDo',
       orContinue: 'or continue with email',
       callbackTitle: 'Signing you in',
       callbackProcessing: 'Completing login, please wait...',
@@ -580,9 +555,11 @@ export default {
     title: 'Dashboard',
     welcomeMessage: "Welcome back! Here's an overview of your account.",
     balance: 'Balance',
+    availableBalance: 'Available Balance',
     apiKeys: 'API Keys',
     todayRequests: 'Today Requests',
     todayCost: 'Today Cost',
+    todaySpend: 'Today Spend',
     todayTokens: 'Today Tokens',
     totalTokens: 'Total Tokens',
     cacheToday: 'Cache (Today)',
@@ -618,7 +595,9 @@ export default {
     viewUsage: 'View Usage',
     checkDetailedLogs: 'Check detailed usage logs',
     redeemCode: 'Redeem Code',
-    addBalanceWithCode: 'Add balance with a code'
+    addBalanceWithCode: 'Add balance with a code',
+    manageBilling: 'Manage Billing',
+    addBalanceOrChoosePlan: 'Add balance or choose a plan'
   },
 
   // Groups (shared)
@@ -5095,6 +5074,48 @@ export default {
         backup: 'Backup',
         payment: 'Payment',
       },
+      tabBadges: {
+        advanced: 'Advanced',
+        ops: 'Ops'
+      },
+      sectionGuides: {
+        general: {
+          title: 'Shape the public face of TokenGate',
+          description: 'This section controls the brand, public endpoints, and operating mode users see first.',
+          items: {
+            brand: 'Set the site name, subtitle, and visual identity.',
+            api: 'Decide which API base URL customers copy into their apps.',
+            mode: 'Use backend mode only when you want an admin-only install.'
+          }
+        },
+        security: {
+          title: 'Control who can sign up and how they sign in',
+          description: 'Registration policy, anti-abuse checks, and alternative sign-in methods all live here.',
+          items: {
+            registration: 'Open or restrict registration, email verification, and password reset.',
+            signIn: 'Offer GitHub, Google, LinuxDo, WeChat, or OIDC only when they fit your audience.',
+            protection: 'Use Turnstile and agreement prompts to reduce abuse and set expectations early.'
+          }
+        },
+        users: {
+          title: 'Decide what every new account starts with',
+          description: 'Use these defaults to shape free tier access, internal credits, and source-specific signup behavior.',
+          items: {
+            balance: 'Set the default balance, concurrency, and request limits.',
+            access: 'Attach default subscriptions or group access for new accounts.',
+            signups: 'Customize defaults for signups coming from specific identity providers.'
+          }
+        },
+        payment: {
+          title: 'Turn usage into a product people can buy',
+          description: 'This section controls recharge behavior, plan packaging, and how payment providers appear to users.',
+          items: {
+            balance: 'Define how wallet balance is sold, topped up, and limited.',
+            plans: 'Package recurring plans and included usage into clear offers.',
+            providers: 'Choose which payment providers and visible methods customers see.'
+          }
+        }
+      },
       features: {
         channelMonitor: {
           title: 'Channel Monitor',
@@ -5215,10 +5236,10 @@ export default {
         secretKeyHint: 'Server-side verification key (keep this secret)',
         secretKeyConfiguredHint: 'Secret key configured. Leave empty to keep the current value.'      },
       linuxdo: {
-        title: 'LinuxDo Connect Login',
-        description: 'Configure LinuxDo Connect OAuth for Sub2API end-user login',
-        enable: 'Enable LinuxDo Login',
-        enableHint: 'Show LinuxDo login on the login/register pages',
+        title: 'LinuxDo Sign-In',
+        description: 'Configure LinuxDo Connect OAuth for TokenGate end-user login',
+        enable: 'Enable LinuxDo Sign-In',
+        enableHint: 'Offer LinuxDo as an alternative sign-in method on login and registration pages',
         clientId: 'Client ID',
         clientIdPlaceholder: 'e.g., hprJ5pC3...',
         clientIdHint: 'Get this from Connect.Linux.Do',
@@ -5235,10 +5256,10 @@ export default {
         redirectUrlSetAndCopied: 'Redirect URL generated and copied to clipboard'
       },
       oidc: {
-        title: 'OIDC Login',
-        description: 'Configure a standard OIDC provider (for example Keycloak)',
-        enable: 'Enable OIDC Login',
-        enableHint: 'Show OIDC login on the login/register pages',
+        title: 'OIDC / SSO Sign-In',
+        description: 'Configure a standard OIDC identity provider such as Keycloak, Authentik, or enterprise SSO',
+        enable: 'Enable OIDC Sign-In',
+        enableHint: 'Offer this provider as an alternative sign-in method on login and registration pages',
         providerName: 'Provider Name',
         providerNamePlaceholder: 'for example Keycloak',
         clientId: 'Client ID',
@@ -5380,12 +5401,12 @@ export default {
         description: 'Customize site branding',
         backendMode: 'Backend Mode',
         backendModeDescription:
-          'Disables user registration, public site, and self-service features. Only admin can log in and manage the platform.',
+          'Disables user registration, the public site, and self-service flows. Use this only for internal or admin-only deployments.',
         siteName: 'Site Name',
-        siteNamePlaceholder: 'Sub2API',
+        siteNamePlaceholder: 'TokenGate',
         siteNameHint: 'Displayed in emails and page titles',
         siteSubtitle: 'Site Subtitle',
-        siteSubtitlePlaceholder: 'Subscription to API Conversion Platform',
+        siteSubtitlePlaceholder: 'Plans, balance, and transparent AI API billing',
         siteSubtitleHint: 'Displayed on login and register pages',
         apiBaseUrl: 'API Base URL',
         apiBaseUrlPlaceholder: 'https://api.example.com',
@@ -5664,7 +5685,7 @@ export default {
         fromEmail: 'From Email',
         fromEmailPlaceholder: "noreply{'@'}example.com",
         fromName: 'From Name',
-        fromNamePlaceholder: 'Sub2API',
+        fromNamePlaceholder: 'TokenGate',
         useTls: 'Use TLS',
         useTlsHint: 'Enable TLS encryption for SMTP connection'
       },
@@ -5695,7 +5716,7 @@ export default {
       },
       adminApiKey: {
         title: 'Admin API Key',
-        description: 'Global API key for external system integration with full admin access',
+        description: 'Advanced integration key for trusted backend systems that need full admin API access',
         notConfigured: 'Admin API key not configured',
         configured: 'Admin API key is active',
         currentKey: 'Current Key',
@@ -5713,7 +5734,7 @@ export default {
         copyKey: 'Copy Key',
         keyCopied: 'Key copied to clipboard',
         keyWarning: 'This key will only be shown once. Please copy it now.',
-        securityWarning: 'Warning: This key provides full admin access. Keep it secure.',
+        securityWarning: 'Warning: this key bypasses the normal dashboard and grants full admin access. Only use it in trusted server-to-server integrations.',
         usage: 'Usage: Add to request header - x-api-key: <your-admin-api-key>'
       },
       soraS3: {
@@ -6233,6 +6254,14 @@ export default {
   userSubscriptions: {
     title: 'My Subscriptions',
     description: 'View your subscription plans and usage',
+    explainer: {
+      planAccessLabel: 'Plan access',
+      planAccessDesc: 'Plans control which model families and service tiers your keys can use.',
+      includedUsageLabel: 'Included usage',
+      includedUsageDesc: 'Daily, weekly, or monthly values show spend included in the plan before overages.',
+      modelPricingLabel: 'Model pricing',
+      modelPricingDesc: 'Final billing remains transparent: text is priced by tokens, while image and video use their own native units.',
+    },
     noActiveSubscriptions: 'No Active Subscriptions',
     noActiveSubscriptionsDesc:
       "You don't have any active subscriptions. Contact administrator to get one.",
@@ -6246,10 +6275,14 @@ export default {
     expires: 'Expires',
     noExpiration: 'No expiration',
     unlimited: 'Unlimited',
+    flexibleUsage: 'Flexible usage',
     unlimitedDesc: 'No usage limits on this subscription',
     daily: 'Daily',
     weekly: 'Weekly',
     monthly: 'Monthly',
+    dailyIncluded: 'Daily included usage',
+    weeklyIncluded: 'Weekly included usage',
+    monthlyIncluded: 'Monthly included usage',
     daysRemaining: '{days} days remaining',
     expiresOn: 'Expires on {date}',
     resetIn: 'Resets in {time}',
@@ -6272,14 +6305,14 @@ export default {
     // Admin tour steps
     admin: {
       welcome: {
-        title: '👋 Welcome to Sub2API',
-        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Sub2API is a powerful AI service gateway platform that helps you easily manage and distribute AI services.</p><p style="margin-bottom: 12px;"><b>🎯 Core Features:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>Group Management</b> - Create service tiers (VIP, Free Trial, etc.)</li><li>🔗 <b>Account Pool</b> - Connect multiple upstream AI service accounts</li><li>🔑 <b>Key Distribution</b> - Generate independent API Keys for users</li><li>💰 <b>Billing Control</b> - Flexible rate and quota management</li></ul><p style="color: #10b981; font-weight: 600;">Let\'s complete the initial setup in 3 minutes →</p></div>',
+        title: '👋 Welcome to TokenGate',
+        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">TokenGate is a subscription-native AI API gateway for packaging text, image, and video access into a real product.</p><p style="margin-bottom: 12px;"><b>🎯 What you will set up:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>Groups and plans</b> - Define who gets access to which model routes</li><li>🔗 <b>Provider accounts</b> - Connect upstream AI accounts and fallback capacity</li><li>🔑 <b>API keys</b> - Issue customer-facing credentials for apps and workflows</li><li>💰 <b>Billing controls</b> - Manage balance, pricing multipliers, and included usage</li></ul><p style="color: #10b981; font-weight: 600;">Let\'s finish the first setup in a few minutes →</p></div>',
         nextBtn: 'Start Setup 🚀',
         prevBtn: 'Skip'
       },
       groupManage: {
         title: '📦 Step 1: Group Management',
-        description: '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>What is a Group?</b></p><p style="margin-bottom: 12px;">Groups are the core concept of Sub2API, like a "service package":</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 Each group can contain multiple upstream accounts</li><li>💰 Each group has independent billing multiplier</li><li>👥 Can be set as public or exclusive</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 Example:</b> You can create "VIP Premium" (high rate) and "Free Trial" (low rate) groups</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 Click "Group Management" on the left sidebar</p></div>'
+        description: '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>What is a Group?</b></p><p style="margin-bottom: 12px;">Groups are the access and billing layer inside TokenGate, similar to a packaged plan or route class:</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 Each group can route to one or more upstream accounts</li><li>💰 Each group can apply its own billing multiplier</li><li>👥 Each group can be public, restricted, or internal-only</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 Example:</b> You might create "Starter", "Growth", and "Internal Ops" groups</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 Click "Group Management" on the left sidebar</p></div>'
       },
       createGroup: {
         title: '➕ Create New Group',
@@ -6372,8 +6405,8 @@ export default {
     // User tour steps
     user: {
       welcome: {
-        title: '👋 Welcome to Sub2API',
-        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Hello! Welcome to the Sub2API AI service platform.</p><p style="margin-bottom: 12px;"><b>🎯 Quick Start:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 Create API Key</li><li>📋 Copy key to your application</li><li>🚀 Start using AI services</li></ul><p style="color: #10b981; font-weight: 600;">Just 1 minute, let\'s get started →</p></div>',
+        title: '👋 Welcome to TokenGate',
+        description: '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Hello! Welcome to TokenGate.</p><p style="margin-bottom: 12px;"><b>🎯 Quick Start:</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 Create an API key</li><li>📋 Add it to your app or workflow</li><li>🚀 Start using your AI access with transparent billing</li></ul><p style="color: #10b981; font-weight: 600;">This only takes about a minute →</p></div>',
         nextBtn: 'Start 🚀',
         prevBtn: 'Skip'
       },
@@ -6404,10 +6437,21 @@ export default {
 
   // Payment System
   payment: {
-    title: 'Recharge / Subscription',
+    title: 'Billing',
+    summary: {
+      balanceLabel: 'Available balance',
+      balanceHint: 'Your wallet balance is used for usage-based billing and overages.',
+      howBillingWorksLabel: 'How billing works',
+      stepOneTitle: 'Add balance',
+      stepOneDesc: 'Top up your wallet for usage-based billing across models.',
+      stepTwoTitle: 'Choose a plan',
+      stepTwoDesc: 'Plans can include recurring access, spend caps, or pricing advantages.',
+      stepThreeTitle: 'Track usage',
+      stepThreeDesc: 'Usage is billed transparently by model pricing, image unit, or video unit.',
+    },
     amountLabel: 'Amount',
     paymentAmount: 'Payment Amount',
-    creditedBalance: 'Credited Balance',
+    creditedBalance: 'Added Balance',
     quickAmounts: 'Quick Amounts',
     customAmount: 'Custom Amount',
     enterAmount: 'Enter amount',
@@ -6486,21 +6530,34 @@ export default {
       backToRecharge: 'Back to Recharge',
       viewOrders: 'View Orders',
     },
-    currentBalance: 'Current Balance',
+    balanceExplainer: {
+      title: 'Balance is your billing wallet',
+      desc: 'Use balance for metered usage, top-ups, and any overages beyond your included plan usage.',
+    },
+    currentBalance: 'Available Balance',
     groupFallback: 'Group #{id}',
-    rechargeAccount: 'Recharge Account',
+    rechargeAccount: 'Billing Account',
     activeSubscription: 'Active Subscription',
     noActiveSubscription: 'No active subscription',
-    tabTopUp: 'Top Up',
-    tabSubscribe: 'Subscribe',
+    tabTopUp: 'Add Balance',
+    tabSubscribe: 'Plans',
     noPlans: 'No subscription plans available',
-    notAvailable: 'Top-up is currently unavailable',
+    notAvailable: 'Balance purchase is currently unavailable',
+    planExplainer: {
+      title: 'Plans package access, not hidden token exchange rates',
+      stepOneTitle: 'Included usage',
+      stepOneDesc: 'Plans can include daily, weekly, or monthly spend limits.',
+      stepTwoTitle: 'Model access',
+      stepTwoDesc: 'Each plan can limit which model families are available to your API keys.',
+      stepThreeTitle: 'Transparent billing',
+      stepThreeDesc: 'Text models are billed by token pricing, while image and video products use their native units.',
+    },
     confirmSubscription: 'Confirm Subscription',
     confirmCancel: 'Are you sure you want to cancel this order?',
     amountTooLow: 'Minimum amount is {min}',
     amountTooHigh: 'Maximum amount is {max}',
     amountNoMethod: 'No payment method available for this amount',
-    rechargeRatePreview: 'Current rate: 1 CNY = {usd} USD',
+    rechargeRatePreview: 'Added balance preview: 1 CNY = {usd} USD',
     refundReason: 'Refund Reason',
     refundReasonPlaceholder: 'Please describe your refund reason',
     stripeLoadFailed: 'Failed to load payment component. Please refresh and try again.',
@@ -6568,11 +6625,17 @@ export default {
     planFeatures: 'Features',
     planCard: {
       rate: 'Rate',
+      billingRate: 'Billing rate',
       dailyLimit: 'Daily',
       weeklyLimit: 'Weekly',
       monthlyLimit: 'Monthly',
+      dailyIncluded: 'Daily included',
+      weeklyIncluded: 'Weekly included',
+      monthlyIncluded: 'Monthly included',
       quota: 'Quota',
+      includedUsage: 'Included usage',
       unlimited: 'Unlimited',
+      flexible: 'Flexible',
       models: 'Models',
     },
     days: 'days',

@@ -10,88 +10,53 @@ export default {
     login: '登录',
     getStarted: '立即开始',
     goToDashboard: '进入控制台',
-    // 新增：面向用户的价值主张
-    heroSubtitle: '一个密钥，畅用多个 AI 模型',
-    heroDescription: '无需管理多个订阅账号，一站式接入 Claude、GPT、Gemini 等主流 AI 服务',
+    viewPricing: '查看账务方式',
+    heroBadge: '面向订阅制产品的 AI API 网关',
+    heroSubtitle: '用套餐、余额和透明定价来销售与消费 AI 能力',
+    heroDescription: 'TokenGate 帮你把文本、图片和视频生成能力统一暴露为一个 API，同时把订阅、钱包余额和按量计费放进同一个产品面里。',
+    heroStats: {
+      tokensLabel: '文本计费',
+      tokensValue: '按每百万 token',
+      tokensDesc: '为不同文本模型分别展示输入与输出价格，不再隐藏真实成本。',
+      billingLabel: '媒体计费',
+      billingValue: '按图片 / 视频单位',
+      billingDesc: '图片与视频保留原生计费单位，而不是被强行换算成 token。',
+      balanceLabel: '商业层',
+      balanceValue: '套餐 + 余额',
+      balanceDesc: '把周期套餐、钱包余额和超额结算统一到一条开发者工作流里。'
+    },
     tags: {
-      subscriptionToApi: '订阅转 API',
-      stickySession: '会话保持',
-      realtimeBilling: '按量计费'
-    },
-    // 用户痛点区块
-    painPoints: {
-      title: '你是否也遇到这些问题？',
-      items: {
-        expensive: {
-          title: '订阅费用高',
-          desc: '每个 AI 服务都要单独订阅，每月支出越来越多'
-        },
-        complex: {
-          title: '多账号难管理',
-          desc: '不同平台的账号、密钥分散各处，管理起来很麻烦'
-        },
-        unstable: {
-          title: '服务不稳定',
-          desc: '单一账号容易触发限制，影响正常使用'
-        },
-        noControl: {
-          title: '用量无法控制',
-          desc: '不知道钱花在哪了，也无法限制团队成员的使用'
-        }
-      }
-    },
-    // 解决方案区块
-    solutions: {
-      title: '我们帮你解决',
-      subtitle: '简单三步，开始省心使用 AI'
+      subscriptionToApi: '套餐 + API 密钥',
+      stickySession: '上游路由',
+      realtimeBilling: '透明计费'
     },
     features: {
-      unifiedGateway: '一键接入',
-      unifiedGatewayDesc: '获取一个 API 密钥，即可调用所有已接入的 AI 模型，无需分别申请。',
-      multiAccount: '稳定可靠',
-      multiAccountDesc: '智能调度多个上游账号，自动切换和负载均衡，告别频繁报错。',
-      balanceQuota: '用多少付多少',
-      balanceQuotaDesc: '按实际使用量计费，支持设置配额上限，团队用量一目了然。'
+      unifiedGateway: '统一 API 接口',
+      unifiedGatewayDesc: '把文本、图片和视频工作负载统一走一个对开发者友好的网关，而不是在每个产品里分别拼装供应商。',
+      multiAccount: '运营更稳',
+      multiAccountDesc: '通过账号池、上游回退和路由策略，降低单个上游变化直接影响客户体验的风险。',
+      balanceQuota: '可直接商用',
+      balanceQuotaDesc: '不用另起一套账务系统，也能交付套餐、钱包余额、用量日志和消费控制。'
     },
-    // 优势对比
-    comparison: {
-      title: '为什么选择我们？',
-      headers: {
-        feature: '对比项',
-        official: '官方订阅',
-        us: '本平台'
-      },
-      items: {
-        pricing: {
-          feature: '付费方式',
-          official: '固定月费，用不完也付',
-          us: '按量付费，用多少付多少'
-        },
-        models: {
-          feature: '模型选择',
-          official: '单一服务商',
-          us: '多模型随意切换'
-        },
-        management: {
-          feature: '账号管理',
-          official: '每个服务单独管理',
-          us: '统一密钥，一站管理'
-        },
-        stability: {
-          feature: '服务稳定性',
-          official: '单账号易触发限制',
-          us: '多账号池，自动切换'
-        },
-        control: {
-          feature: '用量控制',
-          official: '无法限制',
-          us: '可设配额、查明细'
-        }
+    pricing: {
+      eyebrow: '计费方式',
+      title: '用户真正看得懂的 AI 定价',
+      description: 'TokenGate 将“使用单位”和“账务单位”分开。文本模型按每百万 token 展示，图片与视频保留原生单位，最终统一结算到简单清晰的钱包余额上。',
+      cards: {
+        textTitle: '文本模型',
+        textValue: '按每百万 token',
+        textDesc: '直接展示输入与输出价格，便于比较 GPT、Claude、Gemini 等模型族，而不是靠隐藏换算。',
+        mediaTitle: '图片与视频',
+        mediaValue: '按原生单位',
+        mediaDesc: '图片生成和视频任务按它们本来的售卖单位计费，不强行包装成 token。',
+        plansTitle: '套餐与余额',
+        plansValue: '包含消费额度',
+        plansDesc: '套餐负责持续访问和包含用量，钱包余额负责充值与超额结算。'
       }
     },
     providers: {
-      title: '已支持的 AI 模型',
-      description: '一个 API，多种选择',
+      title: '可打包成产品的模型族',
+      description: '用一层商业控制面覆盖不同类型的上游提供方',
       supported: '已支持',
       soon: '即将推出',
       claude: 'Claude',
@@ -99,10 +64,9 @@ export default {
       antigravity: 'Antigravity',
       more: '更多'
     },
-    // CTA 区块
     cta: {
-      title: '准备好开始了吗？',
-      description: '注册即可获得免费试用额度，体验一站式 AI 服务',
+      title: '先从你自己的产品开始',
+      description: '先让内部 AI 工作负载跑在 TokenGate 上，把计费模型打磨顺，再逐步开放给外部客户。',
       button: '免费注册'
     },
     footer: {
@@ -182,8 +146,8 @@ export default {
 
   // Setup Wizard
   setup: {
-    title: 'Sub2API 安装向导',
-    description: '配置您的 Sub2API 实例',
+    title: 'TokenGate 安装向导',
+    description: '配置您的 TokenGate 实例',
     database: {
       title: '数据库配置',
       description: '连接到您的 PostgreSQL 数据库',
@@ -370,8 +334,8 @@ export default {
     expand: '展开',
     logout: '退出登录',
     github: 'GitHub',
-    mySubscriptions: '我的订阅',
-    buySubscription: '充值/订阅',
+    mySubscriptions: '套餐',
+    buySubscription: '账务中心',
     docs: '文档',
     myOrders: '我的订单',
     orderManagement: '订单管理',
@@ -388,11 +352,11 @@ export default {
   // Auth
   auth: {
     welcomeBack: '欢迎回来',
-    signInToAccount: '登录您的账户以继续',
+    signInToAccount: '登录以访问您的 API 密钥、用量与账务',
     signIn: '登录',
     signingIn: '登录中...',
     createAccount: '创建账户',
-    signUpToStart: '注册以开始使用 {siteName}',
+    signUpToStart: '创建账户，开始用 {siteName} 管理套餐、余额与 API 访问',
     signUp: '注册',
     processing: '处理中...',
     continue: '继续',
@@ -460,9 +424,18 @@ export default {
     invitationCodeInvalid: '邀请码无效或已被使用',
     invitationCodeValidating: '正在验证邀请码...',
     invitationCodeInvalidCannotRegister: '邀请码无效，请检查后重试',
-    oauthOrContinue: '或使用邮箱密码继续',
+    oauthOrContinue: '或使用其他登录方式',
+    productContextTitle: '这不是普通登录页，而是你的 AI 商业控制面入口',
+    productContextDescription: 'TokenGate 把 API 访问、用量跟踪和面向订阅的账务能力放进同一个客户账户里。',
+    productContextBullets: {
+      apiKeys: '为你的应用和自动化工作流创建并管理 API 密钥。',
+      billing: '在一个地方查看可用余额、套餐内用量和超额消费。',
+      models: '以透明方式使用文本、图片和视频模型族的定价与访问能力。'
+    },
+    alternativeAccessTitle: '其他登录方式',
+    alternativeAccessHint: '只有当你的工作区已经配置好这些入口时，才建议使用 GitHub、Google、微信、LinuxDo 或 OIDC 登录。',
     linuxdo: {
-      signIn: '使用 Linux.do 登录',
+      signIn: '使用 LinuxDo 登录',
       orContinue: '或使用邮箱密码继续',
       callbackTitle: '正在完成登录',
       callbackProcessing: '正在验证登录信息，请稍候...',
@@ -579,9 +552,11 @@ export default {
     title: '仪表盘',
     welcomeMessage: '欢迎回来！这是您账户的概览。',
     balance: '余额',
+    availableBalance: '可用余额',
     apiKeys: 'API 密钥',
     todayRequests: '今日请求',
     todayCost: '今日消费',
+    todaySpend: '今日支出',
     todayTokens: '今日 Token',
     totalTokens: '累计 Token',
     cacheToday: '今日缓存',
@@ -617,7 +592,9 @@ export default {
     viewUsage: '查看使用记录',
     checkDetailedLogs: '查看详细的使用日志',
     redeemCode: '兑换码',
-    addBalanceWithCode: '使用兑换码充值'
+    addBalanceWithCode: '使用兑换码充值',
+    manageBilling: '管理账务',
+    addBalanceOrChoosePlan: '充值余额或选择套餐'
   },
 
   // Groups (shared)
@@ -5258,6 +5235,48 @@ export default {
         backup: '数据备份',
         payment: '支付设置',
       },
+      tabBadges: {
+        advanced: '高级',
+        ops: '运维'
+      },
+      sectionGuides: {
+        general: {
+          title: '先定义用户看到的 TokenGate 长什么样',
+          description: '这里决定站点品牌、公开端点，以及用户第一次接触到的运行模式。',
+          items: {
+            brand: '设置站点名称、副标题和整体品牌识别。',
+            api: '决定客户复制到应用中的 API Base URL。',
+            mode: '只有在你要做纯后台安装时，才建议开启 backend mode。'
+          }
+        },
+        security: {
+          title: '控制谁可以注册，以及他们如何登录',
+          description: '注册策略、防滥用校验和可选登录方式都集中在这里管理。',
+          items: {
+            registration: '配置开放注册、邮箱验证和忘记密码等基础入口。',
+            signIn: '只有在符合目标用户群时，才开放 GitHub、Google、LinuxDo、微信或 OIDC 登录。',
+            protection: '通过 Turnstile 和登录条款降低滥用风险，并提前设定用户预期。'
+          }
+        },
+        users: {
+          title: '定义每个新账户默认拿到什么',
+          description: '这些默认值会直接影响免费层体验、内部赠送额度和不同注册来源的起始状态。',
+          items: {
+            balance: '设置默认余额、并发和请求速率限制。',
+            access: '给新用户附加默认订阅或分组访问能力。',
+            signups: '按不同身份来源定制新用户的默认策略。'
+          }
+        },
+        payment: {
+          title: '把使用量包装成真正可购买的产品',
+          description: '这里决定余额充值、套餐包装，以及用户最终会看到哪些支付方式。',
+          items: {
+            balance: '定义钱包余额如何售卖、充值和限额。',
+            plans: '把周期套餐和包含额度组织成清晰的商品。',
+            providers: '决定客户会看到哪些支付服务商和支付入口。'
+          }
+        }
+      },
       features: {
         channelMonitor: {
           title: '渠道监控',
@@ -5379,10 +5398,10 @@ export default {
         secretKeyConfiguredHint: '密钥已配置，留空以保留当前值。'
       },
       linuxdo: {
-        title: 'LinuxDo Connect 登录',
-        description: '配置 LinuxDo Connect OAuth，用于 Sub2API 用户登录',
+        title: 'LinuxDo 登录',
+        description: '配置 LinuxDo Connect OAuth，用于 TokenGate 用户登录',
         enable: '启用 LinuxDo 登录',
-        enableHint: '在登录/注册页面显示 LinuxDo 登录入口',
+        enableHint: '在登录和注册页面把 LinuxDo 作为可选登录方式提供给用户',
         clientId: 'Client ID',
         clientIdPlaceholder: '例如：hprJ5pC3...',
         clientIdHint: '从 Connect.Linux.Do 后台获取',
@@ -5398,10 +5417,10 @@ export default {
         redirectUrlSetAndCopied: '已使用当前站点生成回调地址并复制到剪贴板'
       },
       oidc: {
-        title: 'OIDC 登录',
-        description: '配置标准 OIDC Provider（例如 Keycloak）',
+        title: 'OIDC / SSO 登录',
+        description: '配置标准 OIDC 身份提供方，例如 Keycloak、Authentik 或企业 SSO',
         enable: '启用 OIDC 登录',
-        enableHint: '在登录/注册页面显示 OIDC 登录入口',
+        enableHint: '在登录和注册页面把该身份提供方作为可选登录方式提供给用户',
         providerName: 'Provider 名称',
         providerNamePlaceholder: '例如 Keycloak',
         clientId: 'Client ID',
@@ -5539,13 +5558,13 @@ export default {
         description: '自定义站点品牌',
         backendMode: 'Backend 模式',
         backendModeDescription:
-          '禁用用户注册、公开页面和自助服务功能。仅管理员可以登录和管理平台。',
+          '禁用用户注册、公开页面和自助服务流程。只有在内部系统或纯管理员场景下才建议开启。',
         siteName: '站点名称',
         siteNameHint: '显示在邮件和页面标题中',
-        siteNamePlaceholder: 'Sub2API',
+        siteNamePlaceholder: 'TokenGate',
         siteSubtitle: '站点副标题',
         siteSubtitleHint: '显示在登录和注册页面',
-        siteSubtitlePlaceholder: '订阅转 API 转换平台',
+        siteSubtitlePlaceholder: '套餐、余额与透明 AI API 计费',
         apiBaseUrl: 'API 端点地址',
         apiBaseUrlHint: '用于"使用密钥"和"导入到 CC Switch"功能，留空则使用当前站点地址',
         apiBaseUrlPlaceholder: 'https://api.example.com',
@@ -5825,7 +5844,7 @@ export default {
         fromEmail: '发件人邮箱',
         fromEmailPlaceholder: "noreply{'@'}example.com",
         fromName: '发件人名称',
-        fromNamePlaceholder: 'Sub2API',
+        fromNamePlaceholder: 'TokenGate',
         useTls: '使用 TLS',
         useTlsHint: '为 SMTP 连接启用 TLS 加密'
       },
@@ -5856,7 +5875,7 @@ export default {
       },
       adminApiKey: {
         title: '管理员 API Key',
-        description: '用于外部系统集成的全局 API Key，拥有完整的管理员权限',
+        description: '面向受信任后端系统的高级集成密钥，拥有完整的管理员 API 权限',
         notConfigured: '尚未配置管理员 API Key',
         configured: '管理员 API Key 已启用',
         currentKey: '当前密钥',
@@ -5873,7 +5892,7 @@ export default {
         copyKey: '复制密钥',
         keyCopied: '密钥已复制到剪贴板',
         keyWarning: '此密钥仅显示一次，请立即复制保存。',
-        securityWarning: '警告：此密钥拥有完整的管理员权限，请妥善保管。',
+        securityWarning: '警告：此密钥会绕过普通控制台流程并直接拥有完整管理员权限，只应在受信任的服务端集成中使用。',
         usage: '使用方法：在请求头中添加 x-api-key: <your-admin-api-key>'
       },
       soraS3: {
@@ -6392,6 +6411,14 @@ export default {
   userSubscriptions: {
     title: '我的订阅',
     description: '查看您的订阅计划和用量',
+    explainer: {
+      planAccessLabel: '套餐访问范围',
+      planAccessDesc: '套餐决定您的 API Key 可以使用哪些模型族和服务层级。',
+      includedUsageLabel: '套餐内用量',
+      includedUsageDesc: '日、周、月数值表示套餐内已包含的消费额度，超出后再进入余额结算。',
+      modelPricingLabel: '透明计费',
+      modelPricingDesc: '最终计费仍按模型原生单位结算：文本按 token，图片和视频按各自单位。',
+    },
     noActiveSubscriptions: '暂无有效订阅',
     noActiveSubscriptionsDesc: '您没有任何有效订阅。请联系管理员获取订阅。',
     failedToLoad: '加载订阅失败',
@@ -6404,10 +6431,14 @@ export default {
     expires: '到期时间',
     noExpiration: '无到期时间',
     unlimited: '无限制',
+    flexibleUsage: '灵活用量',
     unlimitedDesc: '该订阅无用量限制',
     daily: '每日',
     weekly: '每周',
     monthly: '每月',
+    dailyIncluded: '每日套餐内用量',
+    weeklyIncluded: '每周套餐内用量',
+    monthlyIncluded: '每月套餐内用量',
     daysRemaining: '剩余 {days} 天',
     expiresOn: '{date} 到期',
     resetIn: '{time} 后重置',
@@ -6430,16 +6461,16 @@ export default {
     // Admin tour steps
     admin: {
       welcome: {
-        title: '👋 欢迎使用 Sub2API',
+        title: '👋 欢迎使用 TokenGate',
         description:
-          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">Sub2API 是一个强大的 AI 服务中转平台，让您轻松管理和分发 AI 服务。</p><p style="margin-bottom: 12px;"><b>🎯 核心功能：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>分组管理</b> - 创建不同的服务套餐（VIP、免费试用等）</li><li>🔗 <b>账号池</b> - 连接多个上游 AI 服务商账号</li><li>🔑 <b>密钥分发</b> - 为用户生成独立的 API Key</li><li>💰 <b>计费管理</b> - 灵活的费率和配额控制</li></ul><p style="color: #10b981; font-weight: 600;">接下来，我们将用 3 分钟带您完成首次配置 →</p></div>',
+          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">TokenGate 是一个面向订阅制产品的 AI API 网关，帮助您把文本、图片和视频能力打包成真正可销售的服务。</p><p style="margin-bottom: 12px;"><b>🎯 这次初始化会完成：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>📦 <b>分组与套餐层</b> - 定义哪些用户可以访问哪些模型路由</li><li>🔗 <b>上游账号</b> - 连接 AI 提供方账号和回退能力</li><li>🔑 <b>API 密钥</b> - 为应用和工作流发放调用凭证</li><li>💰 <b>账务控制</b> - 管理余额、计费倍率和包含用量</li></ul><p style="color: #10b981; font-weight: 600;">接下来，我们用几分钟完成首次配置 →</p></div>',
         nextBtn: '开始配置 🚀',
         prevBtn: '跳过'
       },
       groupManage: {
         title: '📦 第一步：分组管理',
         description:
-          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>什么是分组？</b></p><p style="margin-bottom: 12px;">分组是 Sub2API 的核心概念，它就像一个"服务套餐"：</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 每个分组可以包含多个上游账号</li><li>💰 每个分组有独立的计费倍率</li><li>👥 可以设置为公开或专属分组</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 示例：</b>您可以创建"VIP专线"（高倍率）和"免费试用"（低倍率）两个分组</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 点击左侧的"分组管理"开始</p></div>'
+          '<div style="line-height: 1.7;"><p style="margin-bottom: 12px;"><b>什么是分组？</b></p><p style="margin-bottom: 12px;">在 TokenGate 里，分组就是访问控制和计费层，接近一个“套餐路由”：</p><ul style="margin-left: 20px; margin-bottom: 12px; font-size: 13px;"><li>🎯 每个分组可以路由到一个或多个上游账号</li><li>💰 每个分组可以设置独立的计费倍率</li><li>👥 每个分组可以设为公开、受限或仅内部使用</li></ul><p style="margin-top: 12px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px; font-size: 13px;"><b>💡 示例：</b>您可以创建“Starter”“Growth”“内部运营”这样的分组</p><p style="margin-top: 16px; color: #10b981; font-weight: 600;">👉 点击左侧的"分组管理"开始</p></div>'
       },
       createGroup: {
         title: '➕ 创建新分组',
@@ -6551,9 +6582,9 @@ export default {
     // User tour steps
     user: {
       welcome: {
-        title: '👋 欢迎使用 Sub2API',
+        title: '👋 欢迎使用 TokenGate',
         description:
-          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">您好！欢迎来到 Sub2API AI 服务平台。</p><p style="margin-bottom: 12px;"><b>🎯 快速开始：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 创建 API 密钥</li><li>📋 复制密钥到您的应用</li><li>🚀 开始使用 AI 服务</li></ul><p style="color: #10b981; font-weight: 600;">只需 1 分钟，让我们开始吧 →</p></div>',
+          '<div style="line-height: 1.8;"><p style="margin-bottom: 16px;">您好，欢迎来到 TokenGate。</p><p style="margin-bottom: 12px;"><b>🎯 快速开始：</b></p><ul style="margin-left: 20px; margin-bottom: 16px;"><li>🔑 创建 API 密钥</li><li>📋 添加到您的应用或工作流</li><li>🚀 开始使用带透明计费的 AI 访问能力</li></ul><p style="color: #10b981; font-weight: 600;">整个过程大约只要 1 分钟 →</p></div>',
         nextBtn: '开始 🚀',
         prevBtn: '跳过'
       },
@@ -6589,10 +6620,21 @@ export default {
 
   // Payment System
   payment: {
-    title: '充值/订阅',
+    title: '账务中心',
+    summary: {
+      balanceLabel: '可用余额',
+      balanceHint: '您的钱包余额用于按量计费、超额结算和后续消耗。',
+      howBillingWorksLabel: '账务方式',
+      stepOneTitle: '充值余额',
+      stepOneDesc: '先为钱包充值，供不同模型的按量计费统一扣款。',
+      stepTwoTitle: '选择套餐',
+      stepTwoDesc: '套餐可以提供持续访问权限、内含额度或更合适的价格策略。',
+      stepThreeTitle: '跟踪用量',
+      stepThreeDesc: '系统按模型价格、图片单位或视频单位透明结算实际消耗。',
+    },
     amountLabel: '充值金额',
     paymentAmount: '支付金额',
-    creditedBalance: '到账余额',
+    creditedBalance: '增加余额',
     quickAmounts: '快捷金额',
     customAmount: '自定义金额',
     enterAmount: '输入金额',
@@ -6671,21 +6713,34 @@ export default {
       backToRecharge: '返回充值',
       viewOrders: '查看订单',
     },
-    currentBalance: '当前余额',
+    balanceExplainer: {
+      title: '余额就是您的账务钱包',
+      desc: '余额用于按量消耗、充值，以及超出套餐内用量后的自动结算。',
+    },
+    currentBalance: '可用余额',
     groupFallback: '分组 #{id}',
-    rechargeAccount: '充值账户',
+    rechargeAccount: '账务账户',
     activeSubscription: '当前订阅',
     noActiveSubscription: '暂无有效订阅',
-    tabTopUp: '充值',
-    tabSubscribe: '订阅',
+    tabTopUp: '充值余额',
+    tabSubscribe: '套餐',
     noPlans: '暂无可用订阅套餐',
-    notAvailable: '充值功能暂未开放',
+    notAvailable: '余额充值暂未开放',
+    planExplainer: {
+      title: '套餐提供的是访问与额度，不是隐藏的 token 换算',
+      stepOneTitle: '套餐内用量',
+      stepOneDesc: '套餐可以包含每日、每周或每月的消费额度。',
+      stepTwoTitle: '模型访问',
+      stepTwoDesc: '每个套餐都可以限制 API Key 可用的模型族范围。',
+      stepThreeTitle: '透明计费',
+      stepThreeDesc: '文本模型按 token 计费，图片与视频则按各自原生单位计费。',
+    },
     confirmSubscription: '确认订阅',
     confirmCancel: '确定要取消此订单吗？',
     amountTooLow: '最低金额为 {min}',
     amountTooHigh: '最高金额为 {max}',
     amountNoMethod: '该金额没有可用的支付方式',
-    rechargeRatePreview: '当前倍率：1 CNY = {usd} USD',
+    rechargeRatePreview: '到账预览：1 CNY = {usd} USD',
     refundReason: '退款原因',
     refundReasonPlaceholder: '请描述您的退款原因',
     stripeLoadFailed: '支付组件加载失败，请刷新页面重试',

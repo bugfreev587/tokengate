@@ -117,6 +117,10 @@
         <div class="mb-12 flex flex-col items-center justify-between gap-12 lg:flex-row lg:gap-16">
           <!-- Left: Text Content -->
           <div class="flex-1 text-center lg:text-left">
+            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700 shadow-sm backdrop-blur-sm dark:border-emerald-800/50 dark:bg-dark-800/70 dark:text-emerald-300">
+              <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+              {{ t('home.heroBadge') }}
+            </div>
             <h1
               class="mb-4 text-4xl font-bold text-gray-900 dark:text-white md:text-5xl lg:text-6xl"
             >
@@ -125,15 +129,42 @@
             <p class="mb-8 text-lg text-gray-600 dark:text-dark-300 md:text-xl">
               {{ siteSubtitle }}
             </p>
+            <p class="mx-auto mb-8 max-w-2xl text-base leading-8 text-gray-600 dark:text-dark-300 lg:mx-0">
+              {{ t('home.heroDescription') }}
+            </p>
+
+            <div class="mb-8 grid gap-3 sm:grid-cols-3">
+              <div class="rounded-2xl border border-gray-200/70 bg-white/75 p-4 text-left shadow-sm backdrop-blur-sm dark:border-dark-700/60 dark:bg-dark-800/70">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-dark-500">{{ t('home.heroStats.tokensLabel') }}</p>
+                <p class="mt-2 text-lg font-bold text-gray-900 dark:text-white">{{ t('home.heroStats.tokensValue') }}</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-dark-400">{{ t('home.heroStats.tokensDesc') }}</p>
+              </div>
+              <div class="rounded-2xl border border-gray-200/70 bg-white/75 p-4 text-left shadow-sm backdrop-blur-sm dark:border-dark-700/60 dark:bg-dark-800/70">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-dark-500">{{ t('home.heroStats.billingLabel') }}</p>
+                <p class="mt-2 text-lg font-bold text-gray-900 dark:text-white">{{ t('home.heroStats.billingValue') }}</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-dark-400">{{ t('home.heroStats.billingDesc') }}</p>
+              </div>
+              <div class="rounded-2xl border border-gray-200/70 bg-white/75 p-4 text-left shadow-sm backdrop-blur-sm dark:border-dark-700/60 dark:bg-dark-800/70">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400 dark:text-dark-500">{{ t('home.heroStats.balanceLabel') }}</p>
+                <p class="mt-2 text-lg font-bold text-gray-900 dark:text-white">{{ t('home.heroStats.balanceValue') }}</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-dark-400">{{ t('home.heroStats.balanceDesc') }}</p>
+              </div>
+            </div>
 
             <!-- CTA Button -->
-            <div>
+            <div class="flex flex-col items-center gap-3 sm:flex-row lg:items-start">
               <router-link
                 :to="isAuthenticated ? dashboardPath : '/login'"
                 class="btn btn-primary px-8 py-3 text-base shadow-lg shadow-primary-500/30"
               >
                 {{ isAuthenticated ? t('home.goToDashboard') : t('home.getStarted') }}
                 <Icon name="arrowRight" size="md" class="ml-2" :stroke-width="2" />
+              </router-link>
+              <router-link
+                to="/purchase"
+                class="inline-flex items-center rounded-full border border-gray-300/80 bg-white/80 px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm backdrop-blur-sm transition-colors hover:bg-white dark:border-dark-600 dark:bg-dark-800/70 dark:text-dark-100 dark:hover:bg-dark-800"
+              >
+                {{ t('home.viewPricing') }}
               </router-link>
             </div>
           </div>
@@ -282,6 +313,32 @@
           </div>
         </div>
 
+        <!-- Pricing explainer -->
+        <div class="mb-12 rounded-[2rem] border border-gray-200/60 bg-white/70 p-6 shadow-xl shadow-primary-500/5 backdrop-blur-sm dark:border-dark-700/60 dark:bg-dark-800/70 md:p-8">
+          <div class="mb-8 max-w-3xl">
+            <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary-600 dark:text-primary-400">{{ t('home.pricing.eyebrow') }}</p>
+            <h2 class="mt-3 text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">{{ t('home.pricing.title') }}</h2>
+            <p class="mt-3 text-sm leading-7 text-gray-600 dark:text-dark-300">{{ t('home.pricing.description') }}</p>
+          </div>
+          <div class="grid gap-5 md:grid-cols-3">
+            <div class="rounded-2xl border border-gray-200/70 bg-gray-50/80 p-5 dark:border-dark-700 dark:bg-dark-900/40">
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('home.pricing.cards.textTitle') }}</p>
+              <p class="mt-2 text-2xl font-bold text-primary-600 dark:text-primary-400">{{ t('home.pricing.cards.textValue') }}</p>
+              <p class="mt-2 text-sm leading-7 text-gray-500 dark:text-dark-400">{{ t('home.pricing.cards.textDesc') }}</p>
+            </div>
+            <div class="rounded-2xl border border-gray-200/70 bg-gray-50/80 p-5 dark:border-dark-700 dark:bg-dark-900/40">
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('home.pricing.cards.mediaTitle') }}</p>
+              <p class="mt-2 text-2xl font-bold text-primary-600 dark:text-primary-400">{{ t('home.pricing.cards.mediaValue') }}</p>
+              <p class="mt-2 text-sm leading-7 text-gray-500 dark:text-dark-400">{{ t('home.pricing.cards.mediaDesc') }}</p>
+            </div>
+            <div class="rounded-2xl border border-gray-200/70 bg-gray-50/80 p-5 dark:border-dark-700 dark:bg-dark-900/40">
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('home.pricing.cards.plansTitle') }}</p>
+              <p class="mt-2 text-2xl font-bold text-primary-600 dark:text-primary-400">{{ t('home.pricing.cards.plansValue') }}</p>
+              <p class="mt-2 text-sm leading-7 text-gray-500 dark:text-dark-400">{{ t('home.pricing.cards.plansDesc') }}</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Supported Providers -->
         <div class="mb-8 text-center">
           <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">
@@ -417,9 +474,9 @@ const authStore = useAuthStore()
 const appStore = useAppStore()
 
 // Site settings - directly from appStore (already initialized from injected config)
-const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appStore.siteName || 'Sub2API')
+const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appStore.siteName || 'TokenGate')
 const siteLogo = computed(() => appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '')
-const siteSubtitle = computed(() => appStore.cachedPublicSettings?.site_subtitle || 'AI API Gateway Platform')
+const siteSubtitle = computed(() => appStore.cachedPublicSettings?.site_subtitle || t('home.heroSubtitle'))
 const docUrl = computed(() => appStore.cachedPublicSettings?.doc_url || appStore.docUrl || '')
 const homeContent = computed(() => appStore.cachedPublicSettings?.home_content || '')
 
