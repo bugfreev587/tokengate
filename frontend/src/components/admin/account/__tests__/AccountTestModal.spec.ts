@@ -21,6 +21,12 @@ vi.mock('@/composables/useClipboard', () => ({
   })
 }))
 
+vi.mock('@/stores/app', () => ({
+  useAppStore: () => ({
+    apiBaseUrl: 'https://public.example.com/api/v1'
+  })
+}))
+
 vi.mock('vue-i18n', async () => {
   const actual = await vi.importActual<typeof import('vue-i18n')>('vue-i18n')
   const messages: Record<string, string> = {
@@ -88,6 +94,8 @@ function mountModal() {
 
 describe('AccountTestModal', () => {
   beforeEach(() => {
+    vi.stubEnv('VITE_BUILD_TARGET', 'standalone')
+    vi.stubEnv('VITE_API_BASE_URL', 'https://railway.example.com/api/v1')
     getAvailableModels.mockResolvedValue([
       { id: 'gemini-2.0-flash', display_name: 'Gemini 2.0 Flash' },
       { id: 'gemini-2.5-flash-image', display_name: 'Gemini 2.5 Flash Image' },
@@ -113,6 +121,7 @@ describe('AccountTestModal', () => {
   })
 
   afterEach(() => {
+    vi.unstubAllEnvs()
     vi.restoreAllMocks()
   })
 
@@ -134,7 +143,8 @@ describe('AccountTestModal', () => {
     await flushPromises()
 
     expect(global.fetch).toHaveBeenCalledTimes(1)
-    const [, request] = (global.fetch as any).mock.calls[0]
+    const [url, request] = (global.fetch as any).mock.calls[0]
+    expect(url).toBe('https://railway.example.com/api/v1/admin/accounts/42/test')
     expect(JSON.parse(request.body)).toEqual({
       model_id: 'gemini-3.1-flash-image',
       prompt: 'draw a tiny orange cat astronaut'

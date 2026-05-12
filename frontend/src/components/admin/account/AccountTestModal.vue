@@ -239,10 +239,12 @@ import TextArea from '@/components/common/TextArea.vue'
 import { Icon } from '@/components/icons'
 import { useClipboard } from '@/composables/useClipboard'
 import { adminAPI } from '@/api/admin'
+import { useAppStore } from '@/stores/app'
 import type { Account, ClaudeModel } from '@/types'
 
 const { t } = useI18n()
 const { copyToClipboard } = useClipboard()
+const appStore = useAppStore()
 
 interface OutputLine {
   text: string
@@ -276,6 +278,47 @@ let abortController: AbortController | null = null
 const generatedImages = ref<PreviewImage[]>([])
 const previewImageUrl = ref('')
 const prioritizedGeminiModels = ['gemini-3.1-flash-image', 'gemini-2.5-flash-image', 'gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-3-flash-preview', 'gemini-3-pro-preview', 'gemini-2.0-flash']
+const isStandaloneBuild = import.meta.env.VITE_BUILD_TARGET === 'standalone'
+
+const normalizeApiBase = (value?: string | null) => {
+  const raw = (value || '').trim()
+  if (!raw) return ''
+
+  try {
+    const url = new URL(raw, window.location.origin)
+    url.pathname = url.pathname.replace(/\/+$/, '')
+    return `${url.origin}${url.pathname}`
+  } catch {
+    return raw.replace(/\/+$/, '')
+  }
+}
+
+const resolvedAdminApiBase = computed(() => {
+  const candidates = [
+    import.meta.env.VITE_API_BASE_URL as string | undefined,
+    appStore.apiBaseUrl,
+    '/api/v1'
+  ]
+
+  for (const candidate of candidates) {
+    const normalized = normalizeApiBase(candidate)
+    if (!normalized) continue
+
+    if (isStandaloneBuild) {
+      try {
+        const url = new URL(normalized, window.location.origin)
+        if (url.origin === window.location.origin) continue
+      } catch {
+        if (normalized.startsWith('/')) continue
+      }
+    }
+
+    return normalized
+  }
+
+  return '/api/v1'
+})
+
 const supportsGeminiImageTest = computed(() => {
   const modelID = selectedModelId.value.toLowerCase()
   if (!modelID.startsWith('gemini-') || !modelID.includes('-image')) return false
@@ -400,7 +443,7 @@ const startTest = async () => {
 
   try {
     // Create EventSource for SSE
-    const url = `/api/v1/admin/accounts/${props.account.id}/test`
+    const url = `${resolvedAdminApiBase.value}/admin/accounts/${props.account.id}/test`
 
     // Use fetch with streaming for SSE since EventSource doesn't support POST
     const response = await fetch(url, {
