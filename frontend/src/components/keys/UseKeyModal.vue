@@ -357,6 +357,27 @@ const platformNote = computed(() => {
 
 const showPlatformNote = computed(() => activeClientTab.value !== 'opencode')
 
+const normalizeGatewayBaseUrl = (value?: string | null) => {
+  const raw = (value || '').trim()
+  if (!raw) return ''
+
+  try {
+    const url = new URL(raw, window.location.origin)
+    url.pathname = url.pathname
+      .replace(/\/api\/v1\/?$/i, '')
+      .replace(/\/v1\/?$/i, '')
+      .replace(/\/+$/, '')
+    return `${url.origin}${url.pathname}`
+  } catch {
+    return raw
+      .replace(/\/api\/v1\/?$/i, '')
+      .replace(/\/v1\/?$/i, '')
+      .replace(/\/+$/, '')
+  }
+}
+
+const gatewayBaseUrl = computed(() => normalizeGatewayBaseUrl(props.baseUrl) || window.location.origin)
+
 const escapeHtml = (value: string) => value
   .replace(/&/g, '&amp;')
   .replace(/</g, '&lt;')
@@ -376,7 +397,7 @@ const comment = (value: string) => wrapToken('text-slate-500', value)
 // Syntax highlighting helpers
 // Generate file configs based on platform and active tab
 const currentFiles = computed((): FileConfig[] => {
-  const baseUrl = props.baseUrl || window.location.origin
+  const baseUrl = gatewayBaseUrl.value
   const apiKey = props.apiKey
   const baseRoot = baseUrl.replace(/\/v1\/?$/, '').replace(/\/+$/, '')
   const ensureV1 = (value: string) => {

@@ -924,7 +924,7 @@
     <UseKeyModal
       :show="showUseKeyModal"
       :api-key="selectedKey?.key || ''"
-      :base-url="publicSettings?.api_base_url || ''"
+      :base-url="resolvedGatewayBaseUrl"
       :platform="selectedKey?.group?.platform || null"
       :allow-messages-dispatch="selectedKey?.group?.allow_messages_dispatch || false"
       @close="closeUseKeyModal"
@@ -1690,6 +1690,40 @@ const resetRateLimitUsage = async () => {
   }
 }
 
+const normalizeGatewayBaseUrl = (value?: string | null) => {
+  const raw = (value || '').trim()
+  if (!raw) return ''
+
+  try {
+    const url = new URL(raw, window.location.origin)
+    url.pathname = url.pathname
+      .replace(/\/api\/v1\/?$/i, '')
+      .replace(/\/v1\/?$/i, '')
+      .replace(/\/+$/, '')
+    return `${url.origin}${url.pathname}`
+  } catch {
+    return raw
+      .replace(/\/api\/v1\/?$/i, '')
+      .replace(/\/v1\/?$/i, '')
+      .replace(/\/+$/, '')
+  }
+}
+
+const resolvedGatewayBaseUrl = computed(() => {
+  const candidates = [
+    publicSettings.value?.api_base_url,
+    appStore.apiBaseUrl,
+    window.location.origin
+  ]
+
+  for (const candidate of candidates) {
+    const normalized = normalizeGatewayBaseUrl(candidate)
+    if (normalized) return normalized
+  }
+
+  return window.location.origin
+})
+
 const importToCcswitch = (row: ApiKey) => {
   const platform = row.group?.platform || 'anthropic'
 
@@ -1705,7 +1739,7 @@ const importToCcswitch = (row: ApiKey) => {
 }
 
 const executeCcsImport = (row: ApiKey, clientType: CcSwitchClientType) => {
-  const baseUrl = publicSettings.value?.api_base_url || window.location.origin
+  const baseUrl = resolvedGatewayBaseUrl.value
   const platform = row.group?.platform || 'anthropic'
 
   const usageScript = `({
