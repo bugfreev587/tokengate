@@ -14,6 +14,30 @@ import {
 } from '@/api/admin/system'
 import { getPublicSettings as fetchPublicSettingsAPI } from '@/api/auth'
 
+const DEFAULT_SITE_NAME = 'TokenGate'
+const DEFAULT_SITE_SUBTITLE = 'Plans, balance, and transparent AI API billing'
+
+function normalizePublicSettingsBranding(config: PublicSettings): PublicSettings {
+  const normalized = { ...config }
+  const rawSiteName = typeof normalized.site_name === 'string' ? normalized.site_name.trim() : ''
+  const rawSiteSubtitle =
+    typeof normalized.site_subtitle === 'string' ? normalized.site_subtitle.trim() : ''
+
+  if (!rawSiteName || rawSiteName === 'Sub2API') {
+    normalized.site_name = DEFAULT_SITE_NAME
+  }
+
+  if (
+    !rawSiteSubtitle ||
+    rawSiteSubtitle === 'Subscription to API Conversion Platform' ||
+    rawSiteSubtitle === 'AI API Gateway Platform for Subscription Quota Distribution'
+  ) {
+    normalized.site_subtitle = DEFAULT_SITE_SUBTITLE
+  }
+
+  return normalized
+}
+
 export const useAppStore = defineStore('app', () => {
   // ==================== State ====================
 
@@ -288,16 +312,17 @@ export const useAppStore = defineStore('app', () => {
    * Apply settings to store state (internal helper to avoid code duplication)
    */
   function applySettings(config: PublicSettings): void {
+    const normalizedConfig = normalizePublicSettingsBranding(config)
     if (typeof window !== 'undefined') {
-      window.__APP_CONFIG__ = { ...config }
+      window.__APP_CONFIG__ = { ...normalizedConfig }
     }
-    cachedPublicSettings.value = config
-    siteName.value = config.site_name || 'TokenGate'
-    siteLogo.value = config.site_logo || ''
-    siteVersion.value = config.version || ''
-    contactInfo.value = config.contact_info || ''
-    apiBaseUrl.value = config.api_base_url || ''
-    docUrl.value = config.doc_url || ''
+    cachedPublicSettings.value = normalizedConfig
+    siteName.value = normalizedConfig.site_name || DEFAULT_SITE_NAME
+    siteLogo.value = normalizedConfig.site_logo || ''
+    siteVersion.value = normalizedConfig.version || ''
+    contactInfo.value = normalizedConfig.contact_info || ''
+    apiBaseUrl.value = normalizedConfig.api_base_url || ''
+    docUrl.value = normalizedConfig.doc_url || ''
     publicSettingsLoaded.value = true
   }
 
@@ -329,7 +354,7 @@ export const useAppStore = defineStore('app', () => {
         turnstile_site_key: '',
         site_name: siteName.value,
         site_logo: siteLogo.value,
-        site_subtitle: '',
+        site_subtitle: DEFAULT_SITE_SUBTITLE,
         api_base_url: apiBaseUrl.value,
         contact_info: contactInfo.value,
         doc_url: docUrl.value,
