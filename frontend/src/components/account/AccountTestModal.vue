@@ -250,10 +250,12 @@ import TextArea from '@/components/common/TextArea.vue'
 import { Icon } from '@/components/icons'
 import { useClipboard } from '@/composables/useClipboard'
 import { adminAPI } from '@/api/admin'
+import { useAppStore } from '@/stores/app'
 import type { Account, ClaudeModel } from '@/types'
 
 const { t } = useI18n()
 const { copyToClipboard } = useClipboard()
+const appStore = useAppStore()
 
 interface OutputLine {
   text: string
@@ -307,6 +309,21 @@ const supportsOpenAIImageTest = computed(() => {
 })
 
 const supportsImageTest = computed(() => supportsGeminiImageTest.value || supportsOpenAIImageTest.value)
+
+const resolvedAdminApiBase = computed(() => {
+  const candidates = [
+    appStore.apiBaseUrl,
+    import.meta.env.VITE_API_BASE_URL as string | undefined,
+    '/api/v1'
+  ]
+
+  for (const candidate of candidates) {
+    const normalized = (candidate || '').trim().replace(/\/+$/, '')
+    if (normalized) return normalized
+  }
+
+  return '/api/v1'
+})
 
 const sortTestModels = (models: ClaudeModel[]) => {
   const priorityMap = new Map(prioritizedGeminiModels.map((id, index) => [id, index]))
@@ -418,7 +435,7 @@ const startTest = async () => {
 
   try {
     // Create EventSource for SSE
-    const url = `/api/v1/admin/accounts/${props.account.id}/test`
+    const url = `${resolvedAdminApiBase.value}/admin/accounts/${props.account.id}/test`
 
     // Use fetch with streaming for SSE since EventSource doesn't support POST
     const response = await fetch(url, {
