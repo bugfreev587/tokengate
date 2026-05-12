@@ -309,6 +309,7 @@ const supportsOpenAIImageTest = computed(() => {
 })
 
 const supportsImageTest = computed(() => supportsGeminiImageTest.value || supportsOpenAIImageTest.value)
+const isStandaloneBuild = import.meta.env.VITE_BUILD_TARGET === 'standalone'
 
 const normalizeApiBase = (value?: string | null) => {
   const raw = (value || '').trim()
@@ -333,7 +334,14 @@ const resolvedAdminApiBase = computed(() => {
   for (const candidate of candidates) {
     const normalized = normalizeApiBase(candidate)
     if (!normalized) continue
-    if (normalized === window.location.origin) continue
+    if (isStandaloneBuild) {
+      try {
+        const url = new URL(normalized, window.location.origin)
+        if (url.origin === window.location.origin) continue
+      } catch {
+        if (normalized.startsWith('/')) continue
+      }
+    }
     return normalized
   }
 
