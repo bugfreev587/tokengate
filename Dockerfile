@@ -1,5 +1,5 @@
 # =============================================================================
-# Sub2API Multi-Stage Dockerfile
+# TokenGate Multi-Stage Dockerfile
 # =============================================================================
 # Stage 1: Build frontend
 # Stage 2: Build Go backend with embedded frontend
@@ -85,9 +85,9 @@ FROM ${POSTGRES_IMAGE} AS pg-client
 FROM ${ALPINE_IMAGE}
 
 # Labels
-LABEL maintainer="Wei-Shaw <github.com/Wei-Shaw>"
-LABEL description="Sub2API - AI API Gateway Platform"
-LABEL org.opencontainers.image.source="https://github.com/Wei-Shaw/sub2api"
+LABEL maintainer="TokenGate <github.com/bugfreev587/tokengate>"
+LABEL description="TokenGate - Subscription-native AI API Gateway Platform"
+LABEL org.opencontainers.image.source="https://github.com/bugfreev587/tokengate"
 
 # Install runtime dependencies
 RUN apk add --no-cache \
