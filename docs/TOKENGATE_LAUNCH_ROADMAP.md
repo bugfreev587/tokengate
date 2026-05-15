@@ -73,6 +73,7 @@ Required:
 - admin alerting path for failed upstream accounts
 - database backup and restore drill documented
 - Railway and Vercel environment variables documented in one final checklist
+- Railway and Vercel environment variables validated with `tools/check_tokengate_env.sh`
 
 Status: **early**
 

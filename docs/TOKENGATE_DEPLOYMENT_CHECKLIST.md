@@ -52,6 +52,14 @@ Optional environment variables:
 
 - `VITE_BUILD_TARGET=standalone`
 
+Production sanity check:
+
+```bash
+VITE_API_BASE_URL=https://<your-railway-backend-domain>/api/v1 \
+VITE_BUILD_TARGET=standalone \
+bash tools/check_tokengate_env.sh vercel
+```
+
 ## Railway Setup
 
 Use the repository root for the backend service.
@@ -79,6 +87,7 @@ Minimum backend environment variables to verify the first deployment:
 - `ADMIN_PASSWORD`
 - `DATABASE_URL`
 - `REDIS_URL`
+- `CORS_ALLOWED_ORIGINS=https://<your-vercel-frontend-domain>`
 
 If you want the first deployment to behave like the public product, keep `RUN_MODE=standard`.
 
@@ -87,6 +96,23 @@ Notes:
 - The backend now supports Railway-style `DATABASE_URL` and `REDIS_URL` directly.
 - If you prefer more explicit configuration, the split `DATABASE_*` and `REDIS_*` variables still work too.
 - `ADMIN_PASSWORD` can be left empty, but for the first public-style verification it is better to set it explicitly.
+- `CORS_ALLOWED_ORIGINS` should be the frontend origin only, for example `https://tokengate-psi.vercel.app`. Do not use `*` for production.
+
+Production sanity check:
+
+```bash
+AUTO_SETUP=true \
+RUN_MODE=standard \
+SERVER_PORT=8080 \
+JWT_SECRET=<secret> \
+TOTP_ENCRYPTION_KEY=<secret> \
+ADMIN_EMAIL=<email> \
+ADMIN_PASSWORD=<secret> \
+DATABASE_URL=<postgres-url> \
+REDIS_URL=<redis-url> \
+CORS_ALLOWED_ORIGINS=https://<your-vercel-frontend-domain> \
+bash tools/check_tokengate_env.sh railway
+```
 
 ## First Verification Path
 
