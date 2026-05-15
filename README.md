@@ -28,6 +28,7 @@ TokenGate is built on top of the open-source Sub2API foundation and is being pro
 - [Billing model](docs/TOKENGATE_BILLING_MODEL.md)
 - [Deployment checklist](docs/TOKENGATE_DEPLOYMENT_CHECKLIST.md)
 - [Operations runbook](docs/TOKENGATE_OPERATIONS_RUNBOOK.md)
+- [Private beta acceptance checklist](docs/TOKENGATE_PRIVATE_BETA_ACCEPTANCE.md)
 - [Launch roadmap](docs/TOKENGATE_LAUNCH_ROADMAP.md)
 - [Product strategy](docs/TOKENGATE_PRODUCT_STRATEGY.md)
 

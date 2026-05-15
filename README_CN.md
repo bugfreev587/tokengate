@@ -28,6 +28,7 @@ TokenGate 基于开源 Sub2API 能力继续产品化，会作为独立服务持�
 - [计费模型](docs/TOKENGATE_BILLING_MODEL.md)
 - [部署检查清单](docs/TOKENGATE_DEPLOYMENT_CHECKLIST.md)
 - [运维 Runbook](docs/TOKENGATE_OPERATIONS_RUNBOOK.md)
+- [私测验收清单](docs/TOKENGATE_PRIVATE_BETA_ACCEPTANCE.md)
 - [上线路线图](docs/TOKENGATE_LAUNCH_ROADMAP.md)
 - [产品策略](docs/TOKENGATE_PRODUCT_STRATEGY.md)
 

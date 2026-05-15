@@ -16,8 +16,12 @@ Completed:
 - usage logging for a successful model request
 - first pass TokenGate branding and product narrative
 - split frontend/backend API base URL fixes
+- production smoke test script
+- deployment environment checker
+- operations runbook
+- private beta acceptance checklist
 
-Current launch readiness estimate: **70%**
+Current launch readiness estimate: **78%**
 
 ## Phase 1: Core Runtime Verification
 
@@ -58,6 +62,8 @@ Status: **partially complete**
 ## Phase 3: Operational Readiness
 
 Goal: make TokenGate safe to run for real users.
+
+Reference: [TOKENGATE_PRIVATE_BETA_ACCEPTANCE.md](TOKENGATE_PRIVATE_BETA_ACCEPTANCE.md)
 
 Required:
 
@@ -133,3 +139,4 @@ These items need owner decisions before public launch:
 5. Define the first plan and billing model in admin settings.
 6. Verify email, password reset, and payment test mode.
 7. Build public quickstart documentation.
+8. Run the private beta acceptance checklist before inviting users.
