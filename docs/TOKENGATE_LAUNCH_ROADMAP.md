@@ -24,8 +24,10 @@ Completed:
 - public payment documentation cleanup
 - API Keys and Usage onboarding empty states
 - production smoke test preflight and HTTP diagnostics
+- public `/docs` developer onboarding page
+- backend-mode access guard for public docs
 
-Current launch readiness estimate: **85%**
+Current launch readiness estimate: **87%**
 
 ## Phase 1: Core Runtime Verification
 
@@ -145,5 +147,4 @@ These items need owner decisions before public launch:
 4. Lock down public environment configuration.
 5. Define the first plan and billing model in admin settings.
 6. Verify email, password reset, and payment test mode.
-7. Verify SMTP/password reset and payment test mode.
-8. Run the private beta acceptance checklist before inviting users.
+7. Run the private beta acceptance checklist before inviting users.
