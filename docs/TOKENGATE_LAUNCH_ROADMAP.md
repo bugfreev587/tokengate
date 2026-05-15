@@ -29,8 +29,9 @@ Completed:
 - public `/support` contact page
 - backend-mode access guard for public docs
 - database backup script and restore drill runbook
+- backend TokenGate branding defaults in API contract coverage
 
-Current launch readiness estimate: **90%**
+Current launch readiness estimate: **91%**
 
 ## Phase 1: Core Runtime Verification
 
@@ -146,8 +147,7 @@ These items need owner decisions before public launch:
 
 1. Finish account test verification for Claude and OpenAI.
 2. Verify successful OpenAI usage logging.
-3. Make backend default branding fully TokenGate.
-4. Lock down public environment configuration.
-5. Define the first plan and billing model in admin settings.
-6. Verify email, password reset, and payment test mode.
-7. Run the private beta acceptance checklist before inviting users.
+3. Lock down public environment configuration.
+4. Define the first plan and billing model in admin settings.
+5. Verify email, password reset, and payment test mode.
+6. Run the private beta acceptance checklist before inviting users.
