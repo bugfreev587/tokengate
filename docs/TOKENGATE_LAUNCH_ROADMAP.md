@@ -20,8 +20,10 @@ Completed:
 - deployment environment checker
 - operations runbook
 - private beta acceptance checklist
+- public onboarding contract
+- public payment documentation cleanup
 
-Current launch readiness estimate: **78%**
+Current launch readiness estimate: **82%**
 
 ## Phase 1: Core Runtime Verification
 
@@ -100,7 +102,9 @@ Required:
 - admin checklist after first deployment
 - support/contact route
 
-Status: **early**
+Reference: [TOKENGATE_PUBLIC_ONBOARDING.md](TOKENGATE_PUBLIC_ONBOARDING.md)
+
+Status: **partially complete**
 
 ## Phase 5: Product Differentiation
 
@@ -138,5 +142,5 @@ These items need owner decisions before public launch:
 4. Lock down public environment configuration.
 5. Define the first plan and billing model in admin settings.
 6. Verify email, password reset, and payment test mode.
-7. Build public quickstart documentation.
+7. Turn the public onboarding contract into in-app empty states and docs links.
 8. Run the private beta acceptance checklist before inviting users.

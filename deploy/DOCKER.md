@@ -1,76 +1,69 @@
-# Sub2API Docker Image
+# TokenGate Docker Image
 
-Sub2API is an AI API Gateway Platform for distributing and managing AI product subscription API quotas.
+TokenGate is a subscription-native AI API gateway. The primary production target for this repository is Railway backend + Vercel frontend, but the backend can also run as a Docker container with external PostgreSQL and Redis.
 
 ## Quick Start
 
 ```bash
 docker run -d \
-  --name sub2api \
+  --name tokengate \
   -p 8080:8080 \
-  -e DATABASE_URL="postgres://user:pass@host:5432/sub2api" \
+  -e DATABASE_URL="postgresql://user:pass@host:5432/tokengate" \
   -e REDIS_URL="redis://host:6379" \
-  weishaw/sub2api:latest
+  -e JWT_SECRET="$(openssl rand -hex 32)" \
+  -e TOTP_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
+  -e FRONTEND_URL="https://your-frontend-domain" \
+  -e CORS_ALLOWED_ORIGINS="https://your-frontend-domain" \
+  ghcr.io/bugfreev587/tokengate:latest
 ```
 
-## Docker Compose
+If you build locally before publishing an image:
 
-```yaml
-version: '3.8'
-
-services:
-  sub2api:
-    image: weishaw/sub2api:latest
-    ports:
-      - "8080:8080"
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/sub2api?sslmode=disable
-      - REDIS_URL=redis://redis:6379
-    depends_on:
-      - db
-      - redis
-
-  db:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=sub2api
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis_data:/data
-
-volumes:
-  postgres_data:
-  redis_data:
+```bash
+docker build -t tokengate:local .
+docker run -d \
+  --name tokengate \
+  -p 8080:8080 \
+  -e DATABASE_URL="postgresql://user:pass@host:5432/tokengate" \
+  -e REDIS_URL="redis://host:6379" \
+  -e JWT_SECRET="$(openssl rand -hex 32)" \
+  -e TOTP_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
+  -e FRONTEND_URL="https://your-frontend-domain" \
+  -e CORS_ALLOWED_ORIGINS="https://your-frontend-domain" \
+  tokengate:local
 ```
 
-## Environment Variables
+## Required Environment Variables
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | Yes | - |
-| `REDIS_URL` | Redis connection string | Yes | - |
-| `PORT` | Server port | No | `8080` |
-| `GIN_MODE` | Gin framework mode (`debug`/`release`) | No | `release` |
+| Variable | Description |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `REDIS_URL` | Redis connection string |
+| `JWT_SECRET` | Long random secret for JWT signing |
+| `TOTP_ENCRYPTION_KEY` | Long random secret for TOTP encryption |
+| `FRONTEND_URL` | Public frontend origin |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed frontend origins |
 
-## Supported Architectures
+Recommended production variables:
 
-- `linux/amd64`
-- `linux/arm64`
+| Variable | Recommended |
+| --- | --- |
+| `RUN_MODE` | `standard` |
+| `SERVER_MODE` | `release` |
+| `LOG_SERVICE_NAME` | `tokengate` |
+| `LOG_ENV` | `production` |
+| `AUTO_SETUP` | `true` for the first deploy |
+| `ADMIN_EMAIL` | Your admin email |
+| `ADMIN_PASSWORD` | Long generated password |
 
-## Tags
+## Notes
 
-- `latest` - Latest stable release
-- `x.y.z` - Specific version
-- `x.y` - Latest patch of minor version
-- `x` - Latest minor of major version
+- Railway users should prefer the root `Dockerfile` and Railway-managed `DATABASE_URL` / `REDIS_URL`.
+- Vercel frontend users must set `VITE_API_BASE_URL=https://your-backend-domain/api/v1`.
+- Some internal runtime names still use `sub2api` for compatibility with the upstream foundation.
 
 ## Links
 
-- [GitHub Repository](https://github.com/weishaw/sub2api)
-- [Documentation](https://github.com/weishaw/sub2api#readme)
+- [TokenGate repository](https://github.com/bugfreev587/tokengate)
+- [Deployment checklist](../docs/TOKENGATE_DEPLOYMENT_CHECKLIST.md)
+- [Operations runbook](../docs/TOKENGATE_OPERATIONS_RUNBOOK.md)
