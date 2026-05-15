@@ -2,6 +2,8 @@
 
 This runbook covers the operational checks required before public launch.
 
+For the consolidated Railway/Vercel variable list, see [TOKENGATE_PRODUCTION_ENV_CHECKLIST.md](TOKENGATE_PRODUCTION_ENV_CHECKLIST.md).
+
 ## 1. Environment Check
 
 Run this before every production deploy or after changing Railway/Vercel variables:
