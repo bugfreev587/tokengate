@@ -365,9 +365,24 @@
             <EmptyState
               :title="t('keys.noKeysYet')"
               :description="t('keys.createFirstKey')"
-              :action-text="t('keys.createKey')"
-              @action="showCreateModal = true"
-            />
+            >
+              <template #action>
+                <div class="flex flex-col items-center gap-3 sm:flex-row">
+                  <button class="btn btn-primary" @click="showCreateModal = true">
+                    <Icon name="plus" size="md" class="mr-2" />
+                    {{ t('keys.createKey') }}
+                  </button>
+                  <a
+                    href="https://github.com/bugfreev587/tokengate/blob/main/docs/TOKENGATE_QUICKSTART.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-secondary"
+                  >
+                    {{ t('keys.viewQuickstart') }}
+                  </a>
+                </div>
+              </template>
+            </EmptyState>
           </template>
         </DataTable>
       </template>

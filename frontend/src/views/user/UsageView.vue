@@ -329,7 +329,27 @@
           </template>
 
           <template #empty>
-            <EmptyState :message="t('usage.noRecords')" />
+            <EmptyState
+              :title="t('usage.noRecordsTitle')"
+              :description="t('usage.noRecordsDescription')"
+            >
+              <template #action>
+                <div class="flex flex-col items-center gap-3 sm:flex-row">
+                  <RouterLink to="/keys" class="btn btn-primary">
+                    <Icon name="key" size="md" class="mr-2" />
+                    {{ t('usage.createOrUseKey') }}
+                  </RouterLink>
+                  <a
+                    href="https://github.com/bugfreev587/tokengate/blob/main/docs/TOKENGATE_QUICKSTART.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-secondary"
+                  >
+                    {{ t('usage.viewQuickstart') }}
+                  </a>
+                </div>
+              </template>
+            </EmptyState>
           </template>
         </DataTable>
       </template>
