@@ -64,28 +64,61 @@
       </div>
 
       <!-- Help Link -->
-      <p class="mt-8 text-sm text-gray-400 dark:text-dark-500">
+      <p v-if="supportText" class="mt-8 text-sm text-gray-400 dark:text-dark-500">
         Need help?
         <a
-          href="#"
+          v-if="supportHref"
+          :href="supportHref"
+          target="_blank"
+          rel="noopener noreferrer"
           class="text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
         >
-          Contact support
+          {{ supportText }}
         </a>
+        <span v-else class="text-gray-500 dark:text-dark-300">{{ supportText }}</span>
       </p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Icon from '@/components/icons/Icon.vue'
+import { getPublicSettings } from '@/api/auth'
+import { sanitizeUrl } from '@/utils/url'
 
 const { t } = useI18n()
 const router = useRouter()
+const contactInfo = ref('')
+
+const supportHref = computed(() => {
+  const value = contactInfo.value.trim()
+  if (!value) return ''
+
+  const url = sanitizeUrl(value)
+  if (url) return url
+
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+    return `mailto:${value}`
+  }
+
+  return ''
+})
+
+const supportText = computed(() => contactInfo.value.trim())
 
 function goBack(): void {
   router.back()
 }
+
+onMounted(async () => {
+  try {
+    const settings = await getPublicSettings()
+    contactInfo.value = settings.contact_info || ''
+  } catch {
+    contactInfo.value = ''
+  }
+})
 </script>
