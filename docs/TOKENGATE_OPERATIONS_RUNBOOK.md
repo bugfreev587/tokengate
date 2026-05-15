@@ -1,0 +1,174 @@
+# TokenGate Operations Runbook
+
+This runbook covers the operational checks required before public launch.
+
+## 1. Environment Check
+
+Run this before every production deploy or after changing Railway/Vercel variables:
+
+```bash
+AUTO_SETUP=true \
+RUN_MODE=standard \
+SERVER_PORT=8080 \
+JWT_SECRET=<secret> \
+TOTP_ENCRYPTION_KEY=<secret> \
+ADMIN_EMAIL=<email> \
+ADMIN_PASSWORD=<secret> \
+DATABASE_URL=<postgres-url> \
+REDIS_URL=<redis-url> \
+CORS_ALLOWED_ORIGINS=https://<frontend-domain> \
+VITE_API_BASE_URL=https://<backend-domain>/api/v1 \
+VITE_BUILD_TARGET=standalone \
+bash tools/check_tokengate_env.sh all
+```
+
+## 2. Production Smoke Test
+
+Run this after every frontend/backend deploy:
+
+```bash
+TOKENGATE_BASE_URL=https://<backend-domain> \
+TOKENGATE_API_KEY=sk-... \
+bash tools/tokengate_smoke_test.sh
+```
+
+Expected:
+
+- Claude-compatible request returns `2xx`
+- OpenAI-compatible request returns `2xx`
+- API key `Last Used` changes
+- **Usage** records appear after refresh
+- dashboard totals update after refresh
+
+If a provider is not configured yet:
+
+```bash
+TOKENGATE_RUN_OPENAI=0 bash tools/tokengate_smoke_test.sh
+```
+
+## 3. CORS Check
+
+Preflight should return `204` for the production frontend origin:
+
+```bash
+curl -i -X OPTIONS "https://<backend-domain>/api/v1/admin/accounts/1/test" \
+  -H "Origin: https://<frontend-domain>" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: authorization,content-type"
+```
+
+Expected:
+
+- `HTTP/2 204` or `HTTP/1.1 204`
+- `Access-Control-Allow-Origin: https://<frontend-domain>`
+- `Access-Control-Allow-Credentials: true`
+
+If this fails, verify:
+
+```env
+CORS_ALLOWED_ORIGINS=https://<frontend-domain>
+```
+
+Do not use `*` in production.
+
+## 4. SMTP Check
+
+In the admin UI:
+
+1. Open **Admin -> Settings -> Email**.
+2. Configure SMTP host, port, username, password, sender email, sender name, and TLS.
+3. Click **Test SMTP Connection**.
+4. Send a test email to your own address.
+
+Backend endpoints:
+
+- `POST /api/v1/admin/settings/test-smtp`
+- `POST /api/v1/admin/settings/send-test-email`
+
+Both require admin authentication.
+
+Expected:
+
+- SMTP connection test succeeds
+- test email arrives
+- sender name is `TokenGate` or your configured brand
+
+## 5. Password Reset Check
+
+Prerequisites:
+
+- SMTP is configured and test email succeeds
+- email verification is enabled
+- password reset is enabled
+- frontend URL points to the Vercel frontend domain
+
+In the user flow:
+
+1. Open **Forgot Password**.
+2. Submit an existing user email.
+3. Confirm the reset email arrives.
+4. Open the reset link.
+5. Set a new password.
+6. Sign in with the new password.
+
+Expected:
+
+- unknown emails still return the same generic success message
+- reset token is one-time use
+- reset link uses the frontend domain, not the Railway backend domain
+
+## 6. Payment Test Mode Check
+
+Use Stripe first for international public testing unless you intentionally need Alipay/WeChat rails.
+
+In admin:
+
+1. Open **Admin -> Settings -> Payment**.
+2. Enable payment.
+3. Add a Stripe provider instance using test credentials.
+4. Configure visible payment methods.
+5. Create a small balance top-up order from the user Billing page.
+6. Complete the payment in Stripe test mode.
+7. Confirm the order status becomes completed.
+8. Confirm user balance increases.
+
+Webhook URL:
+
+```text
+https://<backend-domain>/api/v1/payment/webhook/stripe
+```
+
+Expected Stripe webhook events:
+
+- `payment_intent.succeeded`
+- `payment_intent.payment_failed`
+
+## 7. Provider Account Check
+
+For each upstream provider:
+
+1. Create or connect the provider account.
+2. Assign it to the `default` or target user group.
+3. Run **Test Account Connection**.
+4. Run a real API key request through the backend gateway.
+5. Confirm usage and balance changes.
+
+If **Test Account Connection** returns `405`, the frontend is probably calling the Vercel domain instead of the Railway backend. Verify:
+
+```env
+VITE_API_BASE_URL=https://<backend-domain>/api/v1
+VITE_BUILD_TARGET=standalone
+```
+
+## 8. Launch Blockers
+
+Do not publicly launch while any of these are true:
+
+- frontend points API calls to the Vercel domain
+- CORS allows `*`
+- SMTP is not configured
+- password reset is not verified
+- payment webhook is not verified
+- only one provider has been tested
+- usage logs do not match successful paid requests
+- database backup/restore has not been rehearsed
