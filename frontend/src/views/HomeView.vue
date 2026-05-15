@@ -477,7 +477,8 @@ const appStore = useAppStore()
 const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appStore.siteName || 'TokenGate')
 const siteLogo = computed(() => appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '')
 const siteSubtitle = computed(() => appStore.cachedPublicSettings?.site_subtitle || t('home.heroSubtitle'))
-const docUrl = computed(() => appStore.cachedPublicSettings?.doc_url || appStore.docUrl || '')
+const defaultDocsUrl = 'https://github.com/bugfreev587/tokengate/blob/main/docs/TOKENGATE_QUICKSTART.md'
+const docUrl = computed(() => appStore.cachedPublicSettings?.doc_url || appStore.docUrl || defaultDocsUrl)
 const homeContent = computed(() => appStore.cachedPublicSettings?.home_content || '')
 
 // Check if homeContent is a URL (for iframe display)
