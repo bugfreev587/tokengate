@@ -169,7 +169,7 @@
                 <Icon name="arrowRight" size="md" class="ml-2" :stroke-width="2" />
               </router-link>
               <router-link
-                to="/purchase"
+                to="/pricing"
                 class="inline-flex items-center rounded-full border border-gray-300/80 bg-white/80 px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm backdrop-blur-sm transition-colors hover:bg-white dark:border-dark-600 dark:bg-dark-800/70 dark:text-dark-100 dark:hover:bg-dark-800"
               >
                 {{ t('home.viewPricing') }}
@@ -475,6 +475,12 @@
             class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
           >
             Support
+          </RouterLink>
+          <RouterLink
+            to="/pricing"
+            class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
+          >
+            Pricing
           </RouterLink>
         </div>
       </div>

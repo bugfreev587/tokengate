@@ -25,11 +25,12 @@ Completed:
 - API Keys and Usage onboarding empty states
 - production smoke test preflight and HTTP diagnostics
 - public `/docs` developer onboarding page
+- public `/pricing` pricing model page
 - public `/support` contact page
 - backend-mode access guard for public docs
 - database backup script and restore drill runbook
 
-Current launch readiness estimate: **89%**
+Current launch readiness estimate: **90%**
 
 ## Phase 1: Core Runtime Verification
 
