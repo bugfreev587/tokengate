@@ -51,6 +51,8 @@ Required:
 - make admin plan creation match the public pricing model
 - document the deduction order for included balance, bonus balance, and prepaid balance
 
+Reference: [TOKENGATE_BILLING_MODEL.md](TOKENGATE_BILLING_MODEL.md)
+
 Status: **partially complete**
 
 ## Phase 3: Operational Readiness
