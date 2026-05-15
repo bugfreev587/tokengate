@@ -85,9 +85,10 @@ check_railway() {
   require_secret "ADMIN_PASSWORD"
   require_url "DATABASE_URL"
   require_url "REDIS_URL"
+  require_url "FRONTEND_URL"
   require_var "CORS_ALLOWED_ORIGINS"
 
-  for name in AUTO_SETUP RUN_MODE SERVER_PORT JWT_SECRET TOTP_ENCRYPTION_KEY ADMIN_EMAIL ADMIN_PASSWORD DATABASE_URL REDIS_URL CORS_ALLOWED_ORIGINS; do
+  for name in AUTO_SETUP RUN_MODE SERVER_PORT JWT_SECRET TOTP_ENCRYPTION_KEY ADMIN_EMAIL ADMIN_PASSWORD DATABASE_URL REDIS_URL FRONTEND_URL CORS_ALLOWED_ORIGINS; do
     check_no_placeholder "$name"
   done
 
@@ -102,6 +103,9 @@ check_railway() {
   fi
   if [[ "$(get_var CORS_ALLOWED_ORIGINS)" != https://* ]]; then
     warn "CORS_ALLOWED_ORIGINS should usually be an https frontend origin"
+  fi
+  if [[ "$(get_var FRONTEND_URL)" != https://* ]]; then
+    warn "FRONTEND_URL should usually be an https frontend origin"
   fi
 }
 

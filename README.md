@@ -72,10 +72,10 @@ Deploy from the `frontend` sub-folder.
 Required Vercel environment variable:
 
 ```bash
-VITE_API_BASE_URL="https://your-railway-backend-domain"
+VITE_API_BASE_URL="https://your-railway-backend-domain/api/v1"
 ```
 
-Do not point `VITE_API_BASE_URL` at the Vercel frontend domain. It must point to the Railway backend origin.
+Do not point `VITE_API_BASE_URL` at the Vercel frontend domain. It must point to the Railway backend API prefix and include `/api/v1`.
 
 ## Verification
 
@@ -88,7 +88,8 @@ DATABASE_URL="postgresql://example" \
 REDIS_URL="redis://example" \
 JWT_SECRET="$(openssl rand -hex 32)" \
 TOTP_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-VITE_API_BASE_URL="https://your-railway-backend-domain" \
+FRONTEND_URL="https://your-frontend-domain" \
+VITE_API_BASE_URL="https://your-railway-backend-domain/api/v1" \
 tools/check_tokengate_env.sh
 ```
 

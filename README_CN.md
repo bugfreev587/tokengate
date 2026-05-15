@@ -72,10 +72,10 @@ Vercel 使用 `frontend` 子目录部署。
 前端必须配置：
 
 ```bash
-VITE_API_BASE_URL="https://your-railway-backend-domain"
+VITE_API_BASE_URL="https://your-railway-backend-domain/api/v1"
 ```
 
-不要把 `VITE_API_BASE_URL` 指向 Vercel 前端域名，它必须指向 Railway 后端域名。
+不要把 `VITE_API_BASE_URL` 指向 Vercel 前端域名，它必须指向 Railway 后端 API 前缀，并包含 `/api/v1`。
 
 ## 验证方式
 
@@ -88,7 +88,8 @@ DATABASE_URL="postgresql://example" \
 REDIS_URL="redis://example" \
 JWT_SECRET="$(openssl rand -hex 32)" \
 TOTP_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-VITE_API_BASE_URL="https://your-railway-backend-domain" \
+FRONTEND_URL="https://your-frontend-domain" \
+VITE_API_BASE_URL="https://your-railway-backend-domain/api/v1" \
 tools/check_tokengate_env.sh
 ```
 

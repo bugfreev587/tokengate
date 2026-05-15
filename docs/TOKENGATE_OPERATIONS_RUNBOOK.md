@@ -16,6 +16,7 @@ ADMIN_EMAIL=<email> \
 ADMIN_PASSWORD=<secret> \
 DATABASE_URL=<postgres-url> \
 REDIS_URL=<redis-url> \
+FRONTEND_URL=https://<frontend-domain> \
 CORS_ALLOWED_ORIGINS=https://<frontend-domain> \
 VITE_API_BASE_URL=https://<backend-domain>/api/v1 \
 VITE_BUILD_TARGET=standalone \

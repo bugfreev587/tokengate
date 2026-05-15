@@ -8,7 +8,7 @@ The goal is not perfection. The goal is a safe, supportable, measurable first re
 
 - Production frontend is deployed on Vercel and returns `200` for `/`, `/home`, `/login`, `/register`, and `/key-usage`.
 - Production backend is deployed on Railway and returns `200` for `/health`.
-- Frontend `VITE_API_BASE_URL` points to the Railway backend, not the Vercel frontend.
+- Frontend `VITE_API_BASE_URL` points to the Railway backend API prefix and includes `/api/v1`.
 - Backend `FRONTEND_URL` points to the Vercel frontend.
 - Backend `CORS_ALLOWED_ORIGINS` includes only approved frontend origins.
 - `DATABASE_URL` uses `${{Postgres.DATABASE_URL}}`.

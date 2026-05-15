@@ -87,6 +87,7 @@ Minimum backend environment variables to verify the first deployment:
 - `ADMIN_PASSWORD`
 - `DATABASE_URL`
 - `REDIS_URL`
+- `FRONTEND_URL=https://<your-vercel-frontend-domain>`
 - `CORS_ALLOWED_ORIGINS=https://<your-vercel-frontend-domain>`
 
 If you want the first deployment to behave like the public product, keep `RUN_MODE=standard`.
@@ -96,6 +97,7 @@ Notes:
 - The backend now supports Railway-style `DATABASE_URL` and `REDIS_URL` directly.
 - If you prefer more explicit configuration, the split `DATABASE_*` and `REDIS_*` variables still work too.
 - `ADMIN_PASSWORD` can be left empty, but for the first public-style verification it is better to set it explicitly.
+- `FRONTEND_URL` is used for password reset, email verification, and other external links.
 - `CORS_ALLOWED_ORIGINS` should be the frontend origin only, for example `https://tokengate-psi.vercel.app`. Do not use `*` for production.
 
 Production sanity check:
@@ -110,6 +112,7 @@ ADMIN_EMAIL=<email> \
 ADMIN_PASSWORD=<secret> \
 DATABASE_URL=<postgres-url> \
 REDIS_URL=<redis-url> \
+FRONTEND_URL=https://<your-vercel-frontend-domain> \
 CORS_ALLOWED_ORIGINS=https://<your-vercel-frontend-domain> \
 bash tools/check_tokengate_env.sh railway
 ```
