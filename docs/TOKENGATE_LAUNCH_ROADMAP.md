@@ -22,8 +22,10 @@ Completed:
 - private beta acceptance checklist
 - public onboarding contract
 - public payment documentation cleanup
+- API Keys and Usage onboarding empty states
+- production smoke test preflight and HTTP diagnostics
 
-Current launch readiness estimate: **82%**
+Current launch readiness estimate: **85%**
 
 ## Phase 1: Core Runtime Verification
 
@@ -101,10 +103,11 @@ Required:
 - onboarding checklist after signup
 - admin checklist after first deployment
 - support/contact route
+- in-app empty states that guide users back to API key creation and quickstart docs
 
 Reference: [TOKENGATE_PUBLIC_ONBOARDING.md](TOKENGATE_PUBLIC_ONBOARDING.md)
 
-Status: **partially complete**
+Status: **mostly complete**
 
 ## Phase 5: Product Differentiation
 
@@ -142,5 +145,5 @@ These items need owner decisions before public launch:
 4. Lock down public environment configuration.
 5. Define the first plan and billing model in admin settings.
 6. Verify email, password reset, and payment test mode.
-7. Turn the public onboarding contract into in-app empty states and docs links.
+7. Verify SMTP/password reset and payment test mode.
 8. Run the private beta acceptance checklist before inviting users.
