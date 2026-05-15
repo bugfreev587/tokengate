@@ -119,3 +119,13 @@ Run this after every production deployment:
 7. Confirm **Usage** records both requests.
 8. Confirm dashboard totals update.
 9. Confirm balance changed by the expected amount.
+
+You can also run the repository smoke test:
+
+```bash
+TOKENGATE_BASE_URL="https://your-backend-domain" \
+TOKENGATE_API_KEY="sk-..." \
+bash tools/tokengate_smoke_test.sh
+```
+
+Set `TOKENGATE_RUN_OPENAI=0` or `TOKENGATE_RUN_CLAUDE=0` while a provider is not configured yet.
