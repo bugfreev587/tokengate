@@ -161,7 +161,37 @@ VITE_API_BASE_URL=https://<backend-domain>/api/v1
 VITE_BUILD_TARGET=standalone
 ```
 
-## 8. Launch Blockers
+## 8. Database Backup And Restore Drill
+
+Create a database backup before any public launch, pricing change, payment migration, or risky backend deploy:
+
+```bash
+DATABASE_URL="postgresql://..." \
+TOKENGATE_BACKUP_DIR=backups \
+tools/tokengate_backup_database.sh
+```
+
+Expected:
+
+- a timestamped `backups/tokengate-*.dump` file is created
+- the file size is greater than zero
+- the backup file is stored somewhere durable outside the app container
+
+Restore rehearsal should happen against a disposable staging database, never production:
+
+```bash
+RESTORE_DATABASE_URL="postgresql://staging-or-empty-db" \
+pg_restore --clean --if-exists --no-owner --no-privileges \
+  --dbname "$RESTORE_DATABASE_URL" backups/tokengate-YYYYMMDDTHHMMSSZ.dump
+```
+
+After restore:
+
+- admin login works in the staging environment
+- users, API keys, provider accounts, payment config, and usage records are visible
+- no production webhook or email jobs are pointed at the restored staging database
+
+## 9. Launch Blockers
 
 Do not publicly launch while any of these are true:
 

@@ -76,8 +76,8 @@ tools/tokengate_smoke_test.sh
 - Railway logs do not show recurring CORS warnings.
 - Backend logs do not expose secrets, provider tokens, or API keys.
 - Rate limits are enabled for auth-sensitive endpoints.
-- Backup process is documented and at least one backup export has been tested.
-- Restore process is documented or rehearsed before public launch.
+- Backup process is documented with `tools/tokengate_backup_database.sh` and at least one backup export has been tested.
+- Restore process is documented and rehearsed against a disposable staging database before public launch.
 - Operations runbook is linked from the README.
 - Known limitations are documented for beta users.
 

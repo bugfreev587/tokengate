@@ -27,8 +27,9 @@ Completed:
 - public `/docs` developer onboarding page
 - public `/support` contact page
 - backend-mode access guard for public docs
+- database backup script and restore drill runbook
 
-Current launch readiness estimate: **88%**
+Current launch readiness estimate: **89%**
 
 ## Phase 1: Core Runtime Verification
 
