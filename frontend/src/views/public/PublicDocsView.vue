@@ -12,6 +12,9 @@
           <RouterLink to="/home" class="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-dark-300 dark:hover:text-white">
             {{ copy.nav.home }}
           </RouterLink>
+          <RouterLink to="/support" class="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-dark-300 dark:hover:text-white">
+            {{ copy.nav.support }}
+          </RouterLink>
           <RouterLink to="/login" class="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
             {{ copy.nav.signIn }}
           </RouterLink>
@@ -124,7 +127,7 @@ const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appS
 const siteLogo = computed(() => appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '')
 
 const enCopy = {
-  nav: { home: 'Home', signIn: 'Sign in' },
+  nav: { home: 'Home', support: 'Support', signIn: 'Sign in' },
   eyebrow: 'Developer docs',
   title: 'Use TokenGate in five minutes',
   subtitle: 'Create an API key, call OpenAI-compatible or Anthropic-compatible endpoints, and verify usage, token cost, and balance changes from the dashboard.',
@@ -179,7 +182,7 @@ curl "$TOKENGATE_BASE_URL/v1/chat/completions" \\
 }
 
 const zhCopy = {
-  nav: { home: '首页', signIn: '登录' },
+  nav: { home: '首页', support: '支持', signIn: '登录' },
   eyebrow: '开发者文档',
   title: '五分钟接入 TokenGate',
   subtitle: '创建 API 密钥，调用 OpenAI-compatible 或 Anthropic-compatible 端点，并在 Dashboard 里确认用量、Token 成本和余额变化。',

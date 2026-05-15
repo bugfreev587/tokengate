@@ -470,6 +470,12 @@
           >
             GitHub
           </a>
+          <RouterLink
+            to="/support"
+            class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
+          >
+            Support
+          </RouterLink>
         </div>
       </div>
     </footer>
