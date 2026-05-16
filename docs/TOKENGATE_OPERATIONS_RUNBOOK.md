@@ -36,6 +36,8 @@ TOKENGATE_API_KEY=sk-... \
 tools/tokengate_launch_readiness.sh
 ```
 
+This verifies public pages plus protected SPA entry routes such as `/dashboard`, `/usage`, and `/admin/accounts`.
+
 For gateway-only checks, run:
 
 ```bash

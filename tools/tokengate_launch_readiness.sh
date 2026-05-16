@@ -19,10 +19,10 @@ Usage:
 Optional:
   TOKENGATE_API_KEY="sk-..."
   TOKENGATE_RUN_API_SMOKE=auto|1|0
-  TOKENGATE_PUBLIC_ROUTES="/home /docs /pricing /support /login"
+  TOKENGATE_FRONTEND_ROUTES="/home /docs /pricing /support /login /dashboard /usage /admin/accounts"
 
 Checks:
-  - public frontend SPA routes survive refresh
+  - frontend SPA routes survive refresh
   - backend /api/v1/settings/public is reachable
   - CORS preflight allows the frontend origin
   - optional Claude/OpenAI gateway smoke via tools/tokengate_smoke_test.sh
@@ -92,7 +92,7 @@ tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
 printf '\nFrontend route refresh checks\n'
-routes="${TOKENGATE_PUBLIC_ROUTES:-/home /docs /pricing /support /login}"
+routes="${TOKENGATE_FRONTEND_ROUTES:-/home /docs /pricing /support /login /dashboard /usage /admin/accounts}"
 for route in $routes; do
   out="$tmp_dir/frontend_${route//\//_}.html"
   status="$(http_status "$FRONTEND_URL$route" "$out")"

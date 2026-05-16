@@ -122,6 +122,8 @@ TOKENGATE_API_KEY="sk-..." \
 tools/tokengate_launch_readiness.sh
 ```
 
+By default this checks `/home`, `/docs`, `/pricing`, `/support`, `/login`, `/dashboard`, `/usage`, and `/admin/accounts` for SPA refresh compatibility.
+
 Backup:
 
 ```bash
