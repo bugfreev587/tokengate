@@ -113,6 +113,15 @@ TOKENGATE_API_KEY="sk-..." \
 bash tools/tokengate_smoke_test.sh
 ```
 
+Launch readiness check:
+
+```bash
+TOKENGATE_FRONTEND_URL="https://<frontend-domain>" \
+TOKENGATE_BACKEND_URL="https://<backend-domain>" \
+TOKENGATE_API_KEY="sk-..." \
+tools/tokengate_launch_readiness.sh
+```
+
 Backup:
 
 ```bash

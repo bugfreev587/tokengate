@@ -30,6 +30,15 @@ bash tools/check_tokengate_env.sh all
 Run this after every frontend/backend deploy:
 
 ```bash
+TOKENGATE_FRONTEND_URL=https://<frontend-domain> \
+TOKENGATE_BACKEND_URL=https://<backend-domain> \
+TOKENGATE_API_KEY=sk-... \
+tools/tokengate_launch_readiness.sh
+```
+
+For gateway-only checks, run:
+
+```bash
 TOKENGATE_BASE_URL=https://<backend-domain> \
 TOKENGATE_API_KEY=sk-... \
 bash tools/tokengate_smoke_test.sh

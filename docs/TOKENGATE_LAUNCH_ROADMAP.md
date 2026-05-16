@@ -31,8 +31,10 @@ Completed:
 - database backup script and restore drill runbook
 - backend TokenGate branding defaults in API contract coverage
 - final production environment checklist
+- launch readiness checker for public routes, backend settings, CORS, and optional API smoke
+- production public route, public settings, and CORS readiness check passed for current Vercel/Railway domains
 
-Current launch readiness estimate: **92%**
+Current launch readiness estimate: **94%**
 
 ## Phase 1: Core Runtime Verification
 
