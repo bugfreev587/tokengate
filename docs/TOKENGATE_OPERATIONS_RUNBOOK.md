@@ -38,6 +38,8 @@ tools/tokengate_launch_readiness.sh
 
 This verifies public pages plus protected SPA entry routes such as `/dashboard`, `/usage`, and `/admin/accounts`.
 
+Use `TOKENGATE_LAUNCH_PROFILE=private` for invite-only beta checks. Use `TOKENGATE_LAUNCH_PROFILE=public` before public self-serve launch; public mode fails if support contact, password reset, registration, or required payment settings are missing.
+
 For gateway-only checks, run:
 
 ```bash

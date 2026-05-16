@@ -124,6 +124,27 @@ tools/tokengate_launch_readiness.sh
 
 By default this checks `/home`, `/docs`, `/pricing`, `/support`, `/login`, `/dashboard`, `/usage`, and `/admin/accounts` for SPA refresh compatibility.
 
+For private beta gating:
+
+```bash
+TOKENGATE_FRONTEND_URL="https://<frontend-domain>" \
+TOKENGATE_BACKEND_URL="https://<backend-domain>" \
+TOKENGATE_LAUNCH_PROFILE=private \
+TOKENGATE_RUN_API_SMOKE=0 \
+tools/tokengate_launch_readiness.sh
+```
+
+For public self-serve launch gating:
+
+```bash
+TOKENGATE_FRONTEND_URL="https://<frontend-domain>" \
+TOKENGATE_BACKEND_URL="https://<backend-domain>" \
+TOKENGATE_LAUNCH_PROFILE=public \
+TOKENGATE_SIGNUP_MODE=self_serve \
+TOKENGATE_REQUIRE_PAYMENT=1 \
+tools/tokengate_launch_readiness.sh
+```
+
 Backup:
 
 ```bash

@@ -5,6 +5,9 @@ FRONTEND_URL="${TOKENGATE_FRONTEND_URL:-}"
 BACKEND_URL="${TOKENGATE_BACKEND_URL:-}"
 API_KEY="${TOKENGATE_API_KEY:-}"
 RUN_API_SMOKE="${TOKENGATE_RUN_API_SMOKE:-auto}"
+LAUNCH_PROFILE="${TOKENGATE_LAUNCH_PROFILE:-private}"
+SIGNUP_MODE="${TOKENGATE_SIGNUP_MODE:-auto}"
+REQUIRE_PAYMENT="${TOKENGATE_REQUIRE_PAYMENT:-auto}"
 
 failures=0
 warnings=0
@@ -19,12 +22,16 @@ Usage:
 Optional:
   TOKENGATE_API_KEY="sk-..."
   TOKENGATE_RUN_API_SMOKE=auto|1|0
+  TOKENGATE_LAUNCH_PROFILE=private|public
+  TOKENGATE_SIGNUP_MODE=auto|invite|self_serve
+  TOKENGATE_REQUIRE_PAYMENT=auto|1|0
   TOKENGATE_FRONTEND_ROUTES="/home /docs /pricing /support /login /dashboard /usage /admin/accounts"
 
 Checks:
   - frontend SPA routes survive refresh
   - backend /api/v1/settings/public is reachable
   - CORS preflight allows the frontend origin
+  - public settings match the intended private/public launch profile
   - optional Claude/OpenAI gateway smoke via tools/tokengate_smoke_test.sh
 EOF
 }
@@ -68,6 +75,27 @@ http_status() {
   printf '%s' "$status"
 }
 
+json_string_value() {
+  local key="$1"
+  local file="$2"
+  sed -n "s/.*\"$key\":\"\\([^\"]*\\)\".*/\\1/p" "$file" | head -1
+}
+
+json_bool_value() {
+  local key="$1"
+  local file="$2"
+  sed -n "s/.*\"$key\":\\(true\\|false\\).*/\\1/p" "$file" | head -1
+}
+
+profile_fail_or_warn() {
+  local message="$1"
+  if [[ "$LAUNCH_PROFILE" == "public" ]]; then
+    fail "$message"
+  else
+    warn "$message"
+  fi
+}
+
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   usage
   exit 0
@@ -75,6 +103,27 @@ fi
 
 require_url "TOKENGATE_FRONTEND_URL" "$FRONTEND_URL" || true
 require_url "TOKENGATE_BACKEND_URL" "$BACKEND_URL" || true
+
+case "$LAUNCH_PROFILE" in
+  private|public) ;;
+  *)
+    fail "TOKENGATE_LAUNCH_PROFILE must be private or public"
+    ;;
+esac
+
+case "$SIGNUP_MODE" in
+  auto|invite|self_serve) ;;
+  *)
+    fail "TOKENGATE_SIGNUP_MODE must be auto, invite, or self_serve"
+    ;;
+esac
+
+case "$REQUIRE_PAYMENT" in
+  auto|1|true|yes|0|false|no) ;;
+  *)
+    fail "TOKENGATE_REQUIRE_PAYMENT must be auto, 1, or 0"
+    ;;
+esac
 
 if [[ "$failures" -gt 0 ]]; then
   usage >&2
@@ -116,6 +165,89 @@ if [[ "$settings_status" -ge 200 && "$settings_status" -lt 300 ]]; then
   else
     warn "public settings response did not visibly include site_name"
   fi
+
+  printf '\nPublic settings launch gate checks\n'
+  site_name="$(json_string_value "site_name" "$settings_out")"
+  contact_info="$(json_string_value "contact_info" "$settings_out")"
+  registration_enabled="$(json_bool_value "registration_enabled" "$settings_out")"
+  password_reset_enabled="$(json_bool_value "password_reset_enabled" "$settings_out")"
+  payment_enabled="$(json_bool_value "payment_enabled" "$settings_out")"
+  email_verify_enabled="$(json_bool_value "email_verify_enabled" "$settings_out")"
+
+  if [[ -n "$site_name" ]]; then
+    pass "site_name is configured: $site_name"
+  else
+    fail "site_name is empty"
+  fi
+
+  if [[ -n "$contact_info" ]]; then
+    pass "contact_info is configured"
+  else
+    profile_fail_or_warn "contact_info is empty; /support has no real support channel"
+  fi
+
+  if [[ "$LAUNCH_PROFILE" == "public" ]]; then
+    if [[ "$password_reset_enabled" == "true" ]]; then
+      pass "password reset is enabled"
+    else
+      fail "password_reset_enabled is false; public users cannot recover accounts"
+    fi
+
+    effective_signup_mode="$SIGNUP_MODE"
+    if [[ "$effective_signup_mode" == "auto" ]]; then
+      effective_signup_mode="self_serve"
+    fi
+    if [[ "$effective_signup_mode" == "self_serve" ]]; then
+      if [[ "$registration_enabled" == "true" ]]; then
+        pass "self-serve registration is enabled"
+      else
+        fail "registration_enabled is false but TOKENGATE_SIGNUP_MODE=self_serve"
+      fi
+      if [[ "$email_verify_enabled" == "true" ]]; then
+        pass "email verification is enabled"
+      else
+        warn "email_verify_enabled is false for self-serve signup"
+      fi
+    else
+      pass "signup mode is invite; public self-serve registration is not required"
+    fi
+  else
+    if [[ "$registration_enabled" == "true" ]]; then
+      warn "registration_enabled is true during private launch profile"
+    else
+      pass "registration is closed for private launch profile"
+    fi
+    if [[ "$password_reset_enabled" == "true" ]]; then
+      pass "password reset is enabled"
+    else
+      warn "password_reset_enabled is false; acceptable for private beta but must be verified before public launch"
+    fi
+  fi
+
+  effective_require_payment="$REQUIRE_PAYMENT"
+  if [[ "$effective_require_payment" == "auto" ]]; then
+    if [[ "$LAUNCH_PROFILE" == "public" ]]; then
+      effective_require_payment="1"
+    else
+      effective_require_payment="0"
+    fi
+  fi
+  case "$effective_require_payment" in
+    1|true|yes)
+      if [[ "$payment_enabled" == "true" ]]; then
+        pass "payment is enabled"
+      else
+        fail "payment_enabled is false but payment is required"
+      fi
+      ;;
+    *)
+      if [[ "$payment_enabled" == "true" ]]; then
+        pass "payment is enabled"
+      else
+        pass "payment is disabled and not required for this launch profile"
+      fi
+      ;;
+  esac
 else
   fail "backend public settings HTTP $settings_status"
   if [[ -f "$settings_out" ]]; then
