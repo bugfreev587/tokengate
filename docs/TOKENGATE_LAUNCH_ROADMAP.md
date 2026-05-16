@@ -39,6 +39,7 @@ Completed:
 - owner decisions captured for support contact and V1 payment provider targets
 - live Claude gateway smoke passed with a TokenGate API key
 - `/v1/usage` confirmed Claude request metering, token totals, and cost accumulation
+- private beta acceptance smoke script added and passed against production Claude route
 
 Current launch readiness estimate: **98%**
 
@@ -61,6 +62,7 @@ Latest production smoke notes:
 
 - Claude-compatible `/v1/messages` returned HTTP 200 using `claude-haiku-4-5-20251001`.
 - API-key `/v1/usage` showed two Claude requests, 32 total tokens, and accumulated metered cost.
+- Private beta acceptance smoke later confirmed three Claude requests, 48 total tokens, and quota/balance usage updates.
 - `/v1/models` currently exposes Claude models only for the test API key.
 - OpenAI-compatible `/v1/chat/completions` currently returns 404 for `gpt-4.1-mini`, indicating the OpenAI account/model route still needs configuration before public launch.
 
