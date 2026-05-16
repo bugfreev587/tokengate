@@ -505,7 +505,14 @@ const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appS
 const siteLogo = computed(() => appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '')
 const siteSubtitle = computed(() => appStore.cachedPublicSettings?.site_subtitle || t('home.heroSubtitle'))
 const defaultDocsUrl = '/docs'
-const docUrl = computed(() => appStore.cachedPublicSettings?.doc_url || appStore.docUrl || defaultDocsUrl)
+const normalizeDocsUrl = (url?: string) => {
+  const trimmed = url?.trim()
+  if (!trimmed || trimmed.includes('TOKENGATE_QUICKSTART.md')) {
+    return defaultDocsUrl
+  }
+  return trimmed
+}
+const docUrl = computed(() => normalizeDocsUrl(appStore.cachedPublicSettings?.doc_url || appStore.docUrl))
 const isDocUrlExternal = computed(() => /^https?:\/\//.test(docUrl.value))
 const homeContent = computed(() => appStore.cachedPublicSettings?.home_content || '')
 

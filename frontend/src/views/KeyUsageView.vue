@@ -341,8 +341,13 @@
           &copy; {{ currentYear }} {{ siteName }}. {{ t('home.footer.allRightsReserved') }}
         </p>
         <div class="flex items-center gap-4">
+          <RouterLink
+            v-if="docUrl && !isDocUrlExternal"
+            :to="docUrl"
+            class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
+          >{{ t('home.docs') }}</RouterLink>
           <a
-            v-if="docUrl"
+            v-else-if="docUrl"
             :href="docUrl"
             target="_blank"
             rel="noopener noreferrer"
@@ -374,7 +379,16 @@ const appStore = useAppStore()
 
 const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appStore.siteName || 'TokenGate')
 const siteLogo = computed(() => appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '')
-const docUrl = computed(() => appStore.cachedPublicSettings?.doc_url || appStore.docUrl || '')
+const defaultDocsUrl = '/docs'
+const normalizeDocsUrl = (url?: string) => {
+  const trimmed = url?.trim()
+  if (!trimmed || trimmed.includes('TOKENGATE_QUICKSTART.md')) {
+    return defaultDocsUrl
+  }
+  return trimmed
+}
+const docUrl = computed(() => normalizeDocsUrl(appStore.cachedPublicSettings?.doc_url || appStore.docUrl))
+const isDocUrlExternal = computed(() => /^https?:\/\//.test(docUrl.value))
 const githubUrl = 'https://github.com/bugfreev587/tokengate'
 
 // ==================== Theme (same as HomeView) ====================

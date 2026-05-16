@@ -339,14 +339,12 @@
                     <Icon name="key" size="md" class="mr-2" />
                     {{ t('usage.createOrUseKey') }}
                   </RouterLink>
-                  <a
-                    href="https://github.com/bugfreev587/tokengate/blob/main/docs/TOKENGATE_QUICKSTART.md"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <RouterLink
+                    to="/docs"
                     class="btn btn-secondary"
                   >
                     {{ t('usage.viewQuickstart') }}
-                  </a>
+                  </RouterLink>
                 </div>
               </template>
             </EmptyState>

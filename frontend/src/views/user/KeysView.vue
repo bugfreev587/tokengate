@@ -372,14 +372,12 @@
                     <Icon name="plus" size="md" class="mr-2" />
                     {{ t('keys.createKey') }}
                   </button>
-                  <a
-                    href="https://github.com/bugfreev587/tokengate/blob/main/docs/TOKENGATE_QUICKSTART.md"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <RouterLink
+                    to="/docs"
                     class="btn btn-secondary"
                   >
                     {{ t('keys.viewQuickstart') }}
-                  </a>
+                  </RouterLink>
                 </div>
               </template>
             </EmptyState>
