@@ -268,6 +268,7 @@ export default {
     searchPlaceholder: 'Search...',
     noOptionsFound: 'No options found',
     noGroupsAvailable: 'No groups available',
+    noGroupsForPlatform: 'No {platform} groups available. Create an active group for this platform first.',
     unknownError: 'Unknown error occurred',
     saving: 'Saving...',
     selectedCount: '({count} selected)',

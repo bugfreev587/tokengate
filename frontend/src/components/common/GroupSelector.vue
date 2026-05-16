@@ -50,7 +50,7 @@
         v-if="filteredGroups.length === 0"
         class="col-span-2 py-2 text-center text-sm text-gray-500 dark:text-gray-400"
       >
-        {{ t('common.noGroupsAvailable') }}
+        <p>{{ emptyGroupsMessage }}</p>
       </div>
     </div>
   </div>
@@ -108,6 +108,23 @@ const filteredGroups = computed(() => {
     )
   }
   return result
+})
+
+const hasGroupsForSelectedPlatform = computed(() => {
+  if (!props.platform) return props.groups.length > 0
+  if (props.platform === 'antigravity' && props.mixedScheduling) {
+    return props.groups.some(
+      (g) => g.platform === 'antigravity' || g.platform === 'anthropic' || g.platform === 'gemini'
+    )
+  }
+  return props.groups.some((g) => g.platform === props.platform)
+})
+
+const emptyGroupsMessage = computed(() => {
+  if (props.platform && !hasGroupsForSelectedPlatform.value) {
+    return t('common.noGroupsForPlatform', { platform: props.platform })
+  }
+  return t('common.noGroupsAvailable')
 })
 
 const handleChange = (groupId: number, checked: boolean) => {

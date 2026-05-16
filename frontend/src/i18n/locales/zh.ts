@@ -268,6 +268,7 @@ export default {
     searchPlaceholder: '搜索...',
     noOptionsFound: '无匹配选项',
     noGroupsAvailable: '无可用分组',
+    noGroupsForPlatform: '没有可用的 {platform} 分组。请先创建一个该平台的启用分组。',
     unknownError: '发生未知错误',
     saving: '保存中...',
     selectedCount: '（已选 {count} 个）',
