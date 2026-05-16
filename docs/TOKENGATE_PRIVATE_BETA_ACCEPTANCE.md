@@ -36,11 +36,11 @@ The goal is not perfection. The goal is a safe, supportable, measurable first re
 Recommended command:
 
 ```bash
-TOKENGATE_BASE_URL="https://<railway-backend-domain>" \
+TOKENGATE_FRONTEND_URL="https://<vercel-frontend-domain>" \
+TOKENGATE_BACKEND_URL="https://<railway-backend-domain>" \
 TOKENGATE_API_KEY="<token-gate-api-key>" \
-TOKENGATE_RUN_CLAUDE=1 \
-TOKENGATE_RUN_OPENAI=1 \
-tools/tokengate_smoke_test.sh
+TOKENGATE_EXPECTED_CONTACT_INFO="bugfreev587@gmail.com" \
+tools/tokengate_private_beta_acceptance.sh
 ```
 
 ## 4. User Onboarding

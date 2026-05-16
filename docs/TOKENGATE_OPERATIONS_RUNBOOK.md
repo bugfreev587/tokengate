@@ -34,10 +34,10 @@ TOKENGATE_FRONTEND_URL=https://<frontend-domain> \
 TOKENGATE_BACKEND_URL=https://<backend-domain> \
 TOKENGATE_API_KEY=sk-... \
 TOKENGATE_EXPECTED_CONTACT_INFO=bugfreev587@gmail.com \
-tools/tokengate_launch_readiness.sh
+tools/tokengate_private_beta_acceptance.sh
 ```
 
-This verifies public pages plus protected SPA entry routes such as `/dashboard`, `/usage`, `/admin/accounts`, and `/admin/launch-readiness`.
+This verifies public pages plus protected SPA entry routes such as `/dashboard`, `/usage`, `/admin/accounts`, and `/admin/launch-readiness`. It also checks CORS, Claude model visibility, Claude gateway smoke, and API-key `/v1/usage` metering.
 
 Use `TOKENGATE_LAUNCH_PROFILE=private` for invite-only beta checks. Use `TOKENGATE_LAUNCH_PROFILE=public` before public self-serve launch; public mode fails if support contact, password reset, registration, or required payment settings are missing.
 

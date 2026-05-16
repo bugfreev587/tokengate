@@ -111,9 +111,11 @@ bash tools/check_tokengate_env.sh all
 Smoke test:
 
 ```bash
-TOKENGATE_BASE_URL="https://<backend-domain>" \
+TOKENGATE_FRONTEND_URL="https://<frontend-domain>" \
+TOKENGATE_BACKEND_URL="https://<backend-domain>" \
 TOKENGATE_API_KEY="sk-..." \
-bash tools/tokengate_smoke_test.sh
+TOKENGATE_EXPECTED_CONTACT_INFO="bugfreev587@gmail.com" \
+tools/tokengate_private_beta_acceptance.sh
 ```
 
 Model visibility check:
