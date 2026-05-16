@@ -35,8 +35,9 @@ Completed:
 - production public route, public settings, and CORS readiness check passed for current Vercel/Railway domains
 - production SPA refresh check passed for `/dashboard`, `/usage`, and `/admin/accounts`
 - private/public launch profile gates added to readiness checker
+- admin launch readiness page for private/public launch blockers
 
-Current launch readiness estimate: **96%**
+Current launch readiness estimate: **97%**
 
 ## Phase 1: Core Runtime Verification
 

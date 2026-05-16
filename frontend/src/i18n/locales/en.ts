@@ -327,6 +327,7 @@ export default {
     ops: 'Ops',
     promoCodes: 'Promo Codes',
     settings: 'Settings',
+    launchReadiness: 'Launch Readiness',
     myAccount: 'My Account',
     lightMode: 'Light Mode',
     darkMode: 'Dark Mode',

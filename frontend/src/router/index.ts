@@ -555,6 +555,17 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/launch-readiness',
+    name: 'AdminLaunchReadiness',
+    component: () => import('@/views/admin/LaunchReadinessView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+      title: 'Launch Readiness',
+      titleKey: 'nav.launchReadiness'
+    }
+  },
+  {
     path: '/admin/risk-control',
     name: 'AdminRiskControl',
     component: () => import('@/views/admin/RiskControlView.vue'),

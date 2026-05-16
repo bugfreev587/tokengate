@@ -645,6 +645,7 @@ const adminNavItems = computed((): NavItem[] => {
     return filtered
   }
 
+  visible.push({ path: '/admin/launch-readiness', label: t('nav.launchReadiness'), icon: DashboardIcon })
   visible.push({ path: '/admin/settings', label: t('nav.settings'), icon: CogIcon })
   for (const cm of customMenuItemsForAdmin.value) {
     visible.push({ path: `/custom/${cm.id}`, label: cm.label, icon: null, iconSvg: cm.icon_svg })
