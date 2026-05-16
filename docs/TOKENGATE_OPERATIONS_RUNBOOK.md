@@ -207,8 +207,10 @@ VITE_BUILD_TARGET=standalone
 Before declaring OpenAI ready, confirm the test API key can actually see an OpenAI-compatible model:
 
 ```bash
-curl -sS "https://<backend-domain>/v1/models" \
-  -H "Authorization: Bearer <tokengate-api-key>"
+TOKENGATE_BASE_URL=https://<backend-domain> \
+TOKENGATE_API_KEY=<tokengate-api-key> \
+TOKENGATE_REQUIRE_OPENAI_MODELS=1 \
+tools/tokengate_model_visibility.sh
 ```
 
 Expected:

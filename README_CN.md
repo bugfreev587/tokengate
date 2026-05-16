@@ -104,6 +104,14 @@ TOKENGATE_RUN_OPENAI=1 \
 tools/tokengate_smoke_test.sh
 ```
 
+也可以先检查这个 key 当前能看到哪些模型族：
+
+```bash
+TOKENGATE_BASE_URL="https://your-railway-backend-domain" \
+TOKENGATE_API_KEY="tg_live_or_sub2api_key" \
+tools/tokengate_model_visibility.sh
+```
+
 ## 本地开发
 
 后端：

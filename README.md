@@ -104,6 +104,14 @@ TOKENGATE_RUN_OPENAI=1 \
 tools/tokengate_smoke_test.sh
 ```
 
+Check which model families that key can see:
+
+```bash
+TOKENGATE_BASE_URL="https://your-railway-backend-domain" \
+TOKENGATE_API_KEY="tg_live_or_sub2api_key" \
+tools/tokengate_model_visibility.sh
+```
+
 ## Local Development
 
 Backend:

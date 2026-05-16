@@ -116,6 +116,16 @@ TOKENGATE_API_KEY="sk-..." \
 bash tools/tokengate_smoke_test.sh
 ```
 
+Model visibility check:
+
+```bash
+TOKENGATE_BASE_URL="https://<backend-domain>" \
+TOKENGATE_API_KEY="sk-..." \
+TOKENGATE_REQUIRE_CLAUDE_MODELS=1 \
+TOKENGATE_REQUIRE_OPENAI_MODELS=1 \
+tools/tokengate_model_visibility.sh
+```
+
 Launch readiness check:
 
 ```bash
