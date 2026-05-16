@@ -18,7 +18,7 @@ Example:
 
 ```bash
 export TOKENGATE_API_KEY="sk-..."
-export TOKENGATE_BASE_URL="https://your-api-domain.example.com"
+export TOKENGATE_BASE_URL="https://tokengate-production.up.railway.app"
 ```
 
 For the current Railway deployment shape, the base URL should be the backend domain, not the Vercel frontend domain.
@@ -60,7 +60,7 @@ curl "$TOKENGATE_BASE_URL/v1/chat/completions" \
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4.1-mini",
+    "model": "gpt-5.2-chat-latest",
     "messages": [
       {
         "role": "user",
@@ -75,6 +75,26 @@ Expected result:
 - the request succeeds if an OpenAI upstream account is assigned to the user's group
 - usage appears in **Usage**
 - dashboard totals update after refresh
+
+OpenAI SDK example:
+
+```js
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.TOKENGATE_API_KEY,
+  baseURL: "https://tokengate-production.up.railway.app/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-5.2-chat-latest",
+  messages: [{ role: "user", content: "Say hi in one short sentence." }],
+});
+
+console.log(response.choices[0]?.message?.content);
+```
+
+Customers should not use the Vercel frontend URL as the SDK base URL. The frontend domain is for the web dashboard only.
 
 ## 4. Verify Account Routing
 

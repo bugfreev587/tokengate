@@ -70,6 +70,52 @@
         </article>
       </section>
 
+      <section class="mt-12 rounded-3xl border border-slate-200 bg-white p-6 dark:border-dark-800 dark:bg-dark-900">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-[0.22em] text-primary-600 dark:text-primary-400">
+              {{ copy.entry.eyebrow }}
+            </p>
+            <h2 class="mt-3 text-2xl font-bold">{{ copy.entry.title }}</h2>
+            <p class="mt-3 max-w-3xl text-sm leading-7 text-slate-600 dark:text-dark-300">{{ copy.entry.body }}</p>
+          </div>
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <RouterLink to="/register" class="btn btn-primary">{{ copy.entry.createAccount }}</RouterLink>
+            <RouterLink to="/keys" class="btn btn-secondary">{{ copy.entry.manageKeys }}</RouterLink>
+          </div>
+        </div>
+        <div class="mt-6 grid gap-4 md:grid-cols-4">
+          <article v-for="item in copy.entry.items" :key="item.path" class="rounded-2xl bg-slate-50 p-5 dark:bg-dark-800">
+            <p class="font-mono text-xs font-semibold text-primary-600 dark:text-primary-400">{{ item.path }}</p>
+            <h3 class="mt-3 font-semibold">{{ item.title }}</h3>
+            <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-dark-300">{{ item.body }}</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="mt-12 rounded-3xl border border-slate-200 bg-white p-6 dark:border-dark-800 dark:bg-dark-900">
+        <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-[0.22em] text-primary-600 dark:text-primary-400">
+              {{ copy.sdk.eyebrow }}
+            </p>
+            <h2 class="mt-3 text-2xl font-bold">{{ copy.sdk.title }}</h2>
+            <p class="mt-3 text-sm leading-7 text-slate-600 dark:text-dark-300">{{ copy.sdk.body }}</p>
+            <div class="mt-5 rounded-2xl bg-slate-50 p-4 dark:bg-dark-800">
+              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-dark-300">{{ copy.sdk.baseUrlLabel }}</p>
+              <p class="mt-2 break-all font-mono text-sm font-semibold text-slate-900 dark:text-white">{{ copy.sdk.baseUrl }}</p>
+            </div>
+          </div>
+          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 p-5 dark:border-dark-700">
+            <div class="mb-4 flex items-center justify-between gap-4">
+              <span class="text-sm font-semibold text-slate-300">{{ copy.sdk.exampleTitle }}</span>
+              <span class="rounded-full bg-primary-500/15 px-3 py-1 text-xs font-semibold text-primary-200">{{ copy.sdk.compatLabel }}</span>
+            </div>
+            <pre class="overflow-x-auto text-sm leading-7 text-slate-100"><code>{{ copy.sdk.code }}</code></pre>
+          </div>
+        </div>
+      </section>
+
       <section class="mt-12 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div class="rounded-3xl border border-slate-200 bg-white p-6 dark:border-dark-800 dark:bg-dark-900">
           <h2 class="text-2xl font-bold">{{ copy.billing.title }}</h2>
@@ -135,14 +181,14 @@ const enCopy = {
   title: 'Use TokenGate in five minutes',
   subtitle: 'Create an API key, call OpenAI-compatible or Anthropic-compatible endpoints, and verify usage, token cost, and balance changes from the dashboard.',
   cta: { createKey: 'Create an API key', githubDocs: 'Open GitHub docs' },
-  code: `export TOKENGATE_BASE_URL="https://your-backend-domain"
+  code: `export TOKENGATE_BASE_URL="https://tokengate-production.up.railway.app"
 export TOKENGATE_API_KEY="sk-..."
 
 curl "$TOKENGATE_BASE_URL/v1/chat/completions" \\
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-4.1-mini",
+    "model": "gpt-5.2-chat-latest",
     "messages": [{"role": "user", "content": "Reply with exactly: hello"}]
   }'`,
   cards: [
@@ -150,6 +196,41 @@ curl "$TOKENGATE_BASE_URL/v1/chat/completions" \\
     { kicker: 'Step 2', title: 'Send one request', body: 'Use the backend Railway domain for gateway endpoints. Do not send API traffic to the Vercel frontend domain.' },
     { kicker: 'Step 3', title: 'Check metering', body: 'After a successful request, Last Used, Usage records, dashboard totals, and balance should update.' },
   ],
+  entry: {
+    eyebrow: 'Customer entry',
+    title: 'Public users should start from the normal app, not the admin console',
+    body: 'The admin console configures upstream accounts, groups, pricing, users, and launch readiness. Customers sign in to the user dashboard, create their own API keys, monitor usage, and manage billing.',
+    createAccount: 'Create customer account',
+    manageKeys: 'Open API Keys',
+    items: [
+      { path: '/home', title: 'Public landing page', body: 'The marketing and product entry for new customers.' },
+      { path: '/dashboard', title: 'Customer dashboard', body: 'The signed-in home for usage, balance, and next actions.' },
+      { path: '/keys', title: 'API key management', body: 'Where customers create, rotate, and disable their TokenGate API keys.' },
+      { path: '/usage', title: 'Usage records', body: 'Where customers confirm requests, model usage, token counts, and costs.' },
+    ],
+  },
+  sdk: {
+    eyebrow: 'API integration',
+    title: 'Use TokenGate like an OpenAI-compatible gateway',
+    body: 'Customers should send model traffic to the Railway backend domain and pass the TokenGate API key as the bearer token. The Vercel domain is only the web application.',
+    baseUrlLabel: 'Current production API base URL',
+    baseUrl: 'https://tokengate-production.up.railway.app',
+    exampleTitle: 'OpenAI SDK example',
+    compatLabel: 'OpenAI compatible',
+    code: `import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.TOKENGATE_API_KEY,
+  baseURL: "https://tokengate-production.up.railway.app/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-5.2-chat-latest",
+  messages: [{ role: "user", content: "Say hi in one short sentence." }],
+});
+
+console.log(response.choices[0]?.message?.content);`,
+  },
   billing: {
     title: 'Billing language',
     body: 'TokenGate separates provider usage units from settlement. This keeps model pricing transparent while users see a simple balance.',
@@ -196,6 +277,29 @@ const zhCopy = {
     { kicker: '第二步', title: '发送请求', body: '网关请求要使用 Railway 后端域名。不要把 API 流量发到 Vercel 前端域名。' },
     { kicker: '第三步', title: '检查计量', body: '请求成功后，Last Used、Usage 记录、Dashboard 汇总和余额都应该更新。' },
   ],
+  entry: {
+    eyebrow: '普通客户入口',
+    title: '普通用户从用户端进入，不进入 Admin 控制台',
+    body: 'Admin 控制台用于配置上游账号、分组、定价、用户和上线检查。普通客户登录后进入用户 Dashboard，自己创建 API key、查看用量并管理账单。',
+    createAccount: '创建客户账号',
+    manageKeys: '打开 API Keys',
+    items: [
+      { path: '/home', title: '公开首页', body: '新客户了解产品和注册登录的入口。' },
+      { path: '/dashboard', title: '用户 Dashboard', body: '登录后的用户主页，用于查看余额、用量和下一步操作。' },
+      { path: '/keys', title: 'API Key 管理', body: '客户创建、轮换、禁用 TokenGate API key 的地方。' },
+      { path: '/usage', title: '用量记录', body: '客户确认请求、模型、token 数和扣费的地方。' },
+    ],
+  },
+  sdk: {
+    eyebrow: 'API 接入',
+    title: '把 TokenGate 当作 OpenAI-compatible 网关使用',
+    body: '客户的模型请求应该发到 Railway 后端域名，并用 TokenGate API key 作为 bearer token。Vercel 域名只负责网页应用。',
+    baseUrlLabel: '当前生产 API Base URL',
+    baseUrl: 'https://tokengate-production.up.railway.app',
+    exampleTitle: 'OpenAI SDK 示例',
+    compatLabel: 'OpenAI compatible',
+    code: enCopy.sdk.code,
+  },
   billing: {
     title: '计费语言',
     body: 'TokenGate 把 provider 用量单位和结算余额分开。这样模型价格透明，用户侧也能保持简单的余额心智。',
