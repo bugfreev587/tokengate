@@ -3547,6 +3547,7 @@ export default {
         generateAuthUrl: '生成授权 URL',
         generating: '生成中...',
         regenerate: '重新生成',
+        openAuthUrlButton: '打开授权链接',
         step2OpenUrl: '在浏览器中打开 URL 并完成授权',
         openUrlDesc: '在新标签页中打开授权 URL，登录您的 Claude 账号并授权。',
         proxyWarning: '注意：如果您配置了代理，请确保浏览器使用相同的代理访问授权页面。',
@@ -3574,14 +3575,14 @@ export default {
           step2OpenUrl: '在浏览器中打开链接并完成授权',
           openUrlDesc: '请在新标签页中打开授权链接，登录您的 OpenAI 账户并授权。',
           importantNotice:
-            '重要提示：授权后页面可能会加载较长时间，请耐心等待。当浏览器地址栏变为 http://localhost... 开头时，表示授权已完成。',
+            '重要提示：授权后看到 “localhost refused to connect / 无法访问” 是正常现象。不要等待该页面加载；请复制浏览器地址栏里的完整 URL，并粘贴到第 3 步。',
           step3EnterCode: '输入授权链接或 Code',
           authCodeDesc:
-            '授权完成后，当页面地址变为 http://localhost:xxx/auth/callback?code=... 时：',
+            '授权完成后，浏览器会跳转到 http://localhost:1455/auth/callback?code=...，并可能显示连接失败。请复制地址栏完整 URL，或仅复制 code 的值。',
           authCode: '授权链接或 Code',
           authCodePlaceholder:
-            '方式1：复制完整的链接\n(http://localhost:xxx/auth/callback?code=...)\n方式2：仅复制 code 参数的值',
-          authCodeHint: '您可以直接复制整个链接或仅复制 code 参数值，系统会自动识别',
+            '推荐：粘贴浏览器地址栏中的完整回调 URL\nhttp://localhost:1455/auth/callback?code=...&state=...\n也可以只粘贴 code 参数的值',
+          authCodeHint: '推荐粘贴完整回调 URL，因为其中包含 state；系统会自动解析 code/state。',
           failedToGenerateUrl: '生成 OpenAI 授权链接失败',
           failedToExchangeCode: 'OpenAI 授权码兑换失败',
           failedToValidateRT: '验证 Refresh Token 失败',

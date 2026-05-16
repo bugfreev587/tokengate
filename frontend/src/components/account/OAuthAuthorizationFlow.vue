@@ -510,6 +510,15 @@
                     <Icon name="refresh" size="xs" class="mr-1 inline" />
                     {{ t('admin.accounts.oauth.regenerate') }}
                   </button>
+                  <a
+                    :href="authUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="ml-4 inline-flex items-center text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                  >
+                    <Icon name="externalLink" size="xs" class="mr-1 inline" />
+                    {{ t('admin.accounts.oauth.openAuthUrlButton') }}
+                  </a>
                 </div>
               </div>
             </div>

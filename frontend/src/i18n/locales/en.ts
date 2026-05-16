@@ -3409,6 +3409,7 @@ export default {
         generateAuthUrl: 'Generate Auth URL',
         generating: 'Generating...',
         regenerate: 'Regenerate',
+        openAuthUrlButton: 'Open auth URL',
         step2OpenUrl: 'Open the URL in your browser and complete authorization',
         openUrlDesc:
           'Open the authorization URL in a new tab, log in to your Claude account and authorize.',
@@ -3440,15 +3441,15 @@ export default {
           openUrlDesc:
             'Open the authorization URL in a new tab, log in to your OpenAI account and authorize.',
           importantNotice:
-            'Important: The page may take a while to load after authorization. Please wait patiently. When the browser address bar changes to http://localhost..., the authorization is complete.',
+            'Important: Seeing "localhost refused to connect" after authorization is expected. Do not wait for that page to load; copy the full URL from the browser address bar and paste it into step 3.',
           step3EnterCode: 'Enter Authorization URL or Code',
           authCodeDesc:
-            'After authorization is complete, when the page URL becomes http://localhost:xxx/auth/callback?code=...:',
+            'After authorization, the browser redirects to http://localhost:1455/auth/callback?code=... and may show a connection error. Copy that full address-bar URL, or copy only the code value.',
           authCode: 'Authorization URL or Code',
           authCodePlaceholder:
-            'Option 1: Copy the complete URL\n(http://localhost:xxx/auth/callback?code=...)\nOption 2: Copy only the code parameter value',
+            'Recommended: paste the full callback URL from the browser address bar\nhttp://localhost:1455/auth/callback?code=...&state=...\nOr paste only the code parameter value',
           authCodeHint:
-            'You can copy the entire URL or just the code parameter value, the system will auto-detect',
+            'The full callback URL is recommended because it includes state. The system will auto-extract code/state.',
           failedToGenerateUrl: 'Failed to generate OpenAI auth URL',
           failedToExchangeCode: 'Failed to exchange OpenAI auth code',
           failedToValidateRT: 'Failed to validate refresh token',
