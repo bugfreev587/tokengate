@@ -33,7 +33,7 @@ Completed:
 - final production environment checklist
 - launch readiness checker for public routes, backend settings, CORS, and optional API smoke
 - production public route, public settings, and CORS readiness check passed for current Vercel/Railway domains
-- production SPA refresh check passed for `/dashboard`, `/usage`, and `/admin/accounts`
+- production SPA refresh check passed for `/dashboard`, `/usage`, `/admin/accounts`, and `/admin/launch-readiness`
 - private/public launch profile gates added to readiness checker
 - admin launch readiness page for private/public launch blockers
 
@@ -51,7 +51,7 @@ Required before moving on:
 - OpenAI API key request succeeds and creates a usage log
 - `Last Used`, dashboard totals, and usage records update after successful requests
 - failed upstream requests produce actionable errors and do not create misleading charges
-- Vercel routes such as `/home`, `/dashboard`, `/admin/accounts`, and `/usage` survive refresh
+- Vercel routes such as `/home`, `/dashboard`, `/admin/accounts`, `/admin/launch-readiness`, and `/usage` survive refresh
 
 Status: **in progress**
 

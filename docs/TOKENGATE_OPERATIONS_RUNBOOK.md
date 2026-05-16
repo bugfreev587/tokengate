@@ -36,7 +36,7 @@ TOKENGATE_API_KEY=sk-... \
 tools/tokengate_launch_readiness.sh
 ```
 
-This verifies public pages plus protected SPA entry routes such as `/dashboard`, `/usage`, and `/admin/accounts`.
+This verifies public pages plus protected SPA entry routes such as `/dashboard`, `/usage`, `/admin/accounts`, and `/admin/launch-readiness`.
 
 Use `TOKENGATE_LAUNCH_PROFILE=private` for invite-only beta checks. Use `TOKENGATE_LAUNCH_PROFILE=public` before public self-serve launch; public mode fails if support contact, password reset, registration, or required payment settings are missing.
 

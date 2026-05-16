@@ -25,7 +25,7 @@ Optional:
   TOKENGATE_LAUNCH_PROFILE=private|public
   TOKENGATE_SIGNUP_MODE=auto|invite|self_serve
   TOKENGATE_REQUIRE_PAYMENT=auto|1|0
-  TOKENGATE_FRONTEND_ROUTES="/home /docs /pricing /support /login /dashboard /usage /admin/accounts"
+  TOKENGATE_FRONTEND_ROUTES="/home /docs /pricing /support /login /dashboard /usage /admin/accounts /admin/launch-readiness"
 
 Checks:
   - frontend SPA routes survive refresh
@@ -141,7 +141,7 @@ tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
 printf '\nFrontend route refresh checks\n'
-routes="${TOKENGATE_FRONTEND_ROUTES:-/home /docs /pricing /support /login /dashboard /usage /admin/accounts}"
+routes="${TOKENGATE_FRONTEND_ROUTES:-/home /docs /pricing /support /login /dashboard /usage /admin/accounts /admin/launch-readiness}"
 for route in $routes; do
   out="$tmp_dir/frontend_${route//\//_}.html"
   status="$(http_status "$FRONTEND_URL$route" "$out")"
