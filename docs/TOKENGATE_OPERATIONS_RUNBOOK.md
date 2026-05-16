@@ -202,6 +202,31 @@ VITE_API_BASE_URL=https://<backend-domain>/api/v1
 VITE_BUILD_TARGET=standalone
 ```
 
+### OpenAI Provider Route Check
+
+Before declaring OpenAI ready, confirm the test API key can actually see an OpenAI-compatible model:
+
+```bash
+curl -sS "https://<backend-domain>/v1/models" \
+  -H "Authorization: Bearer <tokengate-api-key>"
+```
+
+Expected:
+
+- Claude models appear when the Claude Code OAuth account is routed correctly.
+- OpenAI models such as `gpt-4.1-mini` appear only after an OpenAI account/provider is connected, assigned to the same group/channel as the test key, and allowed by model whitelist.
+
+Then run:
+
+```bash
+TOKENGATE_BASE_URL=https://<backend-domain> \
+TOKENGATE_API_KEY=<tokengate-api-key> \
+TOKENGATE_RUN_CLAUDE=0 \
+bash tools/tokengate_smoke_test.sh
+```
+
+If this returns `model route not found`, fix provider account health, group/channel routing, or model whitelist before debugging the frontend.
+
 ## 8. Database Backup And Restore Drill
 
 Create a database backup before any public launch, pricing change, payment migration, or risky backend deploy:
