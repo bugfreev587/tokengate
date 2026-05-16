@@ -36,6 +36,7 @@ trap 'rm -rf "$tmp_dir"' EXIT
 
 diagnose_status() {
   local status="$1"
+  local body_file="${2:-}"
   case "$status" in
     401)
       echo "Hint: API key is missing, invalid, disabled, or expired." >&2
@@ -44,7 +45,11 @@ diagnose_status() {
       echo "Hint: API key is valid but not allowed for this group, plan, balance, or route." >&2
       ;;
     404)
-      echo "Hint: endpoint not found. Check that TOKENGATE_BASE_URL is the Railway backend origin, not the Vercel frontend URL." >&2
+      if [[ -n "$body_file" ]] && grep -q '"message":"model:' "$body_file" 2>/dev/null; then
+        echo "Hint: model route not found. Check provider account health, group/channel routing, and model whitelist for the requested model." >&2
+      else
+        echo "Hint: endpoint not found. Check that TOKENGATE_BASE_URL is the Railway backend origin, not the Vercel frontend URL." >&2
+      fi
       ;;
     405)
       echo "Hint: method not allowed. This often means requests are hitting the frontend/static host instead of the backend API." >&2
@@ -85,7 +90,7 @@ preflight() {
   if [[ -f "$out" ]]; then
     sed -n '1,20p' "$out" >&2 || true
   fi
-  diagnose_status "$status"
+  diagnose_status "$status" "$out"
 }
 
 request() {
@@ -122,7 +127,7 @@ request() {
     if [[ -f "$out" ]]; then
       sed -n '1,40p' "$out" >&2 || true
     fi
-    diagnose_status "$status"
+    diagnose_status "$status" "$out"
     return 1
   fi
 
