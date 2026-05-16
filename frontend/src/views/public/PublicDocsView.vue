@@ -1,340 +1,560 @@
 <template>
-  <div class="min-h-screen bg-slate-50 text-slate-950 dark:bg-dark-950 dark:text-white">
-    <header class="border-b border-slate-200 bg-white/90 backdrop-blur dark:border-dark-800 dark:bg-dark-900/90">
-      <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
+  <div class="docs-page min-h-screen bg-[#07111f] text-slate-100">
+    <header class="sticky top-0 z-30 border-b border-white/10 bg-[#07111f]/88 backdrop-blur-xl">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
         <RouterLink to="/home" class="flex items-center gap-3">
-          <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-dark-800 dark:ring-dark-700">
+          <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-white/15">
             <img :src="siteLogo || '/logo.png'" alt="TokenGate" class="h-full w-full object-contain" />
           </span>
           <span class="text-base font-semibold">{{ siteName }}</span>
         </RouterLink>
+
         <div class="flex items-center gap-3">
-          <RouterLink to="/home" class="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-dark-300 dark:hover:text-white">
-            {{ copy.nav.home }}
-          </RouterLink>
-          <RouterLink to="/pricing" class="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-dark-300 dark:hover:text-white">
-            {{ copy.nav.pricing }}
-          </RouterLink>
-          <RouterLink to="/support" class="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-dark-300 dark:hover:text-white">
-            {{ copy.nav.support }}
-          </RouterLink>
-          <RouterLink to="/login" class="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
-            {{ copy.nav.signIn }}
+          <RouterLink to="/home" class="docs-top-link">Home</RouterLink>
+          <RouterLink to="/pricing" class="docs-top-link">Pricing</RouterLink>
+          <RouterLink to="/support" class="docs-top-link">Support</RouterLink>
+          <RouterLink to="/login" class="rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-100">
+            Sign in
           </RouterLink>
         </div>
       </div>
     </header>
 
-    <main class="mx-auto max-w-6xl px-5 py-10 sm:py-14">
-      <section class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-        <div>
-          <p class="text-sm font-semibold uppercase tracking-[0.24em] text-primary-600 dark:text-primary-400">
-            {{ copy.eyebrow }}
-          </p>
-          <h1 class="mt-4 text-4xl font-black tracking-tight sm:text-5xl">
-            {{ copy.title }}
-          </h1>
-          <p class="mt-5 max-w-2xl text-base leading-8 text-slate-600 dark:text-dark-300">
-            {{ copy.subtitle }}
-          </p>
-          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-            <RouterLink to="/keys" class="btn btn-primary">
-              {{ copy.cta.createKey }}
-            </RouterLink>
-            <a
-              href="https://github.com/bugfreev587/tokengate/blob/main/docs/TOKENGATE_QUICKSTART.md"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="btn btn-secondary"
-            >
-              {{ copy.cta.githubDocs }}
-            </a>
+    <main class="mx-auto grid max-w-7xl gap-8 px-5 py-8 lg:grid-cols-[260px_minmax(0,1fr)]">
+      <aside class="hidden lg:block">
+        <nav class="sticky top-24 rounded-3xl border border-white/10 bg-white/[0.04] p-4 shadow-2xl shadow-black/20">
+          <p class="px-3 text-xs font-bold uppercase tracking-[0.22em] text-cyan-300">Docs</p>
+          <div class="mt-4 space-y-5">
+            <section v-for="section in navSections" :key="section.title">
+              <p class="px-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{{ section.title }}</p>
+              <div class="mt-2 space-y-1">
+                <a
+                  v-for="item in section.items"
+                  :key="item.href"
+                  :href="item.href"
+                  class="block rounded-xl px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white"
+                >
+                  {{ item.label }}
+                </a>
+              </div>
+            </section>
           </div>
-        </div>
+        </nav>
+      </aside>
 
-        <div class="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 p-5 shadow-2xl shadow-primary-900/10 dark:border-dark-700">
-          <div class="mb-4 flex items-center gap-2">
-            <span class="h-3 w-3 rounded-full bg-red-400"></span>
-            <span class="h-3 w-3 rounded-full bg-yellow-400"></span>
-            <span class="h-3 w-3 rounded-full bg-green-400"></span>
-          </div>
-          <pre class="overflow-x-auto text-sm leading-7 text-slate-100"><code>{{ copy.code }}</code></pre>
-        </div>
-      </section>
+      <div class="min-w-0">
+        <section id="overview" class="docs-hero overflow-hidden rounded-[2rem] border border-cyan-300/20 bg-slate-950 p-6 shadow-2xl shadow-cyan-950/30 sm:p-8 lg:p-10">
+          <div class="grid gap-8 xl:grid-cols-[1fr_0.86fr] xl:items-center">
+            <div>
+              <p class="text-sm font-bold uppercase tracking-[0.28em] text-cyan-300">TokenGate Docs</p>
+              <h1 class="mt-4 max-w-3xl text-4xl font-black tracking-tight text-white sm:text-5xl">
+                Ship AI API access behind one customer key.
+              </h1>
+              <p class="mt-5 max-w-2xl text-base leading-8 text-slate-300">
+                TokenGate is an OpenAI-compatible and Anthropic-compatible gateway for packaging subscribed upstream accounts into a user-facing API product with balance, usage, groups, and model routing.
+              </p>
+              <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                <RouterLink to="/register" class="docs-primary-button">Create account</RouterLink>
+                <RouterLink to="/keys" class="docs-secondary-button">Create API key</RouterLink>
+                <a href="#api-reference" class="docs-secondary-button">API Reference</a>
+              </div>
+            </div>
 
-      <section class="mt-12 grid gap-4 md:grid-cols-3">
-        <article v-for="card in copy.cards" :key="card.title" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-dark-800 dark:bg-dark-900">
-          <p class="text-sm font-semibold text-primary-600 dark:text-primary-400">{{ card.kicker }}</p>
-          <h2 class="mt-3 text-xl font-bold">{{ card.title }}</h2>
-          <p class="mt-3 text-sm leading-7 text-slate-600 dark:text-dark-300">{{ card.body }}</p>
-        </article>
-      </section>
-
-      <section class="mt-12 rounded-3xl border border-slate-200 bg-white p-6 dark:border-dark-800 dark:bg-dark-900">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.22em] text-primary-600 dark:text-primary-400">
-              {{ copy.entry.eyebrow }}
-            </p>
-            <h2 class="mt-3 text-2xl font-bold">{{ copy.entry.title }}</h2>
-            <p class="mt-3 max-w-3xl text-sm leading-7 text-slate-600 dark:text-dark-300">{{ copy.entry.body }}</p>
-          </div>
-          <div class="flex flex-col gap-3 sm:flex-row">
-            <RouterLink to="/register" class="btn btn-primary">{{ copy.entry.createAccount }}</RouterLink>
-            <RouterLink to="/keys" class="btn btn-secondary">{{ copy.entry.manageKeys }}</RouterLink>
-          </div>
-        </div>
-        <div class="mt-6 grid gap-4 md:grid-cols-4">
-          <article v-for="item in copy.entry.items" :key="item.path" class="rounded-2xl bg-slate-50 p-5 dark:bg-dark-800">
-            <p class="font-mono text-xs font-semibold text-primary-600 dark:text-primary-400">{{ item.path }}</p>
-            <h3 class="mt-3 font-semibold">{{ item.title }}</h3>
-            <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-dark-300">{{ item.body }}</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="mt-12 rounded-3xl border border-slate-200 bg-white p-6 dark:border-dark-800 dark:bg-dark-900">
-        <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-          <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.22em] text-primary-600 dark:text-primary-400">
-              {{ copy.sdk.eyebrow }}
-            </p>
-            <h2 class="mt-3 text-2xl font-bold">{{ copy.sdk.title }}</h2>
-            <p class="mt-3 text-sm leading-7 text-slate-600 dark:text-dark-300">{{ copy.sdk.body }}</p>
-            <div class="mt-5 rounded-2xl bg-slate-50 p-4 dark:bg-dark-800">
-              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-dark-300">{{ copy.sdk.baseUrlLabel }}</p>
-              <p class="mt-2 break-all font-mono text-sm font-semibold text-slate-900 dark:text-white">{{ copy.sdk.baseUrl }}</p>
+            <div class="rounded-3xl border border-white/10 bg-black/70 p-5">
+              <div class="mb-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="h-3 w-3 rounded-full bg-red-400"></span>
+                  <span class="h-3 w-3 rounded-full bg-amber-300"></span>
+                  <span class="h-3 w-3 rounded-full bg-emerald-400"></span>
+                </div>
+                <span class="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-200">OpenAI compatible</span>
+              </div>
+              <pre class="overflow-x-auto text-sm leading-7 text-slate-100"><code>{{ quickstartCurl }}</code></pre>
             </div>
           </div>
-          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 p-5 dark:border-dark-700">
-            <div class="mb-4 flex items-center justify-between gap-4">
-              <span class="text-sm font-semibold text-slate-300">{{ copy.sdk.exampleTitle }}</span>
-              <span class="rounded-full bg-primary-500/15 px-3 py-1 text-xs font-semibold text-primary-200">{{ copy.sdk.compatLabel }}</span>
-            </div>
-            <pre class="overflow-x-auto text-sm leading-7 text-slate-100"><code>{{ copy.sdk.code }}</code></pre>
+        </section>
+
+        <section id="quickstart" class="docs-section">
+          <div class="docs-section-heading">
+            <p class="docs-eyebrow">Quickstart</p>
+            <h2>Five minute customer setup</h2>
+            <p>Follow this exact path for a regular user. Admin-only setup lives in the dashboard; customers only need balance, group access, and an API key.</p>
           </div>
-        </div>
-      </section>
 
-      <section class="mt-12 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <div class="rounded-3xl border border-slate-200 bg-white p-6 dark:border-dark-800 dark:bg-dark-900">
-          <h2 class="text-2xl font-bold">{{ copy.billing.title }}</h2>
-          <p class="mt-3 text-sm leading-7 text-slate-600 dark:text-dark-300">{{ copy.billing.body }}</p>
-          <dl class="mt-6 space-y-4">
-            <div v-for="item in copy.billing.items" :key="item.term" class="rounded-2xl bg-slate-50 p-4 dark:bg-dark-800">
-              <dt class="font-semibold">{{ item.term }}</dt>
-              <dd class="mt-1 text-sm leading-6 text-slate-600 dark:text-dark-300">{{ item.definition }}</dd>
+          <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <article v-for="step in quickstartSteps" :key="step.title" class="docs-card">
+              <div class="docs-step-number">{{ step.number }}</div>
+              <h3>{{ step.title }}</h3>
+              <p>{{ step.body }}</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="core-concepts" class="docs-section">
+          <div class="docs-section-heading">
+            <p class="docs-eyebrow">Core concepts</p>
+            <h2>How TokenGate decides what a request can use</h2>
+            <p>The mental model is intentionally small: users hold keys, keys bind to groups, groups route to upstream accounts, and usage settles against balance.</p>
+          </div>
+
+          <div class="grid gap-4 lg:grid-cols-2">
+            <article v-for="concept in concepts" :key="concept.title" class="docs-card">
+              <p class="font-mono text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">{{ concept.kicker }}</p>
+              <h3 class="mt-3">{{ concept.title }}</h3>
+              <p>{{ concept.body }}</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="base-url" class="docs-section">
+          <div class="docs-section-heading">
+            <p class="docs-eyebrow">Base URL and auth</p>
+            <h2>Send model traffic to Railway, not Vercel</h2>
+            <p>The Vercel domain serves the web dashboard. SDKs, curl, and production apps must call the Railway backend.</p>
+          </div>
+
+          <div class="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+            <div class="docs-card">
+              <h3>Production API base URL</h3>
+              <div class="mt-4 rounded-2xl border border-cyan-300/20 bg-slate-950 p-4 font-mono text-sm text-cyan-100">
+                {{ apiBaseUrl }}
+              </div>
+              <p class="mt-4">Use <code>/v1</code> paths directly after this host. For OpenAI SDKs, set <code>baseURL</code> to <code>{{ apiBaseUrl }}/v1</code>.</p>
             </div>
-          </dl>
-        </div>
 
-        <div class="rounded-3xl border border-slate-200 bg-white p-6 dark:border-dark-800 dark:bg-dark-900">
-          <h2 class="text-2xl font-bold">{{ copy.troubleshooting.title }}</h2>
-          <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 dark:border-dark-700">
-            <table class="w-full divide-y divide-slate-200 text-left text-sm dark:divide-dark-700">
-              <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500 dark:bg-dark-800 dark:text-dark-300">
+            <div class="docs-card">
+              <h3>Required headers</h3>
+              <div class="mt-4 overflow-hidden rounded-2xl border border-white/10">
+                <table class="docs-table">
+                  <thead>
+                    <tr>
+                      <th>Header</th>
+                      <th>Value</th>
+                      <th>When</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="header in authHeaders" :key="header.name">
+                      <td><code>{{ header.name }}</code></td>
+                      <td><code>{{ header.value }}</code></td>
+                      <td>{{ header.when }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="sdk-examples" class="docs-section">
+          <div class="docs-section-heading">
+            <p class="docs-eyebrow">SDK examples</p>
+            <h2>Use existing OpenAI and Anthropic clients</h2>
+            <p>TokenGate is designed to fit into the client libraries users already know. Replace the API key and base URL, then keep normal request shapes.</p>
+          </div>
+
+          <div class="grid gap-4 xl:grid-cols-2">
+            <article v-for="snippet in sdkSnippets" :key="snippet.title" class="docs-code-panel">
+              <div class="docs-code-panel-header">
+                <span>{{ snippet.title }}</span>
+                <span>{{ snippet.badge }}</span>
+              </div>
+              <pre><code>{{ snippet.code }}</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section id="api-reference" class="docs-section">
+          <div class="docs-section-heading">
+            <p class="docs-eyebrow">API Reference</p>
+            <h2>Gateway endpoints</h2>
+            <p>These are the customer-facing endpoints a regular user calls with a TokenGate API key. Admin endpoints are intentionally excluded.</p>
+          </div>
+
+          <div class="space-y-4">
+            <article v-for="endpoint in endpoints" :key="`${endpoint.method} ${endpoint.path}`" :id="endpoint.id" class="docs-endpoint-card">
+              <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-3">
+                    <span class="docs-method" :class="methodClass(endpoint.method)">{{ endpoint.method }}</span>
+                    <code class="break-all font-mono text-sm font-bold text-slate-100">{{ endpoint.path }}</code>
+                  </div>
+                  <h3 class="mt-4">{{ endpoint.title }}</h3>
+                  <p class="mt-2 text-sm leading-7 text-slate-300">{{ endpoint.description }}</p>
+                </div>
+                <span class="shrink-0 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-slate-300">{{ endpoint.compatibility }}</span>
+              </div>
+
+              <div class="mt-5 grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+                <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                  <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Important fields</p>
+                  <dl class="mt-3 space-y-3">
+                    <div v-for="field in endpoint.fields" :key="field.name">
+                      <dt class="font-mono text-sm font-semibold text-cyan-200">{{ field.name }}</dt>
+                      <dd class="mt-1 text-sm leading-6 text-slate-300">{{ field.description }}</dd>
+                    </div>
+                  </dl>
+                </div>
+                <div class="docs-code-panel">
+                  <div class="docs-code-panel-header">
+                    <span>Example</span>
+                    <span>{{ endpoint.exampleLabel }}</span>
+                  </div>
+                  <pre><code>{{ endpoint.example }}</code></pre>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="errors" class="docs-section">
+          <div class="docs-section-heading">
+            <p class="docs-eyebrow">Errors</p>
+            <h2>How to debug failed requests</h2>
+            <p>Most production issues are wrong host, wrong key, missing group access, no balance, or an upstream account problem.</p>
+          </div>
+
+          <div class="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04]">
+            <table class="docs-table">
+              <thead>
                 <tr>
-                  <th class="px-4 py-3">{{ copy.troubleshooting.error }}</th>
-                  <th class="px-4 py-3">{{ copy.troubleshooting.meaning }}</th>
-                  <th class="px-4 py-3">{{ copy.troubleshooting.action }}</th>
+                  <th>Status</th>
+                  <th>Meaning</th>
+                  <th>Next action</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100 dark:divide-dark-800">
-                <tr v-for="row in copy.troubleshooting.rows" :key="row.error">
-                  <td class="px-4 py-3 font-mono font-semibold text-primary-600 dark:text-primary-400">{{ row.error }}</td>
-                  <td class="px-4 py-3 text-slate-600 dark:text-dark-300">{{ row.meaning }}</td>
-                  <td class="px-4 py-3 text-slate-600 dark:text-dark-300">{{ row.action }}</td>
+              <tbody>
+                <tr v-for="error in errors" :key="error.status">
+                  <td><code>{{ error.status }}</code></td>
+                  <td>{{ error.meaning }}</td>
+                  <td>{{ error.action }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="mt-12 rounded-3xl border border-slate-200 bg-white p-6 dark:border-dark-800 dark:bg-dark-900">
-        <h2 class="text-2xl font-bold">{{ copy.faq.title }}</h2>
-        <div class="mt-6 grid gap-4 md:grid-cols-2">
-          <article v-for="item in copy.faq.items" :key="item.q" class="rounded-2xl bg-slate-50 p-5 dark:bg-dark-800">
-            <h3 class="font-semibold">{{ item.q }}</h3>
-            <p class="mt-2 text-sm leading-7 text-slate-600 dark:text-dark-300">{{ item.a }}</p>
-          </article>
-        </div>
-      </section>
+        <section id="verification" class="docs-section">
+          <div class="docs-section-heading">
+            <p class="docs-eyebrow">Verification</p>
+            <h2>Production smoke checklist</h2>
+            <p>Use this after changing groups, upstream accounts, payment settings, or deployment environment variables.</p>
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-2">
+            <article class="docs-card">
+              <h3>OpenAI group</h3>
+              <ul class="docs-checklist">
+                <li><code>GET /v1/models</code> returns GPT and image models.</li>
+                <li><code>POST /v1/chat/completions</code> returns text.</li>
+                <li><code>POST /v1/responses</code> returns text.</li>
+                <li><code>POST /v1/images/generations</code> returns image data if image generation is enabled for the group.</li>
+              </ul>
+            </article>
+
+            <article class="docs-card">
+              <h3>Claude group</h3>
+              <ul class="docs-checklist">
+                <li><code>GET /v1/models</code> returns Claude models.</li>
+                <li><code>POST /v1/messages</code> returns Anthropic-compatible text.</li>
+                <li><code>POST /v1/chat/completions</code> returns OpenAI-compatible text.</li>
+                <li><code>POST /v1/messages/count_tokens</code> may depend on upstream account support.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 
-const { locale } = useI18n()
+type Method = 'GET' | 'POST'
+
+interface EndpointField {
+  name: string
+  description: string
+}
+
+interface EndpointDoc {
+  id: string
+  method: Method
+  path: string
+  title: string
+  description: string
+  compatibility: string
+  exampleLabel: string
+  fields: EndpointField[]
+  example: string
+}
+
 const appStore = useAppStore()
 
+const apiBaseUrl = 'https://tokengate-production.up.railway.app'
 const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appStore.siteName || 'TokenGate')
 const siteLogo = computed(() => appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '')
 
-const enCopy = {
-  nav: { home: 'Home', pricing: 'Pricing', support: 'Support', signIn: 'Sign in' },
-  eyebrow: 'Developer docs',
-  title: 'Use TokenGate in five minutes',
-  subtitle: 'Create an API key, call OpenAI-compatible or Anthropic-compatible endpoints, and verify usage, token cost, and balance changes from the dashboard.',
-  cta: { createKey: 'Create an API key', githubDocs: 'Open GitHub docs' },
-  code: `export TOKENGATE_BASE_URL="https://tokengate-production.up.railway.app"
-export TOKENGATE_API_KEY="sk-..."
+const navSections = [
+  {
+    title: 'Start',
+    items: [
+      { label: 'Overview', href: '#overview' },
+      { label: 'Quickstart', href: '#quickstart' },
+      { label: 'Base URL and auth', href: '#base-url' },
+    ],
+  },
+  {
+    title: 'Guide',
+    items: [
+      { label: 'Core concepts', href: '#core-concepts' },
+      { label: 'SDK examples', href: '#sdk-examples' },
+      { label: 'Errors', href: '#errors' },
+      { label: 'Verification', href: '#verification' },
+    ],
+  },
+  {
+    title: 'API Reference',
+    items: [
+      { label: 'List models', href: '#list-models' },
+      { label: 'Chat completions', href: '#chat-completions' },
+      { label: 'Responses', href: '#responses' },
+      { label: 'Images', href: '#images' },
+      { label: 'Messages', href: '#messages' },
+      { label: 'Count tokens', href: '#count-tokens' },
+    ],
+  },
+]
 
-curl "$TOKENGATE_BASE_URL/v1/chat/completions" \\
+const quickstartCurl = `export TOKENGATE_API_KEY="sk-..."
+
+curl "${apiBaseUrl}/v1/chat/completions" \\
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "model": "gpt-5.2-chat-latest",
-    "messages": [{"role": "user", "content": "Reply with exactly: hello"}]
-  }'`,
-  cards: [
-    { kicker: 'Step 1', title: 'Create a key', body: 'Open API Keys, create a user key, and keep it private. It acts as the bearer token for downstream apps.' },
-    { kicker: 'Step 2', title: 'Send one request', body: 'Use the backend Railway domain for gateway endpoints. Do not send API traffic to the Vercel frontend domain.' },
-    { kicker: 'Step 3', title: 'Check metering', body: 'After a successful request, Last Used, Usage records, dashboard totals, and balance should update.' },
-  ],
-  entry: {
-    eyebrow: 'Customer entry',
-    title: 'Public users should start from the normal app, not the admin console',
-    body: 'The admin console configures upstream accounts, groups, pricing, users, and launch readiness. Customers sign in to the user dashboard, create their own API keys, monitor usage, and manage billing.',
-    createAccount: 'Create customer account',
-    manageKeys: 'Open API Keys',
-    items: [
-      { path: '/home', title: 'Public landing page', body: 'The marketing and product entry for new customers.' },
-      { path: '/dashboard', title: 'Customer dashboard', body: 'The signed-in home for usage, balance, and next actions.' },
-      { path: '/keys', title: 'API key management', body: 'Where customers create, rotate, and disable their TokenGate API keys.' },
-      { path: '/usage', title: 'Usage records', body: 'Where customers confirm requests, model usage, token counts, and costs.' },
-    ],
+    "messages": [
+      { "role": "user", "content": "Say hi in one short sentence." }
+    ]
+  }'`
+
+const quickstartSteps = [
+  {
+    number: '1',
+    title: 'Get access',
+    body: 'Sign up, then make sure the admin has added balance and enabled the groups you need.',
   },
-  sdk: {
-    eyebrow: 'API integration',
-    title: 'Use TokenGate like an OpenAI-compatible gateway',
-    body: 'Customers should send model traffic to the Railway backend domain and pass the TokenGate API key as the bearer token. The Vercel domain is only the web application.',
-    baseUrlLabel: 'Current production API base URL',
-    baseUrl: 'https://tokengate-production.up.railway.app',
-    exampleTitle: 'OpenAI SDK example',
-    compatLabel: 'OpenAI compatible',
+  {
+    number: '2',
+    title: 'Create a key',
+    body: 'Open API Keys, create a TokenGate API key, and bind it to the OpenAI or Claude group you want to use.',
+  },
+  {
+    number: '3',
+    title: 'Send a request',
+    body: 'Call the Railway backend using standard OpenAI-compatible or Anthropic-compatible request shapes.',
+  },
+  {
+    number: '4',
+    title: 'Check usage',
+    body: 'Open Usage to confirm model, endpoint, tokens, status, and balance deduction.',
+  },
+]
+
+const concepts = [
+  {
+    kicker: 'User',
+    title: 'Customer account',
+    body: 'A regular user owns API keys, balance, usage history, and billing state. Admins configure upstream capacity and permissions.',
+  },
+  {
+    kicker: 'Key',
+    title: 'TokenGate API key',
+    body: 'The bearer credential used by apps. A key usually belongs to one group, which determines model routing and billing rules.',
+  },
+  {
+    kicker: 'Group',
+    title: 'Access and billing layer',
+    body: 'Groups package model access, upstream accounts, RPM, image permission, and rate multipliers. Public groups are available to everyone; exclusive groups require per-user authorization.',
+  },
+  {
+    kicker: 'Balance',
+    title: 'Settlement value',
+    body: 'Tokens, image units, and future video units are usage units. Balance is the money-like value successful usage settles against.',
+  },
+]
+
+const authHeaders = [
+  { name: 'Authorization', value: 'Bearer sk-...', when: 'All gateway requests' },
+  { name: 'Content-Type', value: 'application/json', when: 'All JSON requests' },
+  { name: 'anthropic-version', value: '2023-06-01', when: 'Anthropic /v1/messages clients' },
+]
+
+const sdkSnippets = [
+  {
+    title: 'OpenAI SDK',
+    badge: 'Chat and Responses',
     code: `import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: process.env.TOKENGATE_API_KEY,
-  baseURL: "https://tokengate-production.up.railway.app/v1",
+  baseURL: "${apiBaseUrl}/v1",
 });
 
 const response = await client.chat.completions.create({
   model: "gpt-5.2-chat-latest",
-  messages: [{ role: "user", content: "Say hi in one short sentence." }],
+  messages: [{ role: "user", content: "Say hi." }],
 });
 
 console.log(response.choices[0]?.message?.content);`,
   },
-  billing: {
-    title: 'Billing language',
-    body: 'TokenGate separates provider usage units from settlement. This keeps model pricing transparent while users see a simple balance.',
-    items: [
-      { term: 'Tokens', definition: 'Text model usage units. Public pricing should show input and output prices per 1M tokens.' },
-      { term: 'Image units', definition: 'Image generation units, usually per image or provider-native output unit.' },
-      { term: 'Video units', definition: 'Video generation units, usually per job, second, or provider-native unit.' },
-      { term: 'Balance', definition: 'The account value that successful usage settles against. This is clearer than calling everything credits.' },
-    ],
+  {
+    title: 'Anthropic-compatible cURL',
+    badge: 'Claude messages',
+    code: `curl "${apiBaseUrl}/v1/messages" \\
+  -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -H "anthropic-version: 2023-06-01" \\
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "max_tokens": 64,
+    "messages": [
+      { "role": "user", "content": "Say hi." }
+    ]
+  }'`,
   },
-  troubleshooting: {
-    title: 'Common API errors',
-    error: 'Error',
-    meaning: 'Meaning',
-    action: 'Action',
-    rows: [
-      { error: '401', meaning: 'API key missing or invalid.', action: 'Create, rotate, or re-enable the API key.' },
-      { error: '403', meaning: 'Key is valid but not allowed.', action: 'Check group, plan, balance, or model access.' },
-      { error: '404', meaning: 'Wrong endpoint or host.', action: 'Use the backend base URL and documented gateway path.' },
-      { error: '405', meaning: 'Usually hitting the frontend as an API.', action: 'Point SDKs and curl to the Railway backend domain.' },
-      { error: '429', meaning: 'Rate, quota, or balance limit reached.', action: 'Wait, top up, or change plan limits.' },
-    ],
-  },
-  faq: {
-    title: 'FAQ',
-    items: [
-      { q: 'Should customers think in credits or tokens?', a: 'For V1, use balance plus transparent metered usage. Tokens are usage units; balance is what pays for them.' },
-      { q: 'Can I use OpenAI SDKs?', a: 'Yes. Point the SDK base URL to the TokenGate backend and use the TokenGate API key as the bearer key.' },
-      { q: 'Where should VITE_API_BASE_URL point?', a: 'It must point to the backend API prefix and include /api/v1. It should not point to the Vercel frontend.' },
-      { q: 'How do I verify production after deploy?', a: 'Run tools/tokengate_smoke_test.sh with a real TokenGate API key, then check Usage and Dashboard.' },
-    ],
-  },
-}
+]
 
-const zhCopy = {
-  nav: { home: '首页', pricing: '定价', support: '支持', signIn: '登录' },
-  eyebrow: '开发者文档',
-  title: '五分钟接入 TokenGate',
-  subtitle: '创建 API 密钥，调用 OpenAI-compatible 或 Anthropic-compatible 端点，并在 Dashboard 里确认用量、Token 成本和余额变化。',
-  cta: { createKey: '创建 API 密钥', githubDocs: '打开 GitHub 文档' },
-  code: enCopy.code,
-  cards: [
-    { kicker: '第一步', title: '创建密钥', body: '打开 API Keys，创建一个用户 API key，并妥善保存。它就是下游应用调用 TokenGate 的 bearer token。' },
-    { kicker: '第二步', title: '发送请求', body: '网关请求要使用 Railway 后端域名。不要把 API 流量发到 Vercel 前端域名。' },
-    { kicker: '第三步', title: '检查计量', body: '请求成功后，Last Used、Usage 记录、Dashboard 汇总和余额都应该更新。' },
-  ],
-  entry: {
-    eyebrow: '普通客户入口',
-    title: '普通用户从用户端进入，不进入 Admin 控制台',
-    body: 'Admin 控制台用于配置上游账号、分组、定价、用户和上线检查。普通客户登录后进入用户 Dashboard，自己创建 API key、查看用量并管理账单。',
-    createAccount: '创建客户账号',
-    manageKeys: '打开 API Keys',
-    items: [
-      { path: '/home', title: '公开首页', body: '新客户了解产品和注册登录的入口。' },
-      { path: '/dashboard', title: '用户 Dashboard', body: '登录后的用户主页，用于查看余额、用量和下一步操作。' },
-      { path: '/keys', title: 'API Key 管理', body: '客户创建、轮换、禁用 TokenGate API key 的地方。' },
-      { path: '/usage', title: '用量记录', body: '客户确认请求、模型、token 数和扣费的地方。' },
+const endpoints: EndpointDoc[] = [
+  {
+    id: 'list-models',
+    method: 'GET',
+    path: '/v1/models',
+    title: 'List available models',
+    description: 'Returns the models available through the API key group. OpenAI keys return GPT/image models; Claude keys return Claude models.',
+    compatibility: 'OpenAI style',
+    exampleLabel: 'cURL',
+    fields: [
+      { name: 'data[].id', description: 'Provider model identifier to use in later requests.' },
+      { name: 'data[].object', description: 'OpenAI-compatible object type.' },
     ],
+    example: `curl "${apiBaseUrl}/v1/models" \\
+  -H "Authorization: Bearer $TOKENGATE_API_KEY"`,
   },
-  sdk: {
-    eyebrow: 'API 接入',
-    title: '把 TokenGate 当作 OpenAI-compatible 网关使用',
-    body: '客户的模型请求应该发到 Railway 后端域名，并用 TokenGate API key 作为 bearer token。Vercel 域名只负责网页应用。',
-    baseUrlLabel: '当前生产 API Base URL',
-    baseUrl: 'https://tokengate-production.up.railway.app',
-    exampleTitle: 'OpenAI SDK 示例',
-    compatLabel: 'OpenAI compatible',
-    code: enCopy.sdk.code,
-  },
-  billing: {
-    title: '计费语言',
-    body: 'TokenGate 把 provider 用量单位和结算余额分开。这样模型价格透明，用户侧也能保持简单的余额心智。',
-    items: [
-      { term: 'Tokens', definition: '文本模型用量单位。公开价格建议展示每 1M input/output tokens 的价格。' },
-      { term: 'Image units', definition: '图片生成单位，通常按图片数量或 provider 原生输出单位计费。' },
-      { term: 'Video units', definition: '视频生成单位，通常按任务、秒数或 provider 原生单位计费。' },
-      { term: 'Balance', definition: '成功请求最终扣减的账户余额。V1 里比把所有东西都叫 credits 更清晰。' },
+  {
+    id: 'chat-completions',
+    method: 'POST',
+    path: '/v1/chat/completions',
+    title: 'Create chat completion',
+    description: 'OpenAI-compatible chat endpoint. It works for OpenAI groups and also for Claude groups when the group supports chat-compatible dispatch.',
+    compatibility: 'OpenAI compatible',
+    exampleLabel: 'cURL',
+    fields: [
+      { name: 'model', description: 'Model ID returned by /v1/models.' },
+      { name: 'messages', description: 'Array of role/content messages.' },
+      { name: 'max_tokens', description: 'Optional response token cap.' },
     ],
+    example: quickstartCurl,
   },
-  troubleshooting: {
-    title: '常见 API 错误',
-    error: '错误',
-    meaning: '含义',
-    action: '处理方式',
-    rows: [
-      { error: '401', meaning: 'API key 缺失或无效。', action: '创建、轮换或重新启用 API key。' },
-      { error: '403', meaning: 'Key 有效，但权限不足。', action: '检查分组、套餐、余额或模型访问权限。' },
-      { error: '404', meaning: '端点或域名错误。', action: '使用后端 base URL 和文档里的网关路径。' },
-      { error: '405', meaning: '通常是把前端域名当 API 调了。', action: '把 SDK/curl 指向 Railway 后端域名。' },
-      { error: '429', meaning: '触发限速、额度或余额限制。', action: '等待、充值或调整套餐限制。' },
+  {
+    id: 'responses',
+    method: 'POST',
+    path: '/v1/responses',
+    title: 'Create response',
+    description: 'OpenAI Responses endpoint for modern OpenAI clients. Use this for GPT-5 class models and tools-oriented clients.',
+    compatibility: 'OpenAI Responses',
+    exampleLabel: 'cURL',
+    fields: [
+      { name: 'model', description: 'OpenAI model ID, for example gpt-5.2.' },
+      { name: 'input', description: 'String or structured input accepted by the upstream Responses API.' },
+      { name: 'max_output_tokens', description: 'Optional response token cap.' },
     ],
+    example: `curl "${apiBaseUrl}/v1/responses" \\
+  -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "gpt-5.2",
+    "input": "Reply with exactly: pong",
+    "max_output_tokens": 64
+  }'`,
   },
-  faq: {
-    title: 'FAQ',
-    items: [
-      { q: '用户应该理解 credits 还是 tokens？', a: 'V1 建议使用“余额 + 透明用量”。Tokens 是文本模型用量单位，balance 才是最终结算对象。' },
-      { q: '可以用 OpenAI SDK 吗？', a: '可以。把 SDK base URL 指向 TokenGate 后端，并使用 TokenGate API key 作为 bearer key。' },
-      { q: 'VITE_API_BASE_URL 应该指向哪里？', a: '必须指向后端 API 前缀，并包含 /api/v1。不要指向 Vercel 前端域名。' },
-      { q: '部署后怎么验证生产环境？', a: '用真实 TokenGate API key 运行 tools/tokengate_smoke_test.sh，然后检查 Usage 和 Dashboard。' },
+  {
+    id: 'images',
+    method: 'POST',
+    path: '/v1/images/generations',
+    title: 'Generate image',
+    description: 'OpenAI-compatible image generation. The target group must have image generation enabled.',
+    compatibility: 'OpenAI Images',
+    exampleLabel: 'cURL',
+    fields: [
+      { name: 'model', description: 'Image model ID, for example gpt-image-2.' },
+      { name: 'prompt', description: 'Text prompt for the image.' },
+      { name: 'size', description: 'Provider-supported output size.' },
     ],
+    example: `curl "${apiBaseUrl}/v1/images/generations" \\
+  -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "A tiny blue dot icon on a white background.",
+    "size": "1024x1024",
+    "n": 1
+  }'`,
   },
-}
+  {
+    id: 'messages',
+    method: 'POST',
+    path: '/v1/messages',
+    title: 'Create message',
+    description: 'Anthropic-compatible messages endpoint for Claude groups. OpenAI groups return 403 unless messages dispatch is explicitly enabled.',
+    compatibility: 'Anthropic compatible',
+    exampleLabel: 'cURL',
+    fields: [
+      { name: 'model', description: 'Claude model ID returned by /v1/models.' },
+      { name: 'max_tokens', description: 'Required for Anthropic-compatible requests.' },
+      { name: 'messages', description: 'Array of Anthropic role/content messages.' },
+    ],
+    example: sdkSnippets[1].code,
+  },
+  {
+    id: 'count-tokens',
+    method: 'POST',
+    path: '/v1/messages/count_tokens',
+    title: 'Count message tokens',
+    description: 'Anthropic-compatible token counting endpoint. Availability depends on the selected upstream account type.',
+    compatibility: 'Anthropic compatible',
+    exampleLabel: 'cURL',
+    fields: [
+      { name: 'model', description: 'Claude model ID.' },
+      { name: 'messages', description: 'Messages to estimate.' },
+    ],
+    example: `curl "${apiBaseUrl}/v1/messages/count_tokens" \\
+  -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -H "anthropic-version: 2023-06-01" \\
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "messages": [
+      { "role": "user", "content": "Count this." }
+    ]
+  }'`,
+  },
+]
 
-const copy = computed(() => locale.value.startsWith('zh') ? zhCopy : enCopy)
+const errors = [
+  { status: '401', meaning: 'Missing, invalid, disabled, or deleted API key.', action: 'Create or rotate the key in API Keys.' },
+  { status: '403', meaning: 'The key is valid but not allowed to use the requested group, model, endpoint, or feature.', action: 'Check group access, image permission, balance, and endpoint compatibility.' },
+  { status: '404', meaning: 'Wrong path or non-existent endpoint.', action: 'Use the documented /v1 path on the Railway backend.' },
+  { status: '405', meaning: 'Usually an API request sent to the Vercel frontend.', action: `Use ${apiBaseUrl}, not the frontend app domain.` },
+  { status: '429', meaning: 'Rate limit, concurrency limit, quota, or balance limit reached.', action: 'Wait, increase limits, add balance, or use another group.' },
+  { status: '5xx', meaning: 'Upstream provider or gateway runtime failure.', action: 'Retry with request ID, check Usage, then contact support.' },
+]
+
+const methodClass = (method: Method) => {
+  return method === 'GET' ? 'docs-method-get' : 'docs-method-post'
+}
 
 onMounted(() => {
   if (!appStore.publicSettingsLoaded) {
@@ -342,3 +562,155 @@ onMounted(() => {
   }
 })
 </script>
+
+<style scoped>
+.docs-page {
+  background:
+    radial-gradient(circle at 18% 0%, rgb(20 184 166 / 0.2), transparent 28rem),
+    radial-gradient(circle at 82% 8%, rgb(14 165 233 / 0.18), transparent 26rem),
+    linear-gradient(180deg, #07111f 0%, #0b1322 46%, #07111f 100%);
+}
+
+.docs-top-link {
+  @apply hidden text-sm font-semibold text-slate-300 transition hover:text-white sm:inline-flex;
+}
+
+.docs-hero {
+  position: relative;
+}
+
+.docs-hero::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: linear-gradient(180deg, black, transparent 85%);
+}
+
+.docs-hero > * {
+  position: relative;
+}
+
+.docs-primary-button {
+  @apply inline-flex items-center justify-center rounded-full bg-cyan-300 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-950/40 transition hover:bg-cyan-200;
+}
+
+.docs-secondary-button {
+  @apply inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-bold text-slate-100 transition hover:border-cyan-300/50 hover:bg-cyan-300/10;
+}
+
+.docs-section {
+  @apply mt-10 scroll-mt-24;
+}
+
+.docs-section-heading {
+  @apply mb-5 max-w-3xl;
+}
+
+.docs-section-heading h2 {
+  @apply mt-2 text-3xl font-black tracking-tight text-white;
+}
+
+.docs-section-heading p:not(.docs-eyebrow) {
+  @apply mt-3 text-sm leading-7 text-slate-300;
+}
+
+.docs-eyebrow {
+  @apply text-xs font-bold uppercase tracking-[0.24em] text-cyan-300;
+}
+
+.docs-card {
+  @apply rounded-3xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10;
+}
+
+.docs-card h3 {
+  @apply text-lg font-bold text-white;
+}
+
+.docs-card p,
+.docs-card li {
+  @apply mt-2 text-sm leading-7 text-slate-300;
+}
+
+.docs-step-number {
+  @apply mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-cyan-300 text-sm font-black text-slate-950;
+}
+
+.docs-code-panel {
+  @apply min-w-0 overflow-hidden rounded-3xl border border-white/10 bg-black/70;
+}
+
+.docs-code-panel-header {
+  @apply flex items-center justify-between gap-4 border-b border-white/10 bg-white/[0.04] px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-slate-400;
+}
+
+.docs-code-panel pre {
+  @apply overflow-x-auto p-4 text-sm leading-7 text-slate-100;
+}
+
+.docs-endpoint-card {
+  @apply scroll-mt-24 rounded-3xl border border-white/10 bg-white/[0.045] p-5 shadow-xl shadow-black/10;
+}
+
+.docs-endpoint-card h3 {
+  @apply text-xl font-bold text-white;
+}
+
+.docs-method {
+  @apply inline-flex rounded-lg px-2.5 py-1 font-mono text-xs font-black tracking-[0.08em];
+}
+
+.docs-method-get {
+  @apply bg-emerald-400/15 text-emerald-300;
+}
+
+.docs-method-post {
+  @apply bg-blue-400/15 text-blue-300;
+}
+
+.docs-table {
+  @apply w-full divide-y divide-white/10 text-left text-sm;
+}
+
+.docs-table thead {
+  @apply bg-white/[0.04] text-xs uppercase tracking-[0.14em] text-slate-500;
+}
+
+.docs-table th,
+.docs-table td {
+  @apply px-4 py-3 align-top;
+}
+
+.docs-table tbody {
+  @apply divide-y divide-white/10 text-slate-300;
+}
+
+.docs-table code,
+.docs-card code,
+.docs-checklist code {
+  @apply rounded-md border border-white/10 bg-slate-950 px-1.5 py-0.5 font-mono text-cyan-200;
+}
+
+.docs-checklist {
+  @apply mt-4 space-y-3;
+}
+
+.docs-checklist li {
+  @apply list-none;
+}
+
+.docs-checklist li::before {
+  content: "";
+  display: inline-block;
+  width: 0.42rem;
+  height: 0.72rem;
+  margin-right: 0.75rem;
+  border: solid #67e8f9;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+</style>
