@@ -37,8 +37,10 @@ Completed:
 - private/public launch profile gates added to readiness checker
 - admin launch readiness page for private/public launch blockers
 - owner decisions captured for support contact and V1 payment provider targets
+- live Claude gateway smoke passed with a TokenGate API key
+- `/v1/usage` confirmed Claude request metering, token totals, and cost accumulation
 
-Current launch readiness estimate: **97%**
+Current launch readiness estimate: **98%**
 
 ## Phase 1: Core Runtime Verification
 
@@ -48,11 +50,18 @@ Required before moving on:
 
 - Claude account test succeeds from the admin UI
 - OpenAI account test succeeds from the admin UI
-- Claude API key request succeeds and creates a usage log
+- Claude API key request succeeds and creates a usage log: **verified in production**
 - OpenAI API key request succeeds and creates a usage log
-- `Last Used`, dashboard totals, and usage records update after successful requests
+- API-key `/v1/usage` totals update after successful Claude requests: **verified in production**
+- dashboard `Last Used`, dashboard totals, and usage records update after successful requests
 - failed upstream requests produce actionable errors and do not create misleading charges
 - Vercel routes such as `/home`, `/dashboard`, `/admin/accounts`, `/admin/launch-readiness`, and `/usage` survive refresh
+
+Latest production smoke notes:
+
+- Claude-compatible `/v1/messages` returned HTTP 200 using `claude-haiku-4-5-20251001`.
+- API-key `/v1/usage` showed two Claude requests, 32 total tokens, and accumulated metered cost.
+- OpenAI-compatible `/v1/chat/completions` currently returns 404 for `gpt-4.1-mini`, indicating the OpenAI account/model route still needs configuration before public launch.
 
 Status: **in progress**
 
