@@ -36,6 +36,7 @@ Completed:
 - production SPA refresh check passed for `/dashboard`, `/usage`, `/admin/accounts`, and `/admin/launch-readiness`
 - private/public launch profile gates added to readiness checker
 - admin launch readiness page for private/public launch blockers
+- owner decisions captured for support contact and V1 payment provider targets
 
 Current launch readiness estimate: **97%**
 
@@ -88,7 +89,7 @@ Required:
 - CORS locked to production frontend domains
 - email sending configured and verified
 - password reset verified
-- payment provider selected and verified in test mode
+- Stripe, Alipay, and WeChat Pay providers verified in test mode or sandbox-capable merchant mode
 - payment webhook verified end to end
 - basic abuse controls configured
 - rate limits reviewed for public signup and API key usage
@@ -143,11 +144,14 @@ These items need owner decisions before public launch:
 
 - official production domain and API domain
 - default currency
-- default payment provider
 - first public plan lineup
 - whether V1 is self-serve public signup or invite-only beta
-- whether to support China payment rails in V1
 - whether to expose video generation pricing in V1 or keep it internal first
+
+Decided:
+
+- support contact for the current production deployment: `bugfreev587@gmail.com`
+- V1 payment provider target: Stripe + Alipay + WeChat Pay
 
 ## Next Execution Order
 

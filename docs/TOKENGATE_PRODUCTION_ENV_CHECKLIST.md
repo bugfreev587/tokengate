@@ -78,10 +78,10 @@ Rules:
 In **Admin -> Settings**:
 
 - Set `Site Name` to `TokenGate` or the final brand.
-- Set `Contact Info` so `/support` has a real support channel.
+- Set `Contact Info` to `bugfreev587@gmail.com` for the current TokenGate production deployment.
 - Leave `Doc URL` empty to use `/docs`, or set an external docs URL intentionally.
 - Configure SMTP before enabling email verification or password reset.
-- Configure payment providers in test mode before enabling public top-ups.
+- Configure Stripe, Alipay, and WeChat Pay providers in test mode before enabling public top-ups.
 - Configure public plans only after the first pricing model is approved.
 
 ## Verification Commands
@@ -130,6 +130,7 @@ For private beta gating:
 TOKENGATE_FRONTEND_URL="https://<frontend-domain>" \
 TOKENGATE_BACKEND_URL="https://<backend-domain>" \
 TOKENGATE_LAUNCH_PROFILE=private \
+TOKENGATE_EXPECTED_CONTACT_INFO="bugfreev587@gmail.com" \
 TOKENGATE_RUN_API_SMOKE=0 \
 tools/tokengate_launch_readiness.sh
 ```
@@ -142,6 +143,7 @@ TOKENGATE_BACKEND_URL="https://<backend-domain>" \
 TOKENGATE_LAUNCH_PROFILE=public \
 TOKENGATE_SIGNUP_MODE=self_serve \
 TOKENGATE_REQUIRE_PAYMENT=1 \
+TOKENGATE_EXPECTED_CONTACT_INFO="bugfreev587@gmail.com" \
 tools/tokengate_launch_readiness.sh
 ```
 
@@ -162,4 +164,4 @@ Do not open public signup until all are true:
 - SMTP test email and password reset both work.
 - Payment test order and webhook both work, or payment is intentionally disabled for invite-only beta.
 - Backup export and restore drill have been rehearsed against staging.
-- Support contact is visible and correct.
+- Support contact is visible and set to `bugfreev587@gmail.com`.

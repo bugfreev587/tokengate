@@ -8,6 +8,7 @@ RUN_API_SMOKE="${TOKENGATE_RUN_API_SMOKE:-auto}"
 LAUNCH_PROFILE="${TOKENGATE_LAUNCH_PROFILE:-private}"
 SIGNUP_MODE="${TOKENGATE_SIGNUP_MODE:-auto}"
 REQUIRE_PAYMENT="${TOKENGATE_REQUIRE_PAYMENT:-auto}"
+EXPECTED_CONTACT_INFO="${TOKENGATE_EXPECTED_CONTACT_INFO:-}"
 
 failures=0
 warnings=0
@@ -25,6 +26,7 @@ Optional:
   TOKENGATE_LAUNCH_PROFILE=private|public
   TOKENGATE_SIGNUP_MODE=auto|invite|self_serve
   TOKENGATE_REQUIRE_PAYMENT=auto|1|0
+  TOKENGATE_EXPECTED_CONTACT_INFO="support@example.com"
   TOKENGATE_FRONTEND_ROUTES="/home /docs /pricing /support /login /dashboard /usage /admin/accounts /admin/launch-readiness"
 
 Checks:
@@ -182,8 +184,19 @@ if [[ "$settings_status" -ge 200 && "$settings_status" -lt 300 ]]; then
 
   if [[ -n "$contact_info" ]]; then
     pass "contact_info is configured"
+    if [[ -n "$EXPECTED_CONTACT_INFO" ]]; then
+      if [[ "$contact_info" == "$EXPECTED_CONTACT_INFO" ]]; then
+        pass "contact_info matches expected value"
+      else
+        profile_fail_or_warn "contact_info is '$contact_info', expected '$EXPECTED_CONTACT_INFO'"
+      fi
+    fi
   else
-    profile_fail_or_warn "contact_info is empty; /support has no real support channel"
+    if [[ -n "$EXPECTED_CONTACT_INFO" ]]; then
+      profile_fail_or_warn "contact_info is empty; expected '$EXPECTED_CONTACT_INFO'"
+    else
+      profile_fail_or_warn "contact_info is empty; /support has no real support channel"
+    fi
   fi
 
   if [[ "$LAUNCH_PROFILE" == "public" ]]; then

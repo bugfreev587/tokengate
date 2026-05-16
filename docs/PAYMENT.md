@@ -30,7 +30,7 @@ TokenGate has a built-in payment system that enables user self-service top-up wi
 
 > **EasyPay Provider Notes**: EasyPay-compatible providers vary by country, settlement currency, compliance requirements, and risk controls. TokenGate does not ship with an endorsed provider. Before enabling any provider in production, verify the provider's merchant eligibility, refund policy, webhook reliability, and settlement terms yourself.
 >
-> For a public TokenGate service, Stripe is usually the safest first provider for international beta users because test mode, webhooks, refunds, and compliance review are predictable. Add Alipay, WeChat Pay, or EasyPay-compatible providers only after you have a clear target market and merchant account path.
+> TokenGate's current V1 payment target is Stripe + Alipay + WeChat Pay. Stripe remains the safest first provider for international beta validation because test mode, webhooks, refunds, and compliance review are predictable. Alipay and WeChat Pay should be enabled after merchant credentials, callback URLs, and signature verification have been tested end to end.
 
 ---
 

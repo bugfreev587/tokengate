@@ -33,6 +33,7 @@ Run this after every frontend/backend deploy:
 TOKENGATE_FRONTEND_URL=https://<frontend-domain> \
 TOKENGATE_BACKEND_URL=https://<backend-domain> \
 TOKENGATE_API_KEY=sk-... \
+TOKENGATE_EXPECTED_CONTACT_INFO=bugfreev587@gmail.com \
 tools/tokengate_launch_readiness.sh
 ```
 
@@ -135,29 +136,38 @@ Expected:
 
 ## 6. Payment Test Mode Check
 
-Use Stripe first for international public testing unless you intentionally need Alipay/WeChat rails.
+TokenGate V1 should support Stripe, Alipay, and WeChat Pay. Use Stripe first for international test-mode validation, then enable Alipay and WeChat Pay after the merchant credentials and callback paths are verified.
 
 In admin:
 
 1. Open **Admin -> Settings -> Payment**.
 2. Enable payment.
 3. Add a Stripe provider instance using test credentials.
-4. Configure visible payment methods.
-5. Create a small balance top-up order from the user Billing page.
-6. Complete the payment in Stripe test mode.
-7. Confirm the order status becomes completed.
-8. Confirm user balance increases.
+4. Add Alipay and WeChat Pay provider instances using test credentials or sandbox-capable merchant credentials.
+5. Configure visible payment methods so Alipay routes to the selected Alipay source and WeChat Pay routes to the selected WeChat source.
+6. Create a small balance top-up order from the user Billing page.
+7. Complete the payment in Stripe test mode first, then repeat for Alipay and WeChat Pay.
+8. Confirm the order status becomes completed.
+9. Confirm user balance increases.
 
 Webhook URL:
 
 ```text
 https://<backend-domain>/api/v1/payment/webhook/stripe
+https://<backend-domain>/api/v1/payment/webhook/alipay
+https://<backend-domain>/api/v1/payment/webhook/wxpay
 ```
 
 Expected Stripe webhook events:
 
 - `payment_intent.succeeded`
 - `payment_intent.payment_failed`
+
+Expected China payment behavior:
+
+- Alipay returns a QR/cashier flow appropriate for desktop or mobile.
+- WeChat Pay returns Native, H5, or JSAPI flow based on the client environment.
+- Webhook signature verification succeeds before balance is credited.
 
 ## 7. Provider Account Check
 
