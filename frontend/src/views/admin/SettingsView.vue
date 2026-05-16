@@ -9092,16 +9092,16 @@ watch(
 
 /* ============ 系统设置 Tab 导航 ============ */
 .settings-tabs-shell {
-  @apply sticky z-20 -mx-1 rounded-2xl border border-white/80 bg-white/90 p-1.5 backdrop-blur-xl;
+  @apply sticky z-20 -mx-1 rounded-2xl border border-slate-300/80 bg-slate-100/95 p-1.5 backdrop-blur-xl;
   top: 4.75rem;
   box-shadow:
-    0 12px 28px rgb(15 23 42 / 0.07),
-    0 1px 0 rgb(255 255 255 / 0.9) inset;
+    0 12px 28px rgb(15 23 42 / 0.1),
+    0 1px 0 rgb(255 255 255 / 0.95) inset;
 }
 
 :global(.dark) .settings-tabs-shell {
-  border-color: rgb(51 65 85 / 0.65);
-  background: rgb(15 23 42 / 0.86);
+  border-color: rgb(71 85 105 / 0.85);
+  background: rgb(15 23 42 / 0.94);
   box-shadow:
     0 16px 36px rgb(0 0 0 / 0.28),
     0 1px 0 rgb(255 255 255 / 0.06) inset;
@@ -9122,7 +9122,7 @@ watch(
 }
 
 .settings-tab {
-  @apply relative isolate flex h-10 min-w-[6.75rem] shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-transparent px-3 text-sm font-medium text-gray-600 outline-none transition-colors duration-200 ease-out dark:text-gray-300;
+  @apply relative isolate flex h-10 min-w-[6.75rem] shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-transparent px-3 text-sm font-semibold text-slate-700 outline-none transition-colors duration-200 ease-out dark:text-slate-200;
 }
 
 @media (min-width: 768px) {
@@ -9142,7 +9142,7 @@ watch(
 .settings-tab::before {
   @apply absolute inset-0 -z-10 rounded-xl opacity-0 transition-opacity duration-200;
   content: "";
-  background: linear-gradient(135deg, rgb(248 250 252 / 0.95), rgb(241 245 249 / 0.8));
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.96), rgb(226 232 240 / 0.88));
 }
 
 .settings-tab:hover::before,
@@ -9151,7 +9151,7 @@ watch(
 }
 
 :global(.dark) .settings-tab::before {
-  background: linear-gradient(135deg, rgb(30 41 59 / 0.9), rgb(51 65 85 / 0.62));
+  background: linear-gradient(135deg, rgb(30 41 59 / 0.98), rgb(51 65 85 / 0.82));
 }
 
 .settings-tab:focus-visible {
@@ -9159,10 +9159,10 @@ watch(
 }
 
 .settings-tab-active {
-  @apply border-primary-200/80 bg-white text-primary-700 shadow-sm dark:border-primary-400/30 dark:bg-dark-700/95 dark:text-primary-200;
+  @apply border-primary-400/70 bg-slate-900 text-teal-100 shadow-sm dark:border-primary-300/70 dark:bg-slate-800 dark:text-teal-100;
   box-shadow:
-    0 8px 18px rgb(15 23 42 / 0.08),
-    0 1px 0 rgb(255 255 255 / 0.92) inset;
+    0 8px 18px rgb(15 23 42 / 0.18),
+    0 1px 0 rgb(255 255 255 / 0.18) inset;
 }
 
 :global(.dark) .settings-tab-active {
@@ -9187,16 +9187,16 @@ watch(
 }
 
 .settings-tab-icon {
-  @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors duration-200 dark:text-gray-400;
+  @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors duration-200 dark:text-slate-300;
 }
 
 .settings-tab:hover .settings-tab-icon,
 .settings-tab:focus-visible .settings-tab-icon {
-  @apply text-gray-700 dark:text-gray-200;
+  @apply text-slate-900 dark:text-white;
 }
 
 .settings-tab-active .settings-tab-icon {
-  @apply bg-primary-50 text-primary-600 dark:bg-primary-400/10 dark:text-primary-300;
+  @apply bg-primary-400/15 text-teal-200 dark:bg-primary-400/15 dark:text-teal-200;
 }
 
 .settings-tab-label {
@@ -9208,10 +9208,10 @@ watch(
 }
 
 .settings-tab-badge-advanced {
-  @apply bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300;
+  @apply bg-slate-800 text-slate-100 dark:bg-slate-200 dark:text-slate-900;
 }
 
 .settings-tab-badge-ops {
-  @apply bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300;
+  @apply bg-amber-200 text-amber-900 dark:bg-amber-300 dark:text-amber-950;
 }
 </style>
