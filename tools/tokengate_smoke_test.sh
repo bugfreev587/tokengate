@@ -58,14 +58,22 @@ diagnose_status() {
   esac
 }
 
+print_curl_error() {
+  local err_file="$1"
+  if [[ -s "$err_file" ]]; then
+    sed -n '1,3p' "$err_file" >&2
+  fi
+}
+
 preflight() {
   local out="$tmp_dir/public_settings.json"
+  local err="$tmp_dir/public_settings.err"
   local status
 
   status="$(curl -sS -o "$out" -w '%{http_code}' \
     --connect-timeout 20 \
     --max-time 60 \
-    "$BASE_URL/api/v1/settings/public")"
+    "$BASE_URL/api/v1/settings/public" 2>"$err" || true)"
 
   if [[ "$status" -ge 200 && "$status" -lt 300 ]]; then
     echo "PASS public_settings HTTP $status"
@@ -73,7 +81,10 @@ preflight() {
   fi
 
   echo "WARN public_settings HTTP $status" >&2
-  sed -n '1,20p' "$out" >&2
+  print_curl_error "$err"
+  if [[ -f "$out" ]]; then
+    sed -n '1,20p' "$out" >&2 || true
+  fi
   diagnose_status "$status"
 }
 
@@ -83,6 +94,7 @@ request() {
   local body="$3"
   local extra_header="${4:-}"
   local out="$tmp_dir/${name}.json"
+  local err="$tmp_dir/${name}.err"
   local status
 
   if [[ -n "$extra_header" ]]; then
@@ -93,7 +105,7 @@ request() {
       -H "Authorization: Bearer $API_KEY" \
       -H "Content-Type: application/json" \
       -H "$extra_header" \
-      -d "$body")"
+      -d "$body" 2>"$err" || true)"
   else
     status="$(curl -sS -o "$out" -w '%{http_code}' \
       --connect-timeout 20 \
@@ -101,12 +113,15 @@ request() {
       -X POST "$url" \
       -H "Authorization: Bearer $API_KEY" \
       -H "Content-Type: application/json" \
-      -d "$body")"
+      -d "$body" 2>"$err" || true)"
   fi
 
   if [[ "$status" -lt 200 || "$status" -ge 300 ]]; then
     echo "FAIL $name HTTP $status" >&2
-    sed -n '1,40p' "$out" >&2
+    print_curl_error "$err"
+    if [[ -f "$out" ]]; then
+      sed -n '1,40p' "$out" >&2 || true
+    fi
     diagnose_status "$status"
     return 1
   fi
