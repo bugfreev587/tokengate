@@ -33,6 +33,7 @@ FRONTEND_URL="https://<vercel-frontend-domain>"
 CORS_ALLOWED_ORIGINS="https://<vercel-frontend-domain>"
 LOG_SERVICE_NAME="tokengate"
 LOG_ENV="production"
+TOKENGATE_SUPPORT_CONTACT="bugfreev587@gmail.com"
 ```
 
 Required on first setup or when resetting the bootstrap admin:
@@ -48,6 +49,7 @@ Recommended after setup:
 - Rotate the bootstrap admin password in the UI.
 - Keep `JWT_SECRET` and `TOTP_ENCRYPTION_KEY` stable across deploys.
 - Never set `CORS_ALLOWED_ORIGINS="*"` in production.
+- `TOKENGATE_SUPPORT_CONTACT` is a safe fallback for `/support` when DB-backed `Contact Info` is still empty. Admin -> Settings still takes precedence.
 
 ## Vercel Frontend Settings
 
@@ -79,6 +81,7 @@ In **Admin -> Settings**:
 
 - Set `Site Name` to `TokenGate` or the final brand.
 - Set `Contact Info` to `bugfreev587@gmail.com` for the current TokenGate production deployment.
+- If you need a no-UI fallback, set Railway `TOKENGATE_SUPPORT_CONTACT=bugfreev587@gmail.com`.
 - Leave `Doc URL` empty to use `/docs`, or set an external docs URL intentionally.
 - Configure SMTP before enabling email verification or password reset.
 - Configure Stripe, Alipay, and WeChat Pay providers in test mode before enabling public top-ups.

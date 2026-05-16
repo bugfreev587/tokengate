@@ -88,6 +88,22 @@ CORS_ALLOWED_ORIGINS=https://<frontend-domain>
 
 Do not use `*` in production.
 
+## 3.1 Support Contact Check
+
+The current production support contact should be:
+
+```env
+TOKENGATE_SUPPORT_CONTACT=bugfreev587@gmail.com
+```
+
+Admin -> Settings -> Contact Info takes precedence. If Contact Info is empty, the backend falls back to `TOKENGATE_SUPPORT_CONTACT`, then `TOKENGATE_CONTACT_INFO`.
+
+Expected:
+
+- `/api/v1/settings/public` returns `contact_info: "bugfreev587@gmail.com"`.
+- `/support` shows the same contact.
+- `tools/tokengate_launch_readiness.sh` passes with `TOKENGATE_EXPECTED_CONTACT_INFO=bugfreev587@gmail.com`.
+
 ## 4. SMTP Check
 
 In the admin UI:

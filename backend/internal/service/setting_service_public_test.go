@@ -91,6 +91,28 @@ func TestSettingService_GetPublicSettings_ExposesForceEmailOnThirdPartySignup(t 
 	require.True(t, settings.ForceEmailOnThirdPartySignup)
 }
 
+func TestSettingService_GetPublicSettings_UsesSupportContactEnvFallback(t *testing.T) {
+	t.Setenv("TOKENGATE_SUPPORT_CONTACT", " support@example.com ")
+	svc := NewSettingService(&settingPublicRepoStub{values: map[string]string{}}, &config.Config{})
+
+	settings, err := svc.GetPublicSettings(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, "support@example.com", settings.ContactInfo)
+}
+
+func TestSettingService_GetPublicSettings_DBContactOverridesEnvFallback(t *testing.T) {
+	t.Setenv("TOKENGATE_SUPPORT_CONTACT", "env@example.com")
+	svc := NewSettingService(&settingPublicRepoStub{
+		values: map[string]string{
+			SettingKeyContactInfo: "db@example.com",
+		},
+	}, &config.Config{})
+
+	settings, err := svc.GetPublicSettings(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, "db@example.com", settings.ContactInfo)
+}
+
 func TestSettingService_GetPublicSettings_ExposesWeChatOAuthModeCapabilities(t *testing.T) {
 	svc := NewSettingService(&settingPublicRepoStub{
 		values: map[string]string{

@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"math"
 	"net/url"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -36,6 +37,16 @@ var (
 		"default subscription group cannot be duplicated",
 	)
 )
+
+func publicContactInfo(settings map[string]string) string {
+	if value := strings.TrimSpace(settings[SettingKeyContactInfo]); value != "" {
+		return value
+	}
+	if value := strings.TrimSpace(os.Getenv("TOKENGATE_SUPPORT_CONTACT")); value != "" {
+		return value
+	}
+	return strings.TrimSpace(os.Getenv("TOKENGATE_CONTACT_INFO"))
+}
 
 type SettingRepository interface {
 	Get(ctx context.Context, key string) (*Setting, error)
@@ -712,7 +723,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SiteLogo:                         settings[SettingKeySiteLogo],
 		SiteSubtitle:                     s.getStringOrDefault(settings, SettingKeySiteSubtitle, "Plans, balance, and transparent AI API billing"),
 		APIBaseURL:                       settings[SettingKeyAPIBaseURL],
-		ContactInfo:                      settings[SettingKeyContactInfo],
+		ContactInfo:                      publicContactInfo(settings),
 		DocURL:                           settings[SettingKeyDocURL],
 		HomeContent:                      settings[SettingKeyHomeContent],
 		HideCcsImportButton:              settings[SettingKeyHideCcsImportButton] == "true",
@@ -2503,7 +2514,7 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 		SiteLogo:                         settings[SettingKeySiteLogo],
 		SiteSubtitle:                     s.getStringOrDefault(settings, SettingKeySiteSubtitle, "Plans, balance, and transparent AI API billing"),
 		APIBaseURL:                       settings[SettingKeyAPIBaseURL],
-		ContactInfo:                      settings[SettingKeyContactInfo],
+		ContactInfo:                      publicContactInfo(settings),
 		DocURL:                           settings[SettingKeyDocURL],
 		HomeContent:                      settings[SettingKeyHomeContent],
 		HideCcsImportButton:              settings[SettingKeyHideCcsImportButton] == "true",
