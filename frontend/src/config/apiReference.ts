@@ -22,6 +22,14 @@ export type ApiResponse = {
   example: string
 }
 
+export type ApiParameter = {
+  name: string
+  location: 'body' | 'query' | 'header'
+  type: string
+  required?: boolean
+  description: string
+}
+
 export type ApiExamples = {
   curl: string
   node: string
@@ -39,6 +47,7 @@ export type ApiEndpointConfig = {
   baseUrl: string
   path: string
   auth: ApiAuthConfig
+  parameters: ApiParameter[]
   responses: ApiResponse[]
   examples: ApiExamples
 }
@@ -58,7 +67,7 @@ export type ApiSidebarGroup = {
 const baseUrl = 'https://tokengate-production.up.railway.app'
 
 export const tokenGateApiEndpoint: ApiEndpointConfig = {
-  id: 'endpoint',
+  id: 'chat-completions',
   title: 'Create chat completion',
   section: 'OpenAI compatible',
   description:
@@ -72,6 +81,13 @@ export const tokenGateApiEndpoint: ApiEndpointConfig = {
     required: true,
     description: 'Customer API key created from the TokenGate dashboard.',
   },
+  parameters: [
+    { name: 'model', location: 'body', type: 'string', required: true, description: 'Model id allowed by the API key group, such as gpt-5.1-mini.' },
+    { name: 'messages', location: 'body', type: 'array', required: true, description: 'Conversation messages using OpenAI chat format.' },
+    { name: 'temperature', location: 'body', type: 'number', required: false, description: 'Sampling temperature forwarded to the upstream provider when supported.' },
+    { name: 'max_tokens', location: 'body', type: 'number', required: false, description: 'Maximum output token budget when supported by the selected model.' },
+    { name: 'stream', location: 'body', type: 'boolean', required: false, description: 'Whether to request a streaming response.' },
+  ],
   responses: [
     {
       status: 200,
@@ -158,7 +174,7 @@ export const tokenGateApiEndpoint: ApiEndpointConfig = {
     },
   ],
   examples: {
-    curl: `curl ${baseUrl}/v1/chat/completions \\
+    curl: `curl "${baseUrl}/v1/chat/completions" \\
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -233,6 +249,7 @@ export const tokenGateApiEndpoints: ApiEndpointConfig[] = [
       'Returns the models visible to the API key. TokenGate filters this list by the key group, enabled upstream accounts, and model availability.',
     method: 'GET',
     path: '/v1/models',
+    parameters: [],
     responses: [
       {
         status: 200,
@@ -262,7 +279,7 @@ export const tokenGateApiEndpoints: ApiEndpointConfig[] = [
     ],
     examples: {
       ...tokenGateApiEndpoint.examples,
-      curl: `curl ${baseUrl}/v1/models \\
+      curl: `curl "${baseUrl}/v1/models" \\
   -H "Authorization: Bearer $TOKENGATE_API_KEY"`,
       node: `import OpenAI from "openai";
 
@@ -301,6 +318,13 @@ models.data().forEach(model -> System.out.println(model.id()));`,
       'Creates a response through TokenGate using the OpenAI Responses API shape. Use this endpoint for newer OpenAI-compatible clients and multi-modal request bodies.',
     method: 'POST',
     path: '/v1/responses',
+    parameters: [
+      { name: 'model', location: 'body', type: 'string', required: true, description: 'Model id allowed by the API key group.' },
+      { name: 'input', location: 'body', type: 'string | array', required: true, description: 'Input text or structured input items for the response.' },
+      { name: 'instructions', location: 'body', type: 'string', required: false, description: 'System-level instructions forwarded to the model.' },
+      { name: 'temperature', location: 'body', type: 'number', required: false, description: 'Sampling temperature when supported by the upstream provider.' },
+      { name: 'stream', location: 'body', type: 'boolean', required: false, description: 'Whether to request a streaming response.' },
+    ],
     responses: [
       {
         status: 200,
@@ -331,7 +355,7 @@ models.data().forEach(model -> System.out.println(model.id()));`,
     ],
     examples: {
       ...tokenGateApiEndpoint.examples,
-      curl: `curl ${baseUrl}/v1/responses \\
+      curl: `curl "${baseUrl}/v1/responses" \\
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -373,6 +397,13 @@ Response response = client.responses().create(params);`,
       'Creates image output through an OpenAI-compatible image generation request. Availability depends on the group and upstream account capabilities.',
     method: 'POST',
     path: '/v1/images/generations',
+    parameters: [
+      { name: 'model', location: 'body', type: 'string', required: true, description: 'Image-capable model enabled for the group, such as gpt-image-1.' },
+      { name: 'prompt', location: 'body', type: 'string', required: true, description: 'Text prompt describing the image to generate.' },
+      { name: 'size', location: 'body', type: 'string', required: false, description: 'Requested image size, for example 1024x1024.' },
+      { name: 'quality', location: 'body', type: 'string', required: false, description: 'Provider-specific quality setting when supported.' },
+      { name: 'response_format', location: 'body', type: 'string', required: false, description: 'Image response format such as url or b64_json when supported.' },
+    ],
     responses: [
       {
         status: 200,
@@ -399,7 +430,7 @@ Response response = client.responses().create(params);`,
     ],
     examples: {
       ...tokenGateApiEndpoint.examples,
-      curl: `curl ${baseUrl}/v1/images/generations \\
+      curl: `curl "${baseUrl}/v1/images/generations" \\
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -436,6 +467,13 @@ Response response = client.responses().create(params);`,
       'Creates a Claude message through TokenGate using the Anthropic Messages API request shape. Use this for Claude Code OAuth-backed groups.',
     method: 'POST',
     path: '/v1/messages',
+    parameters: [
+      { name: 'model', location: 'body', type: 'string', required: true, description: 'Claude-compatible model id allowed by the API key group.' },
+      { name: 'messages', location: 'body', type: 'array', required: true, description: 'Conversation messages using Anthropic Messages format.' },
+      { name: 'max_tokens', location: 'body', type: 'number', required: true, description: 'Maximum output token budget.' },
+      { name: 'system', location: 'body', type: 'string | array', required: false, description: 'System prompt or structured system content.' },
+      { name: 'anthropic-version', location: 'header', type: 'string', required: false, description: 'Anthropic API version header. TokenGate accepts and forwards it when provided.' },
+    ],
     responses: [
       {
         status: 200,
@@ -468,7 +506,7 @@ Response response = client.responses().create(params);`,
     ],
     examples: {
       ...tokenGateApiEndpoint.examples,
-      curl: `curl ${baseUrl}/v1/messages \\
+      curl: `curl "${baseUrl}/v1/messages" \\
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -H "anthropic-version: 2023-06-01" \\
@@ -532,6 +570,12 @@ req, _ := http.NewRequest("POST", "${baseUrl}/v1/messages", reqBody)`,
       'Counts tokens for an Anthropic-compatible message request when the selected upstream account supports token counting.',
     method: 'POST',
     path: '/v1/messages/count_tokens',
+    parameters: [
+      { name: 'model', location: 'body', type: 'string', required: true, description: 'Claude-compatible model id to use for token counting.' },
+      { name: 'messages', location: 'body', type: 'array', required: true, description: 'Messages to estimate.' },
+      { name: 'system', location: 'body', type: 'string | array', required: false, description: 'Optional system prompt included in the token estimate.' },
+      { name: 'anthropic-version', location: 'header', type: 'string', required: false, description: 'Anthropic API version header when your client sends one.' },
+    ],
     responses: [
       {
         status: 200,
@@ -547,7 +591,7 @@ req, _ := http.NewRequest("POST", "${baseUrl}/v1/messages", reqBody)`,
     ],
     examples: {
       ...tokenGateApiEndpoint.examples,
-      curl: `curl ${baseUrl}/v1/messages/count_tokens \\
+      curl: `curl "${baseUrl}/v1/messages/count_tokens" \\
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -H "anthropic-version: 2023-06-01" \\
@@ -593,14 +637,12 @@ export const tokenGateApiSidebarGroups: ApiSidebarGroup[] = [
     title: 'Core',
     items: [
       { title: 'List models', method: 'GET', href: '#list-models' },
-      { title: 'Create chat completion', method: 'POST', href: '#endpoint', active: true },
-      { title: 'Create response', method: 'POST', href: '#responses-api' },
     ],
   },
   {
     title: 'OpenAI compatible',
     items: [
-      { title: 'Chat completions', method: 'POST', href: '#endpoint', active: true },
+      { title: 'Chat completions', method: 'POST', href: '#chat-completions', active: true },
       { title: 'Responses', method: 'POST', href: '#responses-api' },
       { title: 'Image generation', method: 'POST', href: '#images-api' },
     ],

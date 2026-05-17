@@ -1,5 +1,5 @@
 <template>
-  <ApiPage
+  <ApiReferencePage
     :endpoints="tokenGateApiEndpoints"
     :sidebar-groups="tokenGateApiSidebarGroups"
     :site-name="siteName"
@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import ApiPage from '@/components/docs/api/ApiPage.vue'
+import ApiReferencePage from '@/components/docs/api/ApiReferencePage.vue'
 import { useAppStore } from '@/stores/app'
 import { tokenGateApiEndpoints, tokenGateApiSidebarGroups } from '@/config/apiReference'
 
