@@ -19,6 +19,7 @@ const methodClass = computed(() => {
   const classes: Record<ApiMethod, string> = {
     GET: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
     POST: 'bg-blue-50 text-blue-700 ring-blue-200',
+    PUT: 'bg-violet-50 text-violet-700 ring-violet-200',
     PATCH: 'bg-amber-50 text-amber-700 ring-amber-200',
     DELETE: 'bg-rose-50 text-rose-700 ring-rose-200',
   }
