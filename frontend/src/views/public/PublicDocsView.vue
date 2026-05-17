@@ -1,6 +1,6 @@
 <template>
   <ApiPage
-    :endpoint="tokenGateApiEndpoint"
+    :endpoints="tokenGateApiEndpoints"
     :sidebar-groups="tokenGateApiSidebarGroups"
     :site-name="siteName"
     :site-logo="siteLogo"
@@ -11,7 +11,7 @@
 import { computed, onMounted } from 'vue'
 import ApiPage from '@/components/docs/api/ApiPage.vue'
 import { useAppStore } from '@/stores/app'
-import { tokenGateApiEndpoint, tokenGateApiSidebarGroups } from '@/config/apiReference'
+import { tokenGateApiEndpoints, tokenGateApiSidebarGroups } from '@/config/apiReference'
 
 const appStore = useAppStore()
 

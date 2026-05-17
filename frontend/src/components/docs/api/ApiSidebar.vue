@@ -25,7 +25,7 @@
           :href="item.href"
           class="flex items-center justify-between gap-3 rounded-xl px-2.5 py-2 text-sm transition"
           :class="item.active ? 'bg-slate-100 text-slate-950' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'"
-          @click="$emit('close')"
+          @click.prevent="$emit('select', item.href)"
         >
           <span class="truncate">{{ item.title }}</span>
           <span
@@ -51,6 +51,7 @@ defineProps<{
 
 defineEmits<{
   close: []
+  select: [href: string]
 }>()
 
 function methodClass(method: ApiMethod) {

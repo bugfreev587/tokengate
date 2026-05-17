@@ -45,9 +45,10 @@
 
     <div class="mx-auto grid max-w-[1500px] gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[280px_minmax(0,1fr)_420px]">
       <ApiSidebar
-        :groups="sidebarGroups"
+        :groups="resolvedSidebarGroups"
         :mobile-open="mobileSidebarOpen"
         @close="mobileSidebarOpen = false"
+        @select="selectSection"
       />
 
       <main class="min-w-0">
@@ -60,9 +61,10 @@
           <div class="grid gap-3 sm:grid-cols-2">
             <a
               v-for="link in relatedLinks"
-              :key="link.href"
+              :key="`${link.href}-${link.title}`"
               :href="link.href"
               class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+              @click.prevent="selectSection(link.href)"
             >
               <div class="flex items-center gap-2">
                 <span
@@ -105,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ApiSidebar from './ApiSidebar.vue'
 import AuthSection from './AuthSection.vue'
 import CodeTabs from './CodeTabs.vue'
@@ -114,21 +116,75 @@ import ResponseSchema from './ResponseSchema.vue'
 import type { ApiEndpointConfig, ApiMethod, ApiSidebarGroup, ApiSidebarItem } from '@/config/apiReference'
 
 const props = defineProps<{
-  endpoint: ApiEndpointConfig
+  endpoint?: ApiEndpointConfig
+  endpoints?: ApiEndpointConfig[]
   sidebarGroups: ApiSidebarGroup[]
   siteName: string
   siteLogo?: string
 }>()
 
 const mobileSidebarOpen = ref(false)
-const activeResponseStatus = ref(props.endpoint.responses[0]?.status ?? 200)
+const activeEndpointId = ref('')
+const activeResponseStatus = ref(200)
+
+const endpointList = computed(() => props.endpoints?.length ? props.endpoints : props.endpoint ? [props.endpoint] : [])
+const endpoint = computed(() => {
+  return endpointList.value.find((item) => item.id === activeEndpointId.value) ?? endpointList.value[0]
+})
+const endpointIds = computed(() => new Set(endpointList.value.map((item) => item.id)))
+
+const resolvedSidebarGroups = computed<ApiSidebarGroup[]>(() => {
+  return props.sidebarGroups.map((group) => ({
+    ...group,
+    items: group.items.map((item) => ({
+      ...item,
+      active: item.href.replace(/^#/, '') === endpoint.value?.id,
+    })),
+  }))
+})
 
 const activeResponseExample = computed(() => {
-  return props.endpoint.responses.find((response) => response.status === activeResponseStatus.value)?.example ?? ''
+  return endpoint.value?.responses.find((response) => response.status === activeResponseStatus.value)?.example ?? ''
 })
 
 const relatedLinks = computed<ApiSidebarItem[]>(() => {
-  return props.sidebarGroups.flatMap((group) => group.items).filter((item) => !item.active).slice(0, 4)
+  return resolvedSidebarGroups.value.flatMap((group) => group.items).filter((item) => !item.active && endpointIds.value.has(item.href.replace(/^#/, ''))).slice(0, 4)
+})
+
+function getHashEndpointId() {
+  return window.location.hash.replace(/^#/, '')
+}
+
+function syncEndpointFromHash() {
+  const hashId = getHashEndpointId()
+  activeEndpointId.value = endpointIds.value.has(hashId) ? hashId : endpointList.value[0]?.id ?? ''
+}
+
+function selectSection(href: string) {
+  const id = href.replace(/^#/, '')
+  if (!endpointIds.value.has(id)) {
+    window.location.hash = id
+    mobileSidebarOpen.value = false
+    return
+  }
+
+  activeEndpointId.value = id
+  window.history.replaceState(null, '', `${window.location.pathname}#${id}`)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+  mobileSidebarOpen.value = false
+}
+
+watch(endpoint, (nextEndpoint) => {
+  activeResponseStatus.value = nextEndpoint?.responses[0]?.status ?? 200
+})
+
+onMounted(() => {
+  syncEndpointFromHash()
+  window.addEventListener('hashchange', syncEndpointFromHash)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('hashchange', syncEndpointFromHash)
 })
 
 function methodClass(method: ApiMethod) {
