@@ -11,10 +11,10 @@
       <StatusCodeTabs v-model="activeStatus" :statuses="statuses" />
     </div>
 
-    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div class="border-b border-gray-200 bg-gray-50 px-4 py-3">
+    <div class="border-t border-gray-200">
+      <div class="border-b border-gray-200 py-3">
         <div class="flex flex-wrap items-center gap-3">
-          <span class="rounded-md bg-white px-2 py-0.5 font-mono text-xs font-bold text-gray-800 ring-1 ring-gray-200">
+          <span class="rounded-md bg-gray-50 px-2 py-0.5 font-mono text-xs font-bold text-gray-800">
             {{ activeResponse?.status }}
           </span>
           <span class="text-sm font-semibold text-gray-950">{{ activeResponse?.label }}</span>
@@ -26,7 +26,7 @@
         <div
           v-for="field in activeResponse?.fields"
           :key="field.name"
-          class="grid gap-3 px-4 py-4 md:grid-cols-[minmax(180px,0.6fr)_120px_1fr]"
+          class="grid gap-3 py-4 md:grid-cols-[minmax(180px,0.6fr)_120px_1fr]"
         >
           <div>
             <code class="font-mono text-sm font-semibold text-gray-950">{{ field.name }}</code>

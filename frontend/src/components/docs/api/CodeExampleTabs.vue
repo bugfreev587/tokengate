@@ -1,26 +1,24 @@
 <template>
   <section class="overflow-hidden rounded-xl border border-gray-200 bg-[#0f172a] shadow-sm">
-    <div class="flex items-center justify-between gap-3 border-b border-white/10 bg-[#111827] px-3 py-2.5">
-      <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">{{ title }}</p>
+    <div class="flex items-center justify-between gap-2 border-b border-white/10 bg-[#0b1120] px-2 py-2">
+      <div class="flex min-w-0 flex-1 gap-1 overflow-x-auto">
+        <button
+          v-for="tab in tabs"
+          :key="tab.key"
+          type="button"
+          class="shrink-0 rounded-md px-2.5 py-1.5 text-xs font-semibold transition"
+          :class="tab.key === activeTab ? 'bg-white text-gray-950' : 'text-gray-400 hover:bg-white/10 hover:text-white'"
+          @click="activeTab = tab.key"
+        >
+          {{ tab.label }}
+        </button>
+      </div>
       <button
         type="button"
-        class="rounded-md border border-white/10 px-2.5 py-1 text-xs font-semibold text-gray-300 transition hover:bg-white/10 hover:text-white"
+        class="shrink-0 rounded-md border border-white/10 px-2.5 py-1.5 text-xs font-semibold text-gray-300 transition hover:bg-white/10 hover:text-white"
         @click="copyActiveCode"
       >
         {{ copied ? 'Copied' : 'Copy' }}
-      </button>
-    </div>
-
-    <div class="flex gap-1 overflow-x-auto border-b border-white/10 bg-[#0b1120] px-2 py-2">
-      <button
-        v-for="tab in tabs"
-        :key="tab.key"
-        type="button"
-        class="rounded-md px-2.5 py-1.5 text-xs font-semibold transition"
-        :class="tab.key === activeTab ? 'bg-white text-gray-950' : 'text-gray-400 hover:bg-white/10 hover:text-white'"
-        @click="activeTab = tab.key"
-      >
-        {{ tab.label }}
       </button>
     </div>
 
@@ -35,7 +33,6 @@ import type { ApiExamples } from '@/config/apiReference'
 type TabKey = keyof ApiExamples
 
 const props = defineProps<{
-  title: string
   examples: ApiExamples
 }>()
 

@@ -1,5 +1,5 @@
 <template>
-  <section id="endpoint" class="border-b border-gray-200 pb-7">
+  <section id="endpoint" class="pb-8">
     <div class="mb-5 flex flex-wrap items-center gap-2 text-sm text-gray-500">
       <RouterLink to="/docs" class="hover:text-gray-950">Docs</RouterLink>
       <span>/</span>
@@ -18,14 +18,14 @@
       {{ endpoint.description }}
     </p>
 
-    <div class="mt-6 rounded-xl border border-gray-200 bg-white p-4">
+    <div class="mt-6">
       <p class="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-gray-400">Base URL</p>
       <code class="block overflow-x-auto rounded-lg bg-gray-50 px-3 py-2.5 font-mono text-sm text-gray-800">
         {{ endpoint.baseUrl }}
       </code>
     </div>
 
-    <div class="mt-4 flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mt-4 flex flex-col gap-3 rounded-lg bg-gray-50 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex min-w-0 items-center gap-3">
         <MethodBadge :method="endpoint.method" />
         <code class="min-w-0 truncate font-mono text-sm font-semibold text-gray-950">

@@ -5,8 +5,8 @@
       {{ auth.description }}
     </p>
 
-    <div class="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div class="grid gap-4 border-b border-gray-200 px-4 py-4 md:grid-cols-[170px_1fr]">
+    <div class="mt-4 border-t border-gray-200">
+      <div class="grid gap-4 border-b border-gray-200 py-4 md:grid-cols-[170px_1fr]">
         <div>
           <p class="font-mono text-sm font-semibold text-gray-950">{{ auth.header }}</p>
           <p class="mt-1 text-xs text-gray-500">Header</p>
@@ -21,7 +21,7 @@
           <p class="mt-3 text-sm leading-6 text-gray-600">{{ auth.required ? 'Send this value in the request headers.' : 'This endpoint can be called without a user or API-key token.' }}</p>
         </div>
       </div>
-      <div class="grid gap-4 px-4 py-4 text-sm md:grid-cols-3">
+      <div class="grid gap-4 border-b border-gray-200 py-4 text-sm md:grid-cols-3">
         <div>
           <p class="text-xs font-semibold uppercase tracking-[0.14em] text-gray-400">Type</p>
           <p class="mt-1 font-medium text-gray-900">{{ auth.type }}</p>

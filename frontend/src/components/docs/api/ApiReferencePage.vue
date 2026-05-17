@@ -19,29 +19,33 @@
 
       <section class="tg-api-section">
         <h2 class="tg-api-section-title">Related endpoints</h2>
-        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+        <div class="mt-4 border-t border-gray-200">
           <a
             v-for="link in relatedLinks"
             :key="`${link.href}-${link.title}`"
             :href="link.href"
-            class="rounded-xl border border-gray-200 bg-white p-4 transition hover:border-gray-300 hover:bg-gray-50"
+            class="flex items-center gap-2 border-b border-gray-200 py-3.5 transition hover:bg-gray-50"
             @click.prevent="selectSection(link.href)"
           >
-            <div class="flex items-center gap-2">
-              <MethodBadge v-if="link.method" :method="link.method" />
-              <span class="text-sm font-semibold text-gray-950">{{ link.title }}</span>
-            </div>
+            <MethodBadge v-if="link.method" :method="link.method" />
+            <span class="text-sm font-semibold text-gray-950">{{ link.title }}</span>
           </a>
         </div>
       </section>
     </main>
 
     <aside class="min-w-0 lg:sticky lg:top-20 lg:self-start">
-      <CodeExampleTabs title="Request example" :examples="endpoint.examples" />
+      <CodeExampleTabs :examples="endpoint.examples" />
       <section class="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
-        <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-3 py-2.5">
-          <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400">Response examples</p>
+        <div class="flex items-center justify-between gap-2 border-b border-gray-200 bg-gray-50 px-2 py-2">
           <StatusCodeTabs v-model="activeResponseStatus" :statuses="responseStatuses" />
+          <button
+            type="button"
+            class="shrink-0 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-500 transition hover:border-gray-300 hover:text-gray-950"
+            @click="copyActiveResponseExample"
+          >
+            {{ responseCopied ? 'Copied' : 'Copy' }}
+          </button>
         </div>
         <pre class="max-h-[420px] overflow-auto bg-[#0f172a] p-4 text-[13px] leading-6 text-gray-100"><code>{{ activeResponseExample }}</code></pre>
       </section>
@@ -73,6 +77,7 @@ const props = defineProps<{
 const mobileSidebarOpen = ref(false)
 const activeEndpointId = ref('')
 const activeResponseStatus = ref(200)
+const responseCopied = ref(false)
 const endpointAliases: Record<string, string> = {
   endpoint: 'chat-completions',
 }
@@ -125,8 +130,17 @@ function selectSection(href: string) {
   mobileSidebarOpen.value = false
 }
 
+async function copyActiveResponseExample() {
+  await navigator.clipboard.writeText(activeResponseExample.value)
+  responseCopied.value = true
+  window.setTimeout(() => {
+    responseCopied.value = false
+  }, 1400)
+}
+
 watch(endpoint, (nextEndpoint) => {
   activeResponseStatus.value = nextEndpoint?.responses[0]?.status ?? 200
+  responseCopied.value = false
 })
 
 onMounted(() => {
@@ -141,7 +155,7 @@ onBeforeUnmount(() => {
 
 <style>
 .tg-api-section {
-  @apply border-b border-gray-200 py-7;
+  @apply py-8;
 }
 
 .tg-api-section-title {

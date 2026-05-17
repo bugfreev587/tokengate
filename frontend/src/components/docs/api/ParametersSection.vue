@@ -5,12 +5,12 @@
       Request fields accepted by this endpoint. Unsupported fields may be ignored or forwarded depending on the upstream provider.
     </p>
 
-    <div class="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div v-if="parameters.length" class="divide-y divide-gray-200">
+    <div class="mt-4 border-t border-gray-200">
+      <div v-if="parameters.length" class="divide-y divide-gray-200 border-b border-gray-200">
         <div
           v-for="parameter in parameters"
           :key="`${parameter.location}-${parameter.name}`"
-          class="grid gap-3 px-4 py-4 md:grid-cols-[minmax(160px,0.55fr)_110px_110px_1fr]"
+          class="grid gap-3 py-4 md:grid-cols-[minmax(160px,0.55fr)_110px_110px_1fr]"
         >
           <div>
             <code class="font-mono text-sm font-semibold text-gray-950">{{ parameter.name }}</code>
@@ -21,7 +21,7 @@
           <p class="text-sm leading-6 text-gray-600">{{ parameter.description }}</p>
         </div>
       </div>
-      <div v-else class="px-4 py-5 text-sm text-gray-600">
+      <div v-else class="border-b border-gray-200 py-5 text-sm text-gray-600">
         This endpoint does not accept query or body parameters.
       </div>
     </div>
