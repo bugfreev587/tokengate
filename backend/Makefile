@@ -1,4 +1,4 @@
-.PHONY: build generate test test-unit test-integration test-e2e
+.PHONY: build generate test test-unit test-integration test-public-release-regression test-e2e
 
 VERSION ?= $(shell tr -d '\r\n' < ./cmd/server/VERSION)
 LDFLAGS ?= -s -w -X main.Version=$(VERSION)
@@ -19,6 +19,10 @@ test-unit:
 
 test-integration:
 	go test -tags=integration ./...
+
+test-public-release-regression:
+	go test -tags=unit -run 'TestPublicReleaseAPIRegression|TestSettingHandler_GetPublicSettings_PublicReleaseDashboardContract' ./internal/server/routes ./internal/handler
+	go test -tags=integration -run TestPublicReleaseHTTPIntegrationGatewayEntrypoints ./internal/publicrelease
 
 test-e2e:
 	./scripts/e2e-test.sh

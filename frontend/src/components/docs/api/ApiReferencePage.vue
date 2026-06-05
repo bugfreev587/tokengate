@@ -12,10 +12,10 @@
     />
 
     <main class="min-w-0">
-      <EndpointHeader :endpoint="endpoint" />
-      <AuthorizationSection :auth="endpoint.auth" />
-      <ParametersSection :parameters="endpoint.parameters" />
-      <ResponseSchema :responses="endpoint.responses" />
+      <EndpointHeader :endpoint="activeEndpoint" />
+      <AuthorizationSection :auth="activeEndpoint.auth" />
+      <ParametersSection :parameters="activeEndpoint.parameters" />
+      <ResponseSchema :responses="activeEndpoint.responses" />
 
       <section class="tg-api-section">
         <h2 class="tg-api-section-title">Related endpoints</h2>
@@ -35,7 +35,7 @@
     </main>
 
     <aside class="min-w-0 lg:sticky lg:top-20 lg:self-start">
-      <CodeExampleTabs :examples="endpoint.examples" />
+      <CodeExampleTabs :examples="activeEndpoint.examples" />
       <section class="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
         <div class="flex items-center justify-between gap-2 border-b border-gray-200 bg-gray-50 px-2 py-2">
           <StatusCodeTabs v-model="activeResponseStatus" :statuses="responseStatuses" />
@@ -83,22 +83,22 @@ const endpointAliases: Record<string, string> = {
 }
 
 const endpointList = computed(() => props.endpoints?.length ? props.endpoints : props.endpoint ? [props.endpoint] : [])
-const endpoint = computed(() => endpointList.value.find((item) => item.id === activeEndpointId.value) ?? endpointList.value[0])
+const activeEndpoint = computed(() => endpointList.value.find((item) => item.id === activeEndpointId.value) ?? endpointList.value[0])
 const endpointIds = computed(() => new Set(endpointList.value.map((item) => item.id)))
-const responseStatuses = computed(() => endpoint.value?.responses.map((response) => response.status) ?? [])
+const responseStatuses = computed(() => activeEndpoint.value?.responses.map((response) => response.status) ?? [])
 
 const resolvedSidebarGroups = computed<ApiSidebarGroup[]>(() => {
   return props.sidebarGroups.map((group) => ({
     ...group,
     items: group.items.map((item) => ({
       ...item,
-      active: item.href.replace(/^#/, '') === endpoint.value?.id,
+      active: item.href.replace(/^#/, '') === activeEndpoint.value?.id,
     })),
   }))
 })
 
 const activeResponseExample = computed(() => {
-  return endpoint.value?.responses.find((response) => response.status === activeResponseStatus.value)?.example ?? ''
+  return activeEndpoint.value?.responses.find((response) => response.status === activeResponseStatus.value)?.example ?? ''
 })
 
 const relatedLinks = computed<ApiSidebarItem[]>(() => {
@@ -138,7 +138,7 @@ async function copyActiveResponseExample() {
   }, 1400)
 }
 
-watch(endpoint, (nextEndpoint) => {
+watch(activeEndpoint, (nextEndpoint) => {
   activeResponseStatus.value = nextEndpoint?.responses[0]?.status ?? 200
   responseCopied.value = false
 })
