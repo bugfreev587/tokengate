@@ -116,7 +116,7 @@ Command:
 ```bash
 curl -i -X POST https://tokengate-production.up.railway.app/v1/chat/completions \
   -H 'Content-Type: application/json' \
-  -d '{"model":"gpt-5.2-chat-latest","messages":[{"role":"user","content":"hello"}]}'
+  -d '{"model":"gpt-5.4","messages":[{"role":"user","content":"hello"}]}'
 ```
 
 Observed result:

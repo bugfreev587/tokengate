@@ -60,7 +60,7 @@ curl "$TOKENGATE_BASE_URL/v1/chat/completions" \
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-5.2-chat-latest",
+    "model": "gpt-5.4",
     "messages": [
       {
         "role": "user",
@@ -87,7 +87,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: "gpt-5.2-chat-latest",
+  model: "gpt-5.4",
   messages: [{ role: "user", content: "Say hi in one short sentence." }],
 });
 
@@ -149,3 +149,14 @@ bash tools/tokengate_smoke_test.sh
 ```
 
 Set `TOKENGATE_RUN_OPENAI=0` or `TOKENGATE_RUN_CLAUDE=0` while a provider is not configured yet.
+
+Before calling the OpenAI-compatible surface production-ready, run the P0 compatibility suite:
+
+```bash
+TOKENGATE_BASE_URL="https://your-backend-domain" \
+TOKENGATE_API_KEY="sk-..." \
+TOKENGATE_OPENAI_MODEL="gpt-5.4" \
+tools/tokengate_p0_compatibility_suite.sh
+```
+
+This verifies `/v1/models`, non-streaming chat, streaming chat with usage, and `/v1/responses`.

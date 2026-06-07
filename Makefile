@@ -1,4 +1,4 @@
-.PHONY: build build-backend build-frontend build-datamanagementd test test-backend test-frontend test-frontend-critical test-public-release-regression test-datamanagementd secret-scan
+.PHONY: build build-backend build-frontend build-datamanagementd test test-backend test-frontend test-frontend-critical test-public-release-regression test-p0-compatibility test-p0-canary test-p0-canary-selftest test-datamanagementd secret-scan
 
 PNPM ?= pnpm
 
@@ -48,6 +48,15 @@ test-frontend-critical:
 test-public-release-regression:
 	@$(MAKE) -C backend test-public-release-regression
 	@$(PNPM) --dir frontend exec vitest run $(FRONTEND_PUBLIC_RELEASE_REGRESSION_VITEST)
+
+test-p0-compatibility:
+	@tools/tokengate_p0_compatibility_suite.sh
+
+test-p0-canary:
+	@tools/tokengate_p0_canary.sh
+
+test-p0-canary-selftest:
+	@tools/tokengate_p0_canary_test.sh
 
 test-datamanagementd:
 	@cd datamanagement && go test ./...

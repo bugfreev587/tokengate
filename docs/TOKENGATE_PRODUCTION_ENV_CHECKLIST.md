@@ -138,6 +138,31 @@ tools/tokengate_launch_readiness.sh
 ```
 
 By default this checks `/home`, `/docs`, `/pricing`, `/support`, `/login`, `/dashboard`, `/usage`, `/admin/accounts`, and `/admin/launch-readiness` for SPA refresh compatibility.
+When `TOKENGATE_API_KEY` is set and `TOKENGATE_RUN_API_SMOKE` is `auto` or `1`, it also runs the P0 OpenAI-compatible gate in `tools/tokengate_p0_compatibility_suite.sh`.
+
+Run the gateway-only P0 gate directly when frontend readiness is not needed:
+
+```bash
+TOKENGATE_BASE_URL="https://<backend-domain>" \
+TOKENGATE_API_KEY="sk-..." \
+TOKENGATE_OPENAI_MODEL="gpt-5.4" \
+tools/tokengate_p0_compatibility_suite.sh
+```
+
+Create a dedicated production canary key before public launch and run the P0
+canary once:
+
+```bash
+TOKENGATE_BASE_URL="https://<backend-domain>" \
+TOKENGATE_API_KEY="sk-..." \
+TOKENGATE_OPENAI_MODEL="gpt-5.4" \
+TOKENGATE_P0_CANARY_NOTIFY_WEBHOOK_URL="https://<alert-webhook>" \
+tools/tokengate_p0_canary.sh
+```
+
+Before opening public signup, make sure a scheduler runs this command every
+5-10 minutes or runs the same canary command externally through GitHub Actions,
+Railway Cron, or another monitor.
 
 For private beta gating:
 
@@ -178,5 +203,6 @@ Do not open public signup until all are true:
 - A real TokenGate API key request creates usage records and updates balance.
 - SMTP test email and password reset both work.
 - Payment test order and webhook both work, or payment is intentionally disabled for invite-only beta.
+- P0 production canary is scheduled with a dedicated smoke key and alert webhook.
 - Backup export and restore drill have been rehearsed against staging.
 - Support contact is visible and set to `bugfreev587@gmail.com`.
