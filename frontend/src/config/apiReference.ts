@@ -82,7 +82,7 @@ export const tokenGateApiEndpoint: ApiEndpointConfig = {
     description: 'Customer API key created from the TokenGate dashboard.',
   },
   parameters: [
-    { name: 'model', location: 'body', type: 'string', required: true, description: 'Model id allowed by the API key group, such as gpt-5.1-mini.' },
+    { name: 'model', location: 'body', type: 'string', required: true, description: 'Model id allowed by the API key group, such as gpt-5.4.' },
     { name: 'messages', location: 'body', type: 'array', required: true, description: 'Conversation messages using OpenAI chat format.' },
     { name: 'temperature', location: 'body', type: 'number', required: false, description: 'Sampling temperature forwarded to the upstream provider when supported.' },
     { name: 'max_tokens', location: 'body', type: 'number', required: false, description: 'Maximum output token budget when supported by the selected model.' },
@@ -109,7 +109,7 @@ export const tokenGateApiEndpoint: ApiEndpointConfig = {
           id: 'chatcmpl_tokengate_123',
           object: 'chat.completion',
           created: 1778956800,
-          model: 'gpt-5.1-mini',
+          model: 'gpt-5.4',
           choices: [
             {
               index: 0,
@@ -178,7 +178,7 @@ export const tokenGateApiEndpoint: ApiEndpointConfig = {
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-5.1-mini",
+    "model": "gpt-5.4",
     "messages": [
       { "role": "user", "content": "Say hello from TokenGate" }
     ]
@@ -191,7 +191,7 @@ const client = new OpenAI({
 });
 
 const completion = await client.chat.completions.create({
-  model: "gpt-5.1-mini",
+  model: "gpt-5.4",
   messages: [{ role: "user", content: "Say hello from TokenGate" }],
 });
 
@@ -205,7 +205,7 @@ client = OpenAI(
 )
 
 completion = client.chat.completions.create(
-    model="gpt-5.1-mini",
+    model="gpt-5.4",
     messages=[{"role": "user", "content": "Say hello from TokenGate"}],
 )
 
@@ -216,7 +216,7 @@ print(completion.choices[0].message.content)`,
 )
 
 completion, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewParams{
-  Model: "gpt-5.1-mini",
+  Model: "gpt-5.4",
   Messages: []openai.ChatCompletionMessageParamUnion{
     openai.UserMessage("Say hello from TokenGate"),
   },
@@ -227,7 +227,7 @@ completion, err := client.Chat.Completions.New(ctx, openai.ChatCompletionNewPara
     .build();
 
 ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
-    .model("gpt-5.1-mini")
+    .model("gpt-5.4")
     .addUserMessage("Say hello from TokenGate")
     .build();
 
@@ -737,7 +737,7 @@ export const tokenGateApiEndpoints: ApiEndpointConfig[] = [
           {
             object: 'list',
             data: [
-              { id: 'gpt-5.1-mini', object: 'model', owned_by: 'openai' },
+              { id: 'gpt-5.4', object: 'model', owned_by: 'openai' },
               { id: 'claude-sonnet-4.6', object: 'model', owned_by: 'anthropic' },
             ],
           },
@@ -813,7 +813,7 @@ models.data().forEach(model -> System.out.println(model.id()));`,
           {
             id: 'resp_tokengate_123',
             object: 'response',
-            model: 'gpt-5.1-mini',
+            model: 'gpt-5.4',
             output_text: 'TokenGate Responses API is ready.',
             usage: { input_tokens: 11, output_tokens: 7, total_tokens: 18 },
           },
@@ -830,29 +830,29 @@ models.data().forEach(model -> System.out.println(model.id()));`,
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "gpt-5.1-mini",
+    "model": "gpt-5.4",
     "input": "Say hello from TokenGate"
   }'`,
       node: `const response = await client.responses.create({
-  model: "gpt-5.1-mini",
+  model: "gpt-5.4",
   input: "Say hello from TokenGate",
 });
 
 console.log(response.output_text);`,
       python: `response = client.responses.create(
-    model="gpt-5.1-mini",
+    model="gpt-5.4",
     input="Say hello from TokenGate",
 )
 
 print(response.output_text)`,
       go: `response, err := client.Responses.New(ctx, responses.ResponseNewParams{
-  Model: "gpt-5.1-mini",
+  Model: "gpt-5.4",
   Input: responses.ResponseNewParamsInputUnion{
     OfString: openai.String("Say hello from TokenGate"),
   },
 })`,
       java: `ResponseCreateParams params = ResponseCreateParams.builder()
-    .model("gpt-5.1-mini")
+    .model("gpt-5.4")
     .input("Say hello from TokenGate")
     .build();
 

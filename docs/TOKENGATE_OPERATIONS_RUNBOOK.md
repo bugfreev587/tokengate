@@ -41,26 +41,100 @@ This verifies public pages plus protected SPA entry routes such as `/dashboard`,
 
 Use `TOKENGATE_LAUNCH_PROFILE=private` for invite-only beta checks. Use `TOKENGATE_LAUNCH_PROFILE=public` before public self-serve launch; public mode fails if support contact, password reset, registration, or required payment settings are missing.
 
-For gateway-only checks, run:
+For the P0 OpenAI-compatible release gate, run:
+
+```bash
+TOKENGATE_BASE_URL=https://<backend-domain> \
+TOKENGATE_API_KEY=sk-... \
+TOKENGATE_OPENAI_MODEL=gpt-5.4 \
+tools/tokengate_p0_compatibility_suite.sh
+```
+
+Expected:
+
+- `/v1/models` returns `2xx`
+- the configured OpenAI-compatible model is visible
+- `/v1/chat/completions` returns `2xx`
+- streaming `/v1/chat/completions` emits SSE data, `[DONE]`, and usage
+- `/v1/responses` returns `2xx`
+- API key `Last Used` changes
+- **Usage** records appear after refresh
+- dashboard totals update after refresh
+
+## P0 Production Canary
+
+After launch, create a dedicated canary credential for the OpenAI-compatible
+`/v1/*` gateway path. Use a key that is valid for the same route normal
+OpenAI-compatible customers use; do not reuse a normal user's provider key.
+Name it clearly, for example `p0-production-canary`, and rotate it whenever the
+upstream account or gateway routing changes.
+
+Run one canary check:
+
+```bash
+TOKENGATE_BASE_URL=https://<backend-domain> \
+TOKENGATE_API_KEY=sk-... \
+TOKENGATE_OPENAI_MODEL=gpt-5.4 \
+TOKENGATE_P0_CANARY_STATE_DIR=/var/tmp/tokengate-p0-canary \
+tools/tokengate_p0_canary.sh
+```
+
+Run it every five minutes from a long-running scheduler:
+
+```bash
+TOKENGATE_BASE_URL=https://<backend-domain> \
+TOKENGATE_API_KEY=sk-... \
+TOKENGATE_P0_CANARY_NOTIFY_WEBHOOK_URL=https://<alert-webhook> \
+TOKENGATE_P0_CANARY_INTERVAL_SECONDS=300 \
+tools/tokengate_p0_canary.sh
+```
+
+For GitHub Actions, Railway Cron, or another external scheduler, leave
+`TOKENGATE_P0_CANARY_INTERVAL_SECONDS` unset and schedule the command externally.
+The latest result is written to `latest.json` and `latest.log` inside
+`TOKENGATE_P0_CANARY_STATE_DIR`.
+
+The repository includes a GitHub Actions monitor at
+`.github/workflows/p0-regression-monitor.yml`. It runs once per hour and uploads
+the latest canary state as the `tokengate-p0-canary-regression` artifact. Set
+these GitHub repository variables and secrets before enabling it:
+
+- `TOKENGATE_REGRESSION_BASE_URL` repository variable: production backend origin.
+- `TOKENGATE_REGRESSION_OPENAI_MODEL` repository variable: optional model
+  override, defaulting to `gpt-5.4`.
+- `TOKENGATE_REGRESSION_API_KEY` repository secret: dedicated canary key for the
+  OpenAI-compatible `/v1/*` P0 suite.
+- `REGRESSION_ALERT_WEBHOOK_URL` repository secret: Discord webhook URL for
+  failure notifications.
+
+Default alert behavior:
+
+- `TOKENGATE_P0_CANARY_NOTIFY_ON=failure` sends a webhook only when the P0 suite
+  fails.
+- `TOKENGATE_P0_CANARY_NOTIFY_ON=always` sends success and failure status.
+- `TOKENGATE_P0_CANARY_NOTIFY_ON=never` disables webhook delivery.
+
+Triage failed canary runs in this order:
+
+- Open `latest.log` and identify the first failed P0 check.
+- If `/v1/models` fails, check backend availability, API key status, and group
+  model visibility.
+- If Chat Completions or Responses fails with `401` or `403`, re-test the
+  upstream OpenAI account authorization and group assignment.
+- If the model is visible but rejected by upstream, switch the canary model to
+  the backend's supported P0 model and update public docs before launch.
+- If only streaming fails, check SSE buffering, proxy timeouts, and
+  `stream_options.include_usage=true` behavior.
+
+The canary redacts TokenGate keys from logs and webhook payloads, but webhook
+destinations should still be treated as operationally sensitive.
+
+The older provider smoke remains useful for narrower Claude/OpenAI checks:
 
 ```bash
 TOKENGATE_BASE_URL=https://<backend-domain> \
 TOKENGATE_API_KEY=sk-... \
 bash tools/tokengate_smoke_test.sh
-```
-
-Expected:
-
-- Claude-compatible request returns `2xx`
-- OpenAI-compatible request returns `2xx`
-- API key `Last Used` changes
-- **Usage** records appear after refresh
-- dashboard totals update after refresh
-
-If a provider is not configured yet:
-
-```bash
-TOKENGATE_RUN_OPENAI=0 bash tools/tokengate_smoke_test.sh
 ```
 
 ## 3. CORS Check

@@ -34,7 +34,7 @@ Checks:
   - backend /api/v1/settings/public is reachable
   - CORS preflight allows the frontend origin
   - public settings match the intended private/public launch profile
-  - optional Claude/OpenAI gateway smoke via tools/tokengate_smoke_test.sh
+  - optional P0 gateway compatibility smoke via tools/tokengate_p0_compatibility_suite.sh
 EOF
 }
 
@@ -321,7 +321,7 @@ if [[ "$should_run_smoke" == "1" ]]; then
   if [[ -z "$API_KEY" ]]; then
     fail "TOKENGATE_API_KEY is required when TOKENGATE_RUN_API_SMOKE=1"
   else
-    TOKENGATE_BASE_URL="$BACKEND_URL" TOKENGATE_API_KEY="$API_KEY" bash tools/tokengate_smoke_test.sh || failures=$((failures + 1))
+    TOKENGATE_BASE_URL="$BACKEND_URL" TOKENGATE_API_KEY="$API_KEY" tools/tokengate_p0_compatibility_suite.sh || failures=$((failures + 1))
   fi
 fi
 

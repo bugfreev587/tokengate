@@ -77,3 +77,76 @@ func TestGatewayRoutesOpenAIImagesPathsAreRegistered(t *testing.T) {
 		require.NotEqual(t, http.StatusNotFound, w.Code, "path=%s should hit OpenAI images handler", path)
 	}
 }
+
+func TestPublicReleaseAPIRegressionGatewayEntrypointsAreRegistered(t *testing.T) {
+	router := newGatewayRoutesTestRouter()
+
+	tests := []struct {
+		name   string
+		method string
+		path   string
+		body   string
+	}{
+		{
+			name:   "OpenAI chat completions v1",
+			method: http.MethodPost,
+			path:   "/v1/chat/completions",
+			body:   `{"model":"gpt-5","messages":[{"role":"user","content":"ping"}]}`,
+		},
+		{
+			name:   "OpenAI chat completions root alias",
+			method: http.MethodPost,
+			path:   "/chat/completions",
+			body:   `{"model":"gpt-5","messages":[{"role":"user","content":"ping"}]}`,
+		},
+		{
+			name:   "OpenAI responses v1",
+			method: http.MethodPost,
+			path:   "/v1/responses",
+			body:   `{"model":"gpt-5","input":"ping"}`,
+		},
+		{
+			name:   "Codex responses compact alias",
+			method: http.MethodPost,
+			path:   "/backend-api/codex/responses/compact",
+			body:   `{"model":"gpt-5","input":"ping"}`,
+		},
+		{
+			name:   "Anthropic messages v1",
+			method: http.MethodPost,
+			path:   "/v1/messages",
+			body:   `{"model":"claude-sonnet-4-5","max_tokens":32,"messages":[{"role":"user","content":"ping"}]}`,
+		},
+		{
+			name:   "OpenAI image generation v1",
+			method: http.MethodPost,
+			path:   "/v1/images/generations",
+			body:   `{"model":"gpt-image-2","prompt":"draw a cat"}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(tt.method, tt.path, strings.NewReader(tt.body))
+			req.Header.Set("Content-Type", "application/json")
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+			require.NotEqual(t, http.StatusNotFound, w.Code, "public API path %s should remain reachable", tt.path)
+		})
+	}
+}
+
+func TestPublicReleaseAPIRegressionCommonEndpointsAreRegistered(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	RegisterCommonRoutes(router)
+
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	require.Equal(t, http.StatusOK, w.Code)
+	require.JSONEq(t, `{"status":"ok"}`, w.Body.String())
+}
