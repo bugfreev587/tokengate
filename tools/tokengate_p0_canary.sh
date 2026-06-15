@@ -69,7 +69,10 @@ json_escape() {
 redact_file() {
   local in_file="$1"
   local out_file="$2"
-  sed -E 's/sk-[A-Za-z0-9_-]+/sk-<redacted>/g' "$in_file" > "$out_file"
+  sed -E \
+    -e 's/sk-[A-Za-z0-9_-]+/sk-<redacted>/g' \
+    -e 's/tg_[A-Za-z0-9_-]+:[A-Za-z0-9_-]+/tg_<redacted>/g' \
+    "$in_file" > "$out_file"
 }
 
 write_status_json() {
@@ -97,8 +100,55 @@ write_status_json() {
 EOF
 }
 
+is_discord_webhook_url() {
+  local url="$1"
+  [[ "$url" == *"discord.com/api/webhooks/"* || "$url" == *"discordapp.com/api/webhooks/"* ]]
+}
+
+github_run_url() {
+  local server_url="${GITHUB_SERVER_URL:-https://github.com}"
+  local repository="${GITHUB_REPOSITORY:-}"
+  local run_id="${GITHUB_RUN_ID:-}"
+
+  if [[ -z "$repository" || -z "$run_id" ]]; then
+    printf 'unknown'
+    return
+  fi
+
+  printf '%s/%s/actions/runs/%s' "${server_url%/}" "$repository" "$run_id"
+}
+
+write_discord_payload() {
+  local path="$1"
+  local status="$2"
+  local exit_code="$3"
+  local run_url
+  local message
+  local escaped_message
+
+  run_url="$(github_run_url)"
+  message=$(
+    cat <<EOF
+TokenGate P0 canary $status.
+Repository: ${GITHUB_REPOSITORY:-unknown}
+Branch: ${GITHUB_REF_NAME:-unknown}
+Trigger: ${GITHUB_EVENT_NAME:-manual}
+Backend: $BASE_URL
+Model: $OPENAI_MODEL
+Exit code: $exit_code
+Run: $run_url
+EOF
+  )
+  escaped_message="$(json_escape "$message")"
+
+  printf '{"content":"%s"}\n' "$escaped_message" > "$path"
+}
+
 send_webhook() {
   local payload_file="$1"
+  local status="${2:-unknown}"
+  local exit_code="${3:-0}"
+  local send_payload_file="$payload_file"
 
   if [[ -z "$WEBHOOK_URL" ]]; then
     return 0
@@ -108,12 +158,17 @@ send_webhook() {
     return 1
   fi
 
+  if is_discord_webhook_url "$WEBHOOK_URL"; then
+    send_payload_file="${payload_file%.json}.discord.json"
+    write_discord_payload "$send_payload_file" "$status" "$exit_code"
+  fi
+
   "$CURL_BIN" -sS \
     --connect-timeout 20 \
     --max-time 60 \
     -X POST "$WEBHOOK_URL" \
     -H "Content-Type: application/json" \
-    -d "$(sed -n '1,$p' "$payload_file")" >/dev/null
+    -d "$(sed -n '1,$p' "$send_payload_file")" >/dev/null
 }
 
 should_notify() {
@@ -172,7 +227,7 @@ run_once() {
   write_status_json "$payload_file" "$status" "$suite_exit" "$started_at" "$finished_at" "$log_file" "$excerpt"
 
   if should_notify "$status"; then
-    if send_webhook "$payload_file"; then
+    if send_webhook "$payload_file" "$status" "$suite_exit"; then
       printf 'PASS webhook notification sent status=%s\n' "$status"
     else
       webhook_exit=1

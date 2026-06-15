@@ -63,11 +63,11 @@ Expected:
 
 ## P0 Production Canary
 
-After launch, create a dedicated TokenGate API key for canary traffic. Put it in
-the same user group and account routing path that normal OpenAI-compatible
-customers should use. Name the key clearly, for example
-`p0-production-canary`, and rotate it whenever the upstream account or group
-assignment changes.
+After launch, create a dedicated canary credential for the OpenAI-compatible
+`/v1/*` gateway path. Use a key that is valid for the same route normal
+OpenAI-compatible customers use; do not reuse a normal user's provider key.
+Name it clearly, for example `p0-production-canary`, and rotate it whenever the
+upstream account or gateway routing changes.
 
 Run one canary check:
 
@@ -93,6 +93,19 @@ For GitHub Actions, Railway Cron, or another external scheduler, leave
 `TOKENGATE_P0_CANARY_INTERVAL_SECONDS` unset and schedule the command externally.
 The latest result is written to `latest.json` and `latest.log` inside
 `TOKENGATE_P0_CANARY_STATE_DIR`.
+
+The repository includes a GitHub Actions monitor at
+`.github/workflows/p0-regression-monitor.yml`. It runs once per hour and uploads
+the latest canary state as the `tokengate-p0-canary-regression` artifact. Set
+these GitHub repository variables and secrets before enabling it:
+
+- `TOKENGATE_REGRESSION_BASE_URL` repository variable: production backend origin.
+- `TOKENGATE_REGRESSION_OPENAI_MODEL` repository variable: optional model
+  override, defaulting to `gpt-5.4`.
+- `TOKENGATE_REGRESSION_API_KEY` repository secret: dedicated canary key for the
+  OpenAI-compatible `/v1/*` P0 suite.
+- `REGRESSION_ALERT_WEBHOOK_URL` repository secret: Discord webhook URL for
+  failure notifications.
 
 Default alert behavior:
 

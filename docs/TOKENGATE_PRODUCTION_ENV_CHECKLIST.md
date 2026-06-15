@@ -149,8 +149,8 @@ TOKENGATE_OPENAI_MODEL="gpt-5.4" \
 tools/tokengate_p0_compatibility_suite.sh
 ```
 
-Create a dedicated production canary key before public launch and run the P0
-canary once:
+Create a dedicated production canary key for the OpenAI-compatible `/v1/*`
+gateway path before public launch and run the P0 canary once:
 
 ```bash
 TOKENGATE_BASE_URL="https://<backend-domain>" \
@@ -163,6 +163,16 @@ tools/tokengate_p0_canary.sh
 Before opening public signup, make sure a scheduler runs this command every
 5-10 minutes or runs the same canary command externally through GitHub Actions,
 Railway Cron, or another monitor.
+
+For the included hourly GitHub Actions monitor
+(`.github/workflows/p0-regression-monitor.yml`), configure:
+
+- Repository variable `TOKENGATE_REGRESSION_BASE_URL` with the backend origin.
+- Optional repository variable `TOKENGATE_REGRESSION_OPENAI_MODEL`; defaults to
+  `gpt-5.4`.
+- Repository secret `TOKENGATE_REGRESSION_API_KEY` with a dedicated canary key
+  for the OpenAI-compatible `/v1/*` P0 suite.
+- Repository secret `REGRESSION_ALERT_WEBHOOK_URL` with the Discord webhook URL.
 
 For private beta gating:
 

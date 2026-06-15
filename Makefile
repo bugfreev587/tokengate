@@ -57,6 +57,7 @@ test-p0-canary:
 
 test-p0-canary-selftest:
 	@tools/tokengate_p0_canary_test.sh
+	@tools/tokengate_regression_workflow_test.sh
 
 test-datamanagementd:
 	@cd datamanagement && go test ./...

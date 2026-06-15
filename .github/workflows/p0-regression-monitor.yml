@@ -1,0 +1,66 @@
+name: TokenGate P0 Regression Monitor
+
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  p0_canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TOKENGATE_BASE_URL: ${{ vars.TOKENGATE_REGRESSION_BASE_URL }}
+      TOKENGATE_API_KEY: ${{ secrets.TOKENGATE_REGRESSION_API_KEY }}
+      TOKENGATE_OPENAI_MODEL: ${{ vars.TOKENGATE_REGRESSION_OPENAI_MODEL || 'gpt-5.4' }}
+      TOKENGATE_P0_CANARY_NOTIFY_WEBHOOK_URL: ${{ secrets.REGRESSION_ALERT_WEBHOOK_URL }}
+      TOKENGATE_P0_CANARY_NOTIFY_ON: never
+      TOKENGATE_P0_CANARY_STATE_DIR: ${{ github.workspace }}/artifacts/p0-canary
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Prepare scripts
+        run: chmod +x tools/tokengate_p0_compatibility_suite.sh tools/tokengate_p0_canary.sh
+
+      - name: Run P0 canary regression
+        run: tools/tokengate_p0_canary.sh
+
+      - name: Upload P0 canary artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tokengate-p0-canary-regression
+          path: artifacts/p0-canary
+          if-no-files-found: warn
+
+      - name: Notify Discord on failure
+        if: failure() && env.TOKENGATE_P0_CANARY_NOTIFY_WEBHOOK_URL != ''
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python3 - <<'PY' > /tmp/tokengate-discord-payload.json
+          import json
+          import os
+
+          message = "\n".join(
+              [
+                  "TokenGate P0 regression monitor failed.",
+                  f"Repository: {os.environ.get('GITHUB_REPOSITORY', 'unknown')}",
+                  f"Branch: {os.environ.get('GITHUB_REF_NAME', 'unknown')}",
+                  f"Trigger: {os.environ.get('GITHUB_EVENT_NAME', 'unknown')}",
+                  f"Backend: {os.environ.get('TOKENGATE_BASE_URL', 'unknown')}",
+                  f"Model: {os.environ.get('TOKENGATE_OPENAI_MODEL', 'unknown')}",
+                  f"Run: {os.environ.get('RUN_URL', 'unknown')}",
+              ]
+          )
+          print(json.dumps({"content": message}))
+          PY
+          curl -sS \
+            --connect-timeout 20 \
+            --max-time 60 \
+            -X POST "$TOKENGATE_P0_CANARY_NOTIFY_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            --data-binary @/tmp/tokengate-discord-payload.json
