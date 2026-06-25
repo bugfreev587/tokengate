@@ -6299,10 +6299,10 @@ const settingsTabs = [
   { key: "security" as SettingsTab, icon: "shield" as const },
   { key: "users" as SettingsTab, icon: "user" as const },
   { key: "payment" as SettingsTab, icon: "creditCard" as const },
-  { key: "gateway" as SettingsTab, icon: "server" as const, badgeKey: "advanced" as const, badgeTone: "advanced" as const },
-  { key: "agreement" as SettingsTab, icon: "document" as const, badgeKey: "advanced" as const, badgeTone: "advanced" as const },
-  { key: "features" as SettingsTab, icon: "bolt" as const, badgeKey: "advanced" as const, badgeTone: "advanced" as const },
-  { key: "email" as SettingsTab, icon: "mail" as const, badgeKey: "advanced" as const, badgeTone: "advanced" as const },
+  { key: "gateway" as SettingsTab, icon: "server" as const },
+  { key: "agreement" as SettingsTab, icon: "document" as const },
+  { key: "features" as SettingsTab, icon: "bolt" as const },
+  { key: "email" as SettingsTab, icon: "mail" as const },
   { key: "backup" as SettingsTab, icon: "database" as const, badgeKey: "ops" as const, badgeTone: "ops" as const },
 ];
 
@@ -9092,7 +9092,7 @@ watch(
 
 /* ============ 系统设置 Tab 导航 ============ */
 .settings-tabs-shell {
-  @apply sticky z-20 -mx-1 rounded-2xl border border-slate-300/80 bg-slate-100/95 p-1.5 backdrop-blur-xl;
+  @apply sticky z-20 -mx-1 rounded-2xl border border-slate-300/80 bg-slate-100/95 p-1.5 backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-950/90;
   top: 4.75rem;
   box-shadow:
     0 12px 28px rgb(15 23 42 / 0.1),
@@ -9101,7 +9101,7 @@ watch(
 
 :global(.dark) .settings-tabs-shell {
   border-color: rgb(71 85 105 / 0.85);
-  background: rgb(15 23 42 / 0.94);
+  background: linear-gradient(135deg, rgb(15 23 42 / 0.96), rgb(30 41 59 / 0.92));
   box-shadow:
     0 16px 36px rgb(0 0 0 / 0.28),
     0 1px 0 rgb(255 255 255 / 0.06) inset;
@@ -9122,7 +9122,7 @@ watch(
 }
 
 .settings-tab {
-  @apply relative isolate flex h-10 min-w-[6.75rem] shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-transparent px-3 text-sm font-semibold text-slate-700 outline-none transition-colors duration-200 ease-out dark:text-slate-200;
+  @apply relative isolate flex h-10 min-w-[6.75rem] shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-transparent px-3 text-sm font-semibold text-slate-700 outline-none transition-colors duration-200 ease-out dark:text-slate-100;
 }
 
 @media (min-width: 768px) {

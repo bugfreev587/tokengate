@@ -533,6 +533,23 @@ describe("admin SettingsView payment visible method controls", () => {
     adminSettingsFetch.mockResolvedValue(undefined);
   });
 
+  it("keeps settings tab labels readable without advanced badges", async () => {
+    const wrapper = mountView();
+
+    await flushPromises();
+
+    const advancedTabKeys = ["gateway", "agreement", "features", "email"];
+
+    for (const tabKey of advancedTabKeys) {
+      expect(wrapper.get(`#settings-tab-${tabKey}`).text()).toBe(
+        `admin.settings.tabs.${tabKey}`,
+      );
+    }
+    expect(wrapper.get(".settings-tabs").text()).not.toContain(
+      "admin.settings.tabBadges.advanced",
+    );
+  });
+
   it("does not render legacy visible payment method controls", async () => {
     const wrapper = mountView();
 
