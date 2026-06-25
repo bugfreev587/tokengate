@@ -9099,7 +9099,7 @@ watch(
     0 1px 0 rgb(255 255 255 / 0.95) inset;
 }
 
-:global(.dark) .settings-tabs-shell {
+.settings-tabs-shell:is(.dark *) {
   border-color: rgb(71 85 105 / 0.85);
   background: linear-gradient(135deg, rgb(15 23 42 / 0.96), rgb(30 41 59 / 0.92));
   box-shadow:
@@ -9150,7 +9150,7 @@ watch(
   opacity: 1;
 }
 
-:global(.dark) .settings-tab::before {
+.settings-tab:is(.dark *)::before {
   background: linear-gradient(135deg, rgb(30 41 59 / 0.98), rgb(51 65 85 / 0.82));
 }
 
@@ -9165,7 +9165,7 @@ watch(
     0 1px 0 rgb(255 255 255 / 0.18) inset;
 }
 
-:global(.dark) .settings-tab-active {
+.settings-tab-active:is(.dark *) {
   box-shadow:
     0 12px 26px rgb(0 0 0 / 0.22),
     0 1px 0 rgb(255 255 255 / 0.08) inset;
