@@ -321,6 +321,72 @@
           </div>
         </div>
 
+        <!-- CLI setup guidance -->
+        <section class="mb-12 rounded-[2rem] border border-gray-200/60 bg-white/75 p-6 shadow-xl shadow-primary-500/5 backdrop-blur-sm dark:border-dark-700/60 dark:bg-dark-800/70 md:p-8">
+          <div class="mb-8 grid gap-6 lg:grid-cols-[0.86fr_1.14fr] lg:items-end">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.22em] text-primary-600 dark:text-primary-400">
+                {{ t('home.cli.eyebrow') }}
+              </p>
+              <h2 class="mt-3 text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">
+                {{ t('home.cli.title') }}
+              </h2>
+            </div>
+            <p class="text-sm leading-7 text-gray-600 dark:text-dark-300">
+              {{ t('home.cli.description') }}
+            </p>
+          </div>
+
+          <div class="grid gap-5 lg:grid-cols-2">
+            <div class="overflow-hidden rounded-2xl border border-gray-200/70 bg-gray-50/85 dark:border-dark-700 dark:bg-dark-900/45">
+              <div class="flex items-center justify-between gap-3 border-b border-gray-200/70 px-5 py-4 dark:border-dark-700">
+                <div>
+                  <p class="text-base font-semibold text-gray-900 dark:text-white">
+                    {{ t('home.cli.claude.title') }}
+                  </p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-dark-400">
+                    {{ t('home.cli.claude.description') }}
+                  </p>
+                </div>
+                <span class="shrink-0 rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
+                  /v1/messages
+                </span>
+              </div>
+              <pre class="overflow-x-auto px-5 py-4 text-left text-xs leading-6 text-gray-800 dark:text-dark-100"><code>export ANTHROPIC_BASE_URL="https://&lt;tokengate-backend&gt;"
+export ANTHROPIC_AUTH_TOKEN="&lt;tokengate-api-key&gt;"
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1</code></pre>
+            </div>
+
+            <div class="overflow-hidden rounded-2xl border border-gray-200/70 bg-gray-50/85 dark:border-dark-700 dark:bg-dark-900/45">
+              <div class="flex items-center justify-between gap-3 border-b border-gray-200/70 px-5 py-4 dark:border-dark-700">
+                <div>
+                  <p class="text-base font-semibold text-gray-900 dark:text-white">
+                    {{ t('home.cli.codex.title') }}
+                  </p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-dark-400">
+                    {{ t('home.cli.codex.description') }}
+                  </p>
+                </div>
+                <span class="shrink-0 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                  /v1/responses
+                </span>
+              </div>
+              <pre class="overflow-x-auto px-5 py-4 text-left text-xs leading-6 text-gray-800 dark:text-dark-100"><code>model_provider = "tokengate"
+model = "gpt-5.4"
+
+[model_providers.tokengate]
+name = "TokenGate"
+base_url = "https://&lt;tokengate-backend&gt;/v1"
+env_key = "TOKENGATE_API_KEY"
+wire_api = "responses"</code></pre>
+            </div>
+          </div>
+
+          <p class="mt-5 text-sm leading-7 text-gray-500 dark:text-dark-400">
+            {{ t('home.cli.note') }}
+          </p>
+        </section>
+
         <!-- Pricing explainer -->
         <div class="mb-12 rounded-[2rem] border border-gray-200/60 bg-white/70 p-6 shadow-xl shadow-primary-500/5 backdrop-blur-sm dark:border-dark-700/60 dark:bg-dark-800/70 md:p-8">
           <div class="mb-8 max-w-3xl">

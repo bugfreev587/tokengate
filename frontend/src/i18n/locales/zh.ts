@@ -38,6 +38,20 @@ export default {
       balanceQuota: '可直接商用',
       balanceQuotaDesc: '不用另起一套账务系统，也能交付套餐、钱包余额、用量日志和消费控制。'
     },
+    cli: {
+      eyebrow: '编程 CLI 接入',
+      title: 'Claude Code CLI 和 Codex CLI 都可以接入 TokenGate',
+      description: 'TokenGate 暴露 Anthropic 兼容和 OpenAI Responses 兼容端点，编程 Agent 只需要把 base URL 指向你的后端，并使用 TokenGate API key 鉴权。',
+      claude: {
+        title: 'Claude Code CLI',
+        description: '通过 Anthropic 兼容网关转发 Claude Code 请求。'
+      },
+      codex: {
+        title: 'Codex CLI',
+        description: '把 TokenGate 注册成 OpenAI Responses provider。'
+      },
+      note: '在控制台的 API Keys 页面创建密钥。使用密钥弹窗会自动把这里的占位符替换成真实后端地址和 TokenGate API key。'
+    },
     pricing: {
       eyebrow: '计费方式',
       title: '用户真正看得懂的 AI 定价',

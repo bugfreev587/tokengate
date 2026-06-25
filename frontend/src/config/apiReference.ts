@@ -1106,6 +1106,12 @@ req.Header.Set("Authorization", "Bearer "+os.Getenv("TOKENGATE_API_KEY"))`,
 
 export const tokenGateApiSidebarGroups: ApiSidebarGroup[] = [
   {
+    title: 'Guides',
+    items: [
+      { title: 'CLI setup', href: '/docs/cli' },
+    ],
+  },
+  {
     title: 'Core',
     items: [
       { title: 'Health check', method: 'GET', href: '#health-check' },

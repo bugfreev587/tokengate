@@ -154,6 +154,15 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/docs/cli',
+    name: 'CliDocs',
+    component: () => import('@/views/public/PublicCliDocsView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'CLI Setup'
+    }
+  },
+  {
     path: '/pricing',
     name: 'PublicPricing',
     component: () => import('@/views/public/PublicPricingView.vue'),

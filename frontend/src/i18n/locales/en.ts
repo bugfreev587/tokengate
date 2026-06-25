@@ -38,6 +38,20 @@ export default {
       balanceQuota: 'Commercially Ready',
       balanceQuotaDesc: 'Ship plans, wallet balance, usage logs, and spend controls without building a separate billing system around your AI stack.'
     },
+    cli: {
+      eyebrow: 'Coding CLI access',
+      title: 'Use TokenGate from Claude Code CLI and Codex CLI',
+      description: 'TokenGate exposes Anthropic-compatible and OpenAI Responses-compatible endpoints, so coding agents can point their base URL at your backend and authenticate with a TokenGate API key.',
+      claude: {
+        title: 'Claude Code CLI',
+        description: 'Route Claude Code through the Anthropic-compatible gateway.'
+      },
+      codex: {
+        title: 'Codex CLI',
+        description: 'Register TokenGate as an OpenAI Responses provider.'
+      },
+      note: 'Create a key in Dashboard → API Keys. The Use Key dialog fills these placeholders with your real backend URL and TokenGate API key.'
+    },
     pricing: {
       eyebrow: 'Billing model',
       title: 'Pricing that users can actually understand',

@@ -18,17 +18,31 @@
         <p class="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
           {{ group.title }}
         </p>
-        <a
+        <template
           v-for="item in group.items"
           :key="`${group.title}-${item.title}`"
-          :href="item.href"
-          class="flex items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-sm transition"
-          :class="item.active ? 'bg-gray-100 text-gray-950' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950'"
-          @click.prevent="$emit('select', item.href)"
         >
-          <span class="truncate">{{ item.title }}</span>
-          <MethodBadge v-if="item.method" :method="item.method" />
-        </a>
+          <RouterLink
+            v-if="isRouteLink(item.href)"
+            :to="item.href"
+            class="flex items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-sm transition"
+            :class="itemClass(item.active)"
+            @click="$emit('close')"
+          >
+            <span class="truncate">{{ item.title }}</span>
+            <MethodBadge v-if="item.method" :method="item.method" />
+          </RouterLink>
+          <a
+            v-else
+            :href="item.href"
+            class="flex items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-sm transition"
+            :class="itemClass(item.active)"
+            @click.prevent="$emit('select', item.href)"
+          >
+            <span class="truncate">{{ item.title }}</span>
+            <MethodBadge v-if="item.method" :method="item.method" />
+          </a>
+        </template>
       </div>
     </nav>
   </aside>
@@ -47,4 +61,12 @@ defineEmits<{
   close: []
   select: [href: string]
 }>()
+
+function isRouteLink(href: string) {
+  return href.startsWith('/')
+}
+
+function itemClass(active?: boolean) {
+  return active ? 'bg-gray-100 text-gray-950' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950'
+}
 </script>
