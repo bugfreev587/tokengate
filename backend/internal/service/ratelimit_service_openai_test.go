@@ -184,7 +184,7 @@ func TestHandle429_OpenAIPersistsCodexSnapshotImmediately(t *testing.T) {
 	headers.Set("x-codex-secondary-reset-after-seconds", "18000")
 	headers.Set("x-codex-secondary-window-minutes", "300")
 
-	svc.handle429(context.Background(), account, headers, nil)
+	svc.handle429(context.Background(), account, "", headers, nil)
 
 	if repo.rateLimitedID != account.ID {
 		t.Fatalf("rateLimitedID = %d, want %d", repo.rateLimitedID, account.ID)
@@ -211,7 +211,7 @@ func TestHandle429_OpenAISyncsObservedPlanType(t *testing.T) {
 	}
 	body := []byte(`{"error":{"type":"usage_limit_reached","message":"limit reached","plan_type":"free","resets_at":1777283883}}`)
 
-	svc.handle429(context.Background(), account, http.Header{}, body)
+	svc.handle429(context.Background(), account, "", http.Header{}, body)
 
 	require.Equal(t, []int64{account.ID}, repo.bulkUpdatedIDs)
 	require.Equal(t, "free", repo.bulkUpdatedPayload.Credentials["plan_type"])

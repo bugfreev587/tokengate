@@ -3830,6 +3830,14 @@ func retryBackoffDelay(attempt int) time.Duration {
 	return delay
 }
 
+func anthropicRateLimitModelFallback(model string) (string, bool) {
+	model = strings.ToLower(strings.TrimSpace(model))
+	if model == "" || !strings.Contains(model, "sonnet") || strings.Contains(model, "opus") {
+		return "", false
+	}
+	return "claude-opus-4-7", true
+}
+
 func sleepWithContext(ctx context.Context, d time.Duration) error {
 	if d <= 0 {
 		return nil
@@ -4527,6 +4535,7 @@ func (s *GatewayService) Forward(ctx context.Context, c *gin.Context, account *A
 	// 重试循环
 	var resp *http.Response
 	retryStart := time.Now()
+	modelFallbackUsed := false
 	for attempt := 1; attempt <= maxRetryAttempts; attempt++ {
 		// 构建上游请求（每次重试需要重新构建，因为请求体需要重新读取）
 		upstreamCtx, releaseUpstreamCtx := detachStreamUpstreamContext(ctx, reqStream)
@@ -4562,6 +4571,39 @@ func (s *GatewayService) Forward(ctx context.Context, c *gin.Context, account *A
 				},
 			})
 			return nil, fmt.Errorf("upstream request failed: %s", safeErr)
+		}
+
+		if resp.StatusCode == http.StatusTooManyRequests && !modelFallbackUsed && account.IsAnthropicOAuthOrSetupToken() {
+			if fallbackModel, ok := anthropicRateLimitModelFallback(reqModel); ok {
+				respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 2<<20))
+				_ = resp.Body.Close()
+				if s.rateLimitService != nil {
+					s.rateLimitService.HandleUpstreamErrorForModel(ctx, account, reqModel, resp.StatusCode, resp.Header, respBody)
+				}
+				appendOpsUpstreamError(c, OpsUpstreamErrorEvent{
+					Platform:           account.Platform,
+					AccountID:          account.ID,
+					AccountName:        account.Name,
+					UpstreamStatusCode: resp.StatusCode,
+					UpstreamRequestID:  resp.Header.Get("x-request-id"),
+					UpstreamURL:        safeUpstreamURL(upstreamReq.URL.String()),
+					Kind:               "model_fallback",
+					Message:            extractUpstreamErrorMessage(respBody),
+					Detail: func() string {
+						if s.cfg != nil && s.cfg.Gateway.LogUpstreamErrorBody {
+							return truncateString(string(respBody), s.cfg.Gateway.LogUpstreamErrorBodyMaxBytes)
+						}
+						return ""
+					}(),
+				})
+				logger.LegacyPrintf("service.gateway", "Account %d: Anthropic model %s rate limited, retrying with fallback model %s", account.ID, reqModel, fallbackModel)
+				body = s.replaceModelInBody(body, fallbackModel)
+				reqModel = fallbackModel
+				mappedModel = fallbackModel
+				setOpsUpstreamRequestBody(c, body)
+				modelFallbackUsed = true
+				continue
+			}
 		}
 
 		// 优先检测thinking block签名错误（400）并重试一次
@@ -4847,7 +4889,7 @@ func (s *GatewayService) Forward(ctx context.Context, c *gin.Context, account *A
 		logger.LegacyPrintf("service.gateway", "[Forward] Upstream error (failover): Account=%d(%s) Status=%d RequestID=%s Body=%s",
 			account.ID, account.Name, resp.StatusCode, resp.Header.Get("x-request-id"), truncateString(string(respBody), 1000))
 
-		s.handleFailoverSideEffects(ctx, resp, account)
+		s.handleFailoverSideEffectsForModel(ctx, resp, account, reqModel)
 		appendOpsUpstreamError(c, OpsUpstreamErrorEvent{
 			Platform:           account.Platform,
 			AccountID:          account.ID,
@@ -4910,7 +4952,7 @@ func (s *GatewayService) Forward(ctx context.Context, c *gin.Context, account *A
 				} else {
 					logger.LegacyPrintf("service.gateway", "Account %d: 400 error, attempting failover", account.ID)
 				}
-				s.handleFailoverSideEffects(ctx, resp, account)
+				s.handleFailoverSideEffectsForModel(ctx, resp, account, reqModel)
 				return nil, &UpstreamFailoverError{StatusCode: resp.StatusCode, ResponseBody: respBody}
 			}
 		}
@@ -5150,7 +5192,7 @@ func (s *GatewayService) forwardAnthropicAPIKeyPassthroughWithInput(
 		logger.LegacyPrintf("service.gateway", "[Anthropic Passthrough] Upstream error (failover): Account=%d(%s) Status=%d RequestID=%s Body=%s",
 			account.ID, account.Name, resp.StatusCode, resp.Header.Get("x-request-id"), truncateString(string(respBody), 1000))
 
-		s.handleFailoverSideEffects(ctx, resp, account)
+		s.handleFailoverSideEffectsForModel(ctx, resp, account, input.RequestModel)
 		appendOpsUpstreamError(c, OpsUpstreamErrorEvent{
 			Platform:           account.Platform,
 			AccountID:          account.ID,
@@ -7035,8 +7077,12 @@ func (s *GatewayService) handleRetryExhaustedSideEffects(ctx context.Context, re
 }
 
 func (s *GatewayService) handleFailoverSideEffects(ctx context.Context, resp *http.Response, account *Account) {
+	s.handleFailoverSideEffectsForModel(ctx, resp, account, "")
+}
+
+func (s *GatewayService) handleFailoverSideEffectsForModel(ctx context.Context, resp *http.Response, account *Account, requestedModel string) {
 	body, _ := io.ReadAll(io.LimitReader(resp.Body, 2<<20))
-	s.rateLimitService.HandleUpstreamError(ctx, account, resp.StatusCode, resp.Header, body)
+	s.rateLimitService.HandleUpstreamErrorForModel(ctx, account, requestedModel, resp.StatusCode, resp.Header, body)
 }
 
 // handleRetryExhaustedError 处理重试耗尽后的错误

@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 	"time"
+
+	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
 )
 
 const modelRateLimitsKey = "model_rate_limits"
@@ -28,19 +30,12 @@ func (a *Account) getRateLimitRemainingForKey(key string) time.Duration {
 }
 
 func (a *Account) isModelRateLimitedWithContext(ctx context.Context, requestedModel string) bool {
-	if a == nil {
-		return false
+	for _, modelKey := range a.modelRateLimitLookupKeys(ctx, requestedModel) {
+		if a.isRateLimitActiveForKey(modelKey) {
+			return true
+		}
 	}
-
-	modelKey := a.GetMappedModel(requestedModel)
-	if a.Platform == PlatformAntigravity {
-		modelKey = resolveFinalAntigravityModelKey(ctx, a, requestedModel)
-	}
-	modelKey = strings.TrimSpace(modelKey)
-	if modelKey == "" {
-		return false
-	}
-	return a.isRateLimitActiveForKey(modelKey)
+	return false
 }
 
 // GetModelRateLimitRemainingTime 获取模型限流剩余时间
@@ -54,15 +49,46 @@ func (a *Account) GetModelRateLimitRemainingTimeWithContext(ctx context.Context,
 		return 0
 	}
 
+	for _, modelKey := range a.modelRateLimitLookupKeys(ctx, requestedModel) {
+		if remaining := a.getRateLimitRemainingForKey(modelKey); remaining > 0 {
+			return remaining
+		}
+	}
+	return 0
+}
+
+func (a *Account) modelRateLimitLookupKeys(ctx context.Context, requestedModel string) []string {
+	if a == nil {
+		return nil
+	}
+
 	modelKey := a.GetMappedModel(requestedModel)
 	if a.Platform == PlatformAntigravity {
 		modelKey = resolveFinalAntigravityModelKey(ctx, a, requestedModel)
 	}
 	modelKey = strings.TrimSpace(modelKey)
 	if modelKey == "" {
-		return 0
+		return nil
 	}
-	return a.getRateLimitRemainingForKey(modelKey)
+
+	keys := []string{modelKey}
+	addKey := func(key string) {
+		key = strings.TrimSpace(key)
+		if key == "" {
+			return
+		}
+		for _, existing := range keys {
+			if existing == key {
+				return
+			}
+		}
+		keys = append(keys, key)
+	}
+	if a.Platform == PlatformAnthropic {
+		addKey(claude.NormalizeModelID(modelKey))
+		addKey(claude.DenormalizeModelID(modelKey))
+	}
+	return keys
 }
 
 func resolveFinalAntigravityModelKey(ctx context.Context, account *Account, requestedModel string) string {

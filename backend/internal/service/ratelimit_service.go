@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
 	"github.com/tidwall/gjson"
 )
@@ -130,6 +131,12 @@ func (s *RateLimitService) CheckErrorPolicy(ctx context.Context, account *Accoun
 // HandleUpstreamError 处理上游错误响应，标记账号状态
 // 返回是否应该停止该账号的调度
 func (s *RateLimitService) HandleUpstreamError(ctx context.Context, account *Account, statusCode int, headers http.Header, responseBody []byte) (shouldDisable bool) {
+	return s.HandleUpstreamErrorForModel(ctx, account, "", statusCode, headers, responseBody)
+}
+
+// HandleUpstreamErrorForModel 处理带模型上下文的上游错误响应。
+// 当 Anthropic OAuth 返回 429 且模型已知时，只标记该模型限流，避免误摘整个账号。
+func (s *RateLimitService) HandleUpstreamErrorForModel(ctx context.Context, account *Account, requestedModel string, statusCode int, headers http.Header, responseBody []byte) (shouldDisable bool) {
 	customErrorCodesEnabled := account.IsCustomErrorCodesEnabled()
 
 	// 池模式默认不标记本地账号状态；仅当用户显式配置自定义错误码时按本地策略处理。
@@ -271,7 +278,7 @@ func (s *RateLimitService) HandleUpstreamError(ctx context.Context, account *Acc
 		)
 		shouldDisable = s.handle403(ctx, account, upstreamMsg, responseBody)
 	case 429:
-		s.handle429(ctx, account, headers, responseBody)
+		s.handle429(ctx, account, requestedModel, headers, responseBody)
 		shouldDisable = false
 	case 529:
 		s.handle529(ctx, account)
@@ -821,7 +828,7 @@ func (s *RateLimitService) handleCustomErrorCode(ctx context.Context, account *A
 
 // handle429 处理429限流错误
 // 解析响应头获取重置时间，标记账号为限流状态
-func (s *RateLimitService) handle429(ctx context.Context, account *Account, headers http.Header, responseBody []byte) {
+func (s *RateLimitService) handle429(ctx context.Context, account *Account, requestedModel string, headers http.Header, responseBody []byte) {
 	// 1. OpenAI 平台：优先尝试解析 x-codex-* 响应头（用于 rate_limit_exceeded）
 	if account.Platform == PlatformOpenAI {
 		persistOpenAI429PlanType(ctx, s.accountRepo, account, responseBody)
@@ -838,20 +845,18 @@ func (s *RateLimitService) handle429(ctx context.Context, account *Account, head
 
 	// 2. Anthropic 平台：尝试解析 per-window 头（5h / 7d），选择实际触发的窗口
 	if result := calculateAnthropic429ResetTime(headers); result != nil {
+		if s.trySetAnthropicModelRateLimit(ctx, account, requestedModel, result.resetAt) {
+			s.updateAnthropicRejectedSessionWindow(ctx, account, result)
+			slog.Info("anthropic_model_rate_limited", "account_id", account.ID, "model", claude.NormalizeModelID(account.GetMappedModel(requestedModel)), "reset_at", result.resetAt, "reset_in", time.Until(result.resetAt).Truncate(time.Second))
+			return
+		}
+
 		if err := s.accountRepo.SetRateLimited(ctx, account.ID, result.resetAt); err != nil {
 			slog.Warn("rate_limit_set_failed", "account_id", account.ID, "error", err)
 			return
 		}
 
-		// 更新 session window：优先使用 5h-reset 头精确计算，否则从 resetAt 反推
-		windowEnd := result.resetAt
-		if result.fiveHourReset != nil {
-			windowEnd = *result.fiveHourReset
-		}
-		windowStart := windowEnd.Add(-5 * time.Hour)
-		if err := s.accountRepo.UpdateSessionWindow(ctx, account.ID, &windowStart, &windowEnd, "rejected"); err != nil {
-			slog.Warn("rate_limit_update_session_window_failed", "account_id", account.ID, "error", err)
-		}
+		s.updateAnthropicRejectedSessionWindow(ctx, account, result)
 
 		slog.Info("anthropic_account_rate_limited", "account_id", account.ID, "reset_at", result.resetAt, "reset_in", time.Until(result.resetAt).Truncate(time.Second))
 		return
@@ -926,6 +931,36 @@ func (s *RateLimitService) handle429(ctx context.Context, account *Account, head
 	}
 
 	slog.Info("account_rate_limited", "account_id", account.ID, "reset_at", resetAt)
+}
+
+func (s *RateLimitService) trySetAnthropicModelRateLimit(ctx context.Context, account *Account, requestedModel string, resetAt time.Time) bool {
+	if account == nil || !account.IsAnthropicOAuthOrSetupToken() {
+		return false
+	}
+	modelKey := strings.TrimSpace(account.GetMappedModel(requestedModel))
+	if modelKey == "" {
+		return false
+	}
+	modelKey = claude.NormalizeModelID(modelKey)
+	if err := s.accountRepo.SetModelRateLimit(ctx, account.ID, modelKey, resetAt); err != nil {
+		slog.Warn("model_rate_limit_set_failed", "account_id", account.ID, "model", modelKey, "error", err)
+		return false
+	}
+	return true
+}
+
+func (s *RateLimitService) updateAnthropicRejectedSessionWindow(ctx context.Context, account *Account, result *anthropic429Result) {
+	if account == nil || result == nil {
+		return
+	}
+	windowEnd := result.resetAt
+	if result.fiveHourReset != nil {
+		windowEnd = *result.fiveHourReset
+	}
+	windowStart := windowEnd.Add(-5 * time.Hour)
+	if err := s.accountRepo.UpdateSessionWindow(ctx, account.ID, &windowStart, &windowEnd, "rejected"); err != nil {
+		slog.Warn("rate_limit_update_session_window_failed", "account_id", account.ID, "error", err)
+	}
 }
 
 func (s *RateLimitService) apply429FallbackRateLimit(ctx context.Context, account *Account, reason string) {

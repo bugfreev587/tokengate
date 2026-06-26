@@ -53,6 +53,22 @@ func TestIsModelRateLimited(t *testing.T) {
 			expected:       true,
 		},
 		{
+			name: "anthropic OAuth normalized model key hit - short request maps to upstream id",
+			account: &Account{
+				Platform: PlatformAnthropic,
+				Type:     AccountTypeOAuth,
+				Extra: map[string]any{
+					modelRateLimitsKey: map[string]any{
+						"claude-sonnet-4-5-20250929": map[string]any{
+							"rate_limit_reset_at": future,
+						},
+					},
+				},
+			},
+			requestedModel: "claude-sonnet-4-5",
+			expected:       true,
+		},
+		{
 			name: "no rate limit - expired",
 			account: &Account{
 				Extra: map[string]any{
