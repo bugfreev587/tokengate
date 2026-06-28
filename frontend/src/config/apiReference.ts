@@ -64,7 +64,7 @@ export type ApiSidebarGroup = {
   items: ApiSidebarItem[]
 }
 
-const baseUrl = 'https://tokengate-production.up.railway.app'
+const baseUrl = 'https://api.tokengate.to'
 
 export const tokenGateApiEndpoint: ApiEndpointConfig = {
   id: 'chat-completions',

@@ -46,15 +46,15 @@
           </div>
           <div class="grid gap-2 border-b border-gray-200 px-4 py-4 text-sm sm:grid-cols-[170px_minmax(0,1fr)]">
             <span class="font-semibold text-gray-950">Claude Code CLI</span>
-            <code class="tg-code-line">https://&lt;tokengate-backend&gt;</code>
+            <code class="tg-code-line">https://api.tokengate.to</code>
           </div>
           <div class="grid gap-2 px-4 py-4 text-sm sm:grid-cols-[170px_minmax(0,1fr)]">
             <span class="font-semibold text-gray-950">Codex CLI</span>
-            <code class="tg-code-line">https://&lt;tokengate-backend&gt;/v1</code>
+            <code class="tg-code-line">https://api.tokengate.to/v1</code>
           </div>
         </div>
         <p class="mt-4 text-sm leading-7 text-gray-600">
-          Replace <code class="tg-inline-code">&lt;tokengate-backend&gt;</code> with your TokenGate backend host. Replace <code class="tg-inline-code">&lt;tokengate-api-key&gt;</code> with a key created in TokenGate.
+          Use <code class="tg-inline-code">api.tokengate.to</code> for CLI and SDK traffic. The web app domains are for dashboard/docs pages only. Replace <code class="tg-inline-code">&lt;tokengate-api-key&gt;</code> with a key created in TokenGate.
         </p>
       </section>
 
@@ -224,13 +224,15 @@ const sidebarGroups = computed<ApiSidebarGroup[]>(() => tokenGateApiSidebarGroup
   })),
 })))
 
-const claudeShell = `export ANTHROPIC_BASE_URL="https://<tokengate-backend>"
+const tokenGateApiBaseUrl = 'https://api.tokengate.to'
+
+const claudeShell = `export ANTHROPIC_BASE_URL="${tokenGateApiBaseUrl}"
 export ANTHROPIC_AUTH_TOKEN="<tokengate-api-key>"
 export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`
 
 const claudeSettings = `{
   "env": {
-    "ANTHROPIC_BASE_URL": "https://<tokengate-backend>",
+    "ANTHROPIC_BASE_URL": "${tokenGateApiBaseUrl}",
     "ANTHROPIC_AUTH_TOKEN": "<tokengate-api-key>",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "CLAUDE_CODE_ATTRIBUTION_HEADER": "0"
@@ -244,11 +246,11 @@ model = "gpt-5.4"
 
 [model_providers.tokengate]
 name = "TokenGate"
-base_url = "https://<tokengate-backend>/v1"
+base_url = "${tokenGateApiBaseUrl}/v1"
 env_key = "TOKENGATE_API_KEY"
 wire_api = "responses"`
 
-const smokeTest = `curl "https://<tokengate-backend>/v1/models" \\
+const smokeTest = `curl "${tokenGateApiBaseUrl}/v1/models" \\
   -H "Authorization: Bearer <tokengate-api-key>"`
 
 const troubleshooting = [
@@ -325,5 +327,11 @@ onBeforeUnmount(() => {
 
 .tg-code-line {
   @apply min-w-0 overflow-x-auto rounded-lg bg-gray-50 px-3 py-2 font-mono text-xs leading-6 text-gray-800;
+}
+
+.tg-inline-code::selection,
+.tg-code-line::selection {
+  background-color: #ccfbf1;
+  color: #111827;
 }
 </style>
