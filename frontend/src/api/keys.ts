@@ -6,6 +6,40 @@
 import { apiClient } from './client'
 import type { ApiKey, CreateApiKeyRequest, UpdateApiKeyRequest, PaginatedResponse } from '@/types'
 
+export type ApiKeyConnectionStatus = 'success' | 'error' | 'skipped'
+
+export interface ApiKeyConnectionTestModelResult {
+  model: string
+  provider: string
+  endpoint: string
+  status: ApiKeyConnectionStatus
+  http_status?: number
+  latency_ms: number
+  message?: string
+}
+
+export interface ApiKeyConnectionTestResult {
+  api_key_id: number
+  key_name: string
+  group_id?: number
+  group_name?: string
+  platform?: string
+  base_url: string
+  success: boolean
+  models_visible: boolean
+  visible_model_count: number
+  tested_model_count: number
+  skipped_model_count: number
+  truncated: boolean
+  message: string
+  results: ApiKeyConnectionTestModelResult[]
+}
+
+export interface TestApiKeyConnectionRequest {
+  max_models?: number
+  models?: string[]
+}
+
 /**
  * List all API keys for current user
  * @param page - Page number (default: 1)
@@ -131,13 +165,31 @@ export async function toggleStatus(id: number, status: 'active' | 'inactive'): P
   return update(id, { status })
 }
 
+/**
+ * Test whether an API key can reach its current group's model provider.
+ * @param id - API key ID
+ * @param request - Optional probe limits or explicit model list
+ * @returns Per-model connection test result
+ */
+export async function testConnection(
+  id: number,
+  request: TestApiKeyConnectionRequest = { max_models: 12 }
+): Promise<ApiKeyConnectionTestResult> {
+  const { data } = await apiClient.post<ApiKeyConnectionTestResult>(
+    `/keys/${id}/test-connection`,
+    request
+  )
+  return data
+}
+
 export const keysAPI = {
   list,
   getById,
   create,
   update,
   delete: deleteKey,
-  toggleStatus
+  toggleStatus,
+  testConnection
 }
 
 export default keysAPI

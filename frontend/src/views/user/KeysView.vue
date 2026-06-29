@@ -328,6 +328,22 @@
                 <Icon name="upload" size="sm" />
                 <span class="text-xs">{{ t('keys.importToCcSwitch') }}</span>
               </button>
+              <!-- Test Connection Button -->
+              <button
+                @click="runConnectionTest(row)"
+                :disabled="testingConnectionKeyId === row.id"
+                :data-testid="`test-connection-button-${row.id}`"
+                class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-cyan-50 hover:text-cyan-600 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-cyan-900/20 dark:hover:text-cyan-400"
+              >
+                <Icon
+                  :name="testingConnectionKeyId === row.id ? 'refresh' : 'bolt'"
+                  size="sm"
+                  :class="testingConnectionKeyId === row.id ? 'animate-spin' : ''"
+                />
+                <span class="text-xs">
+                  {{ testingConnectionKeyId === row.id ? t('keys.testingConnection') : t('keys.testConnection') }}
+                </span>
+              </button>
               <!-- Toggle Status Button -->
               <button
                 @click="toggleKeyStatus(row)"
@@ -943,6 +959,145 @@
       @close="closeUseKeyModal"
     />
 
+    <!-- Connection Test Result Dialog -->
+    <BaseDialog
+      :show="showConnectionTestModal"
+      :title="t('keys.connectionTestTitle')"
+      width="wide"
+      @close="closeConnectionTestModal"
+    >
+      <div v-if="connectionTestResult" class="space-y-4">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div class="min-w-0 space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span
+                :class="[
+                  'badge',
+                  connectionTestResult.success ? 'badge-success' : 'badge-danger'
+                ]"
+              >
+                {{
+                  connectionTestResult.success
+                    ? t('keys.connectionTestSuccess')
+                    : t('keys.connectionTestFailed')
+                }}
+              </span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">
+                {{ connectionTestResult.key_name }}
+              </span>
+              <span
+                v-if="connectionTestResult.group_name"
+                class="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600 dark:bg-dark-700 dark:text-gray-300"
+              >
+                {{ connectionTestResult.group_name }}
+              </span>
+            </div>
+            <p class="break-words text-sm text-gray-500 dark:text-gray-400">
+              {{ connectionTestResult.message }}
+            </p>
+            <p class="break-all font-mono text-xs text-gray-400 dark:text-dark-400">
+              {{ connectionTestResult.base_url }}
+            </p>
+          </div>
+
+          <div class="grid shrink-0 grid-cols-3 gap-2 text-center">
+            <div class="rounded border border-gray-200 px-3 py-2 dark:border-dark-700">
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                {{ t('keys.connectionModelsVisible') }}
+              </div>
+              <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                {{ connectionTestResult.visible_model_count }}
+              </div>
+            </div>
+            <div class="rounded border border-gray-200 px-3 py-2 dark:border-dark-700">
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                {{ t('keys.connectionModelsTested') }}
+              </div>
+              <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                {{ connectionTestResult.tested_model_count }}
+              </div>
+            </div>
+            <div class="rounded border border-gray-200 px-3 py-2 dark:border-dark-700">
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                {{ t('keys.connectionModelsSkipped') }}
+              </div>
+              <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                {{ connectionTestResult.skipped_model_count }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="connectionTestResult.truncated"
+          class="rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-sm text-yellow-800 dark:border-yellow-900/50 dark:bg-yellow-900/20 dark:text-yellow-300"
+        >
+          {{ t('keys.connectionTruncated') }}
+        </div>
+
+        <div v-if="connectionTestResult.results.length > 0" class="overflow-hidden rounded border border-gray-200 dark:border-dark-700">
+          <div class="max-h-80 overflow-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-dark-700">
+              <thead class="sticky top-0 bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500 dark:bg-dark-800 dark:text-gray-400">
+                <tr>
+                  <th class="px-3 py-2 font-medium">{{ t('keys.connectionModel') }}</th>
+                  <th class="px-3 py-2 font-medium">{{ t('common.status') }}</th>
+                  <th class="px-3 py-2 font-medium">{{ t('keys.connectionLatency') }}</th>
+                  <th class="px-3 py-2 font-medium">{{ t('keys.connectionEndpoint') }}</th>
+                  <th class="px-3 py-2 font-medium">{{ t('keys.connectionMessage') }}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100 dark:divide-dark-700">
+                <tr
+                  v-for="result in connectionTestResult.results"
+                  :key="`${result.provider}:${result.model}:${result.endpoint}`"
+                  class="bg-white dark:bg-dark-900"
+                >
+                  <td class="max-w-[240px] px-3 py-2">
+                    <div class="truncate font-medium text-gray-900 dark:text-white" :title="result.model">
+                      {{ result.model }}
+                    </div>
+                    <div class="text-xs text-gray-400 dark:text-dark-400">
+                      {{ result.provider }}
+                    </div>
+                  </td>
+                  <td class="px-3 py-2">
+                    <span :class="connectionResultBadgeClass(result.status)">
+                      {{ t(`keys.connectionStatus.${result.status}`) }}
+                    </span>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-2 font-mono text-xs text-gray-600 dark:text-gray-300">
+                    {{ result.latency_ms }}ms
+                  </td>
+                  <td class="max-w-[220px] px-3 py-2">
+                    <span class="block truncate font-mono text-xs text-gray-500 dark:text-gray-400" :title="result.endpoint">
+                      {{ result.endpoint }}
+                    </span>
+                  </td>
+                  <td class="max-w-[260px] px-3 py-2 text-gray-500 dark:text-gray-400">
+                    <span class="line-clamp-2" :title="result.message">
+                      {{ result.message || (result.http_status ? `HTTP ${result.http_status}` : '-') }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div v-else class="rounded border border-gray-200 px-3 py-6 text-center text-sm text-gray-500 dark:border-dark-700 dark:text-gray-400">
+          {{ t('keys.connectionNoResults') }}
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="flex justify-end">
+          <button @click="closeConnectionTestModal" class="btn btn-secondary">
+            {{ t('common.close') }}
+          </button>
+        </div>
+      </template>
+    </BaseDialog>
+
     <!-- CCS Client Selection Dialog for Antigravity -->
     <BaseDialog
       :show="showCcsClientSelect"
@@ -1067,6 +1222,10 @@ import { getPersistedPageSize } from '@/composables/usePersistedPageSize'
 
 const { t } = useI18n()
 import { keysAPI, authAPI, usageAPI, userGroupsAPI } from '@/api'
+import type {
+  ApiKeyConnectionStatus,
+  ApiKeyConnectionTestResult
+} from '@/api/keys'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import TablePageLayout from '@/components/layout/TablePageLayout.vue'
 	import DataTable from '@/components/common/DataTable.vue'
@@ -1156,9 +1315,12 @@ const showDeleteDialog = ref(false)
 const showResetQuotaDialog = ref(false)
 const showResetRateLimitDialog = ref(false)
 const showUseKeyModal = ref(false)
+const showConnectionTestModal = ref(false)
 const showCcsClientSelect = ref(false)
 const pendingCcsRow = ref<ApiKey | null>(null)
 const selectedKey = ref<ApiKey | null>(null)
+const testingConnectionKeyId = ref<number | null>(null)
+const connectionTestResult = ref<ApiKeyConnectionTestResult | null>(null)
 const copiedKeyId = ref<number | null>(null)
 const groupSelectorKeyId = ref<number | null>(null)
 const publicSettings = ref<PublicSettings | null>(null)
@@ -1381,6 +1543,30 @@ const closeUseKeyModal = () => {
   showUseKeyModal.value = false
   selectedKey.value = null
 }
+
+const runConnectionTest = async (key: ApiKey) => {
+  testingConnectionKeyId.value = key.id
+  try {
+    connectionTestResult.value = await keysAPI.testConnection(key.id, { max_models: 12 })
+    showConnectionTestModal.value = true
+  } catch (error: any) {
+    appStore.showError(error?.message || t('keys.connectionTestRequestFailed'))
+  } finally {
+    testingConnectionKeyId.value = null
+  }
+}
+
+const closeConnectionTestModal = () => {
+  showConnectionTestModal.value = false
+  connectionTestResult.value = null
+}
+
+const connectionResultBadgeClass = (status: ApiKeyConnectionStatus) => [
+  'badge',
+  status === 'success' ? 'badge-success' :
+    status === 'skipped' ? 'badge-gray' :
+      'badge-danger'
+]
 
 const handlePageChange = (page: number) => {
   pagination.value.page = page

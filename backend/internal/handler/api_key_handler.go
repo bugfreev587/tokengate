@@ -62,6 +62,12 @@ type UpdateAPIKeyRequest struct {
 	ResetRateLimitUsage *bool    `json:"reset_rate_limit_usage"` // 重置限速用量
 }
 
+// TestAPIKeyConnectionRequest represents the optional live connection test payload.
+type TestAPIKeyConnectionRequest struct {
+	MaxModels *int     `json:"max_models"`
+	Models    []string `json:"models"`
+}
+
 // List handles listing user's API keys with pagination
 // GET /api/v1/api-keys
 func (h *APIKeyHandler) List(c *gin.Context) {
@@ -268,6 +274,73 @@ func (h *APIKeyHandler) Delete(c *gin.Context) {
 	}
 
 	response.Success(c, gin.H{"message": "API key deleted successfully"})
+}
+
+// TestConnection runs a small live gateway probe with the selected API key.
+// POST /api/v1/keys/:id/test-connection
+func (h *APIKeyHandler) TestConnection(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+
+	keyID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid key ID")
+		return
+	}
+
+	var req TestAPIKeyConnectionRequest
+	_ = c.ShouldBindJSON(&req)
+	maxModels := 0
+	if req.MaxModels != nil {
+		maxModels = *req.MaxModels
+	}
+
+	result, err := h.apiKeyService.TestConnection(c.Request.Context(), keyID, subject.UserID, service.APIKeyConnectionTestOptions{
+		BaseURL:   resolveAPIKeyConnectionGatewayBaseURL(c),
+		MaxModels: maxModels,
+		Models:    req.Models,
+	})
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, result)
+}
+
+func resolveAPIKeyConnectionGatewayBaseURL(c *gin.Context) string {
+	if c == nil || c.Request == nil {
+		return ""
+	}
+	scheme := "http"
+	if c.Request.TLS != nil {
+		scheme = "https"
+	}
+	if proto := firstForwardedHeaderValue(c.GetHeader("X-Forwarded-Proto")); proto != "" {
+		scheme = strings.ToLower(proto)
+	}
+
+	host := strings.TrimSpace(c.Request.Host)
+	if forwardedHost := firstForwardedHeaderValue(c.GetHeader("X-Forwarded-Host")); forwardedHost != "" {
+		host = forwardedHost
+	}
+	if host == "" {
+		return ""
+	}
+	return scheme + "://" + host
+}
+
+func firstForwardedHeaderValue(raw string) string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return ""
+	}
+	if idx := strings.Index(raw, ","); idx >= 0 {
+		raw = raw[:idx]
+	}
+	return strings.TrimSpace(raw)
 }
 
 // GetAvailableGroups 获取用户可以绑定的分组列表
