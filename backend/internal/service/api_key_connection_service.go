@@ -23,6 +23,8 @@ const (
 	APIKeyConnectionStatusSuccess = "success"
 	APIKeyConnectionStatusError   = "error"
 	APIKeyConnectionStatusSkipped = "skipped"
+
+	chatGPTCodexUnsupportedModelPhrase = "not supported when using codex with a chatgpt account"
 )
 
 // APIKeyConnectionTestOptions configures a live TokenGate gateway probe.
@@ -294,6 +296,11 @@ func probeConnectionTestModel(ctx context.Context, client *http.Client, baseURL,
 	respBody, _ := io.ReadAll(io.LimitReader(resp.Body, apiKeyConnectionBodyLimit))
 	result.HTTPStatus = resp.StatusCode
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		if isChatGPTCodexUnsupportedModelResponse(resp.StatusCode, respBody) {
+			result.Status = APIKeyConnectionStatusSkipped
+			result.Message = connectionTestJSONErrorMessage(respBody)
+			return result
+		}
 		result.Message = connectionTestHTTPMessage(resp.StatusCode, respBody)
 		return result
 	}
@@ -388,6 +395,25 @@ func connectionTestHTTPMessage(status int, body []byte) string {
 		return fmt.Sprintf("HTTP %d", status)
 	}
 	return sanitizeConnectionTestMessage(fmt.Sprintf("HTTP %d: %s", status, snippet))
+}
+
+func isChatGPTCodexUnsupportedModelResponse(status int, body []byte) bool {
+	if status != http.StatusBadRequest {
+		return false
+	}
+	return strings.Contains(strings.ToLower(string(body)), chatGPTCodexUnsupportedModelPhrase)
+}
+
+func connectionTestJSONErrorMessage(body []byte) string {
+	var payload struct {
+		Error struct {
+			Message string `json:"message"`
+		} `json:"error"`
+	}
+	if err := json.Unmarshal(body, &payload); err == nil && strings.TrimSpace(payload.Error.Message) != "" {
+		return sanitizeConnectionTestMessage(payload.Error.Message)
+	}
+	return "Model is not supported when using Codex with a ChatGPT account"
 }
 
 func sanitizeConnectionTestMessage(message string) string {
