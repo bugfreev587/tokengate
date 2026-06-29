@@ -5529,7 +5529,9 @@ func (s *OpenAIGatewayService) resolveOpenAIChannelPricing(ctx context.Context, 
 	}
 	gid := apiKey.Group.ID
 	resolved := s.resolver.Resolve(ctx, PricingInput{Model: billingModel, GroupID: &gid})
-	if resolved.Source == PricingSourceChannel {
+	if resolved.Source == PricingSourceChannel ||
+		(resolved.Source == PricingSourceGlobalOverride &&
+			(resolved.Mode == BillingModePerRequest || resolved.Mode == BillingModeImage)) {
 		return resolved
 	}
 	return nil

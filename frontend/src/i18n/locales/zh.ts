@@ -334,6 +334,7 @@ export default {
     users: '用户管理',
     groups: '分组管理',
     channels: '渠道管理',
+    modelPricing: '模型价格',
     availableChannels: '可用渠道',
     subscriptions: '订阅管理',
     accounts: '账号管理',
@@ -2289,6 +2290,61 @@ export default {
         intervals: '阶梯定价',
         unitPerMillion: '/ 1M token',
         unitPerRequest: '/ 次'
+      }
+    },
+
+    modelPricing: {
+      title: '模型价格',
+      description: '管理全局模型价格覆盖，作为渠道特例之外的默认价目表',
+      searchPlaceholder: '搜索模型或供应商',
+      addOverride: '新增覆盖',
+      editOverride: '编辑覆盖',
+      clear: '清除',
+      clearOverride: '清除覆盖',
+      blankUsesFallback: '价格留空时继续使用 placeholder 中显示的 fallback 值。',
+      failedToLoad: '加载模型价格失败',
+      failedToSave: '保存模型价格覆盖失败',
+      failedToClear: '清除模型价格覆盖失败',
+      saved: '模型价格覆盖已保存',
+      cleared: '模型价格覆盖已清除',
+      modelRequired: '请输入模型名',
+      emptyTitle: '没有找到模型价格',
+      emptyDescription: '换个搜索条件，或为自定义模型新增一个全局覆盖。',
+      columns: {
+        model: '模型',
+        provider: '供应商',
+        source: '来源',
+        mode: '模式',
+        input: '输入',
+        output: '输出',
+        cacheWrite: '缓存写入',
+        cacheRead: '缓存读取',
+        imageOutput: '图片输出',
+        perRequest: '按次'
+      },
+      fields: {
+        model: '模型',
+        provider: '供应商',
+        billingMode: '计费模式',
+        input: '输入',
+        output: '输出',
+        cacheWrite: '缓存写入',
+        cacheRead: '缓存读取',
+        imageOutput: '图片输出',
+        perRequest: '按次 / 图片'
+      },
+      filters: {
+        allProviders: '全部供应商',
+        allSources: '全部来源',
+        allModes: '全部模式'
+      },
+      sources: {
+        globalOverride: '全局覆盖',
+        fallback: 'Fallback'
+      },
+      modes: {
+        perRequest: '按次',
+        image: '图片'
       }
     },
 

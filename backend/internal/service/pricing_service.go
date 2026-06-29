@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -72,6 +73,11 @@ type LiteLLMModelPricing struct {
 	SupportsPromptCaching               bool    `json:"supports_prompt_caching"`
 	OutputCostPerImage                  float64 `json:"output_cost_per_image"`       // 图片生成模型每张图片价格
 	OutputCostPerImageToken             float64 `json:"output_cost_per_image_token"` // 图片输出 token 价格
+}
+
+type LiteLLMModelPricingEntry struct {
+	Model   string
+	Pricing LiteLLMModelPricing
 }
 
 // PricingRemoteClient 远程价格数据获取接口
@@ -574,6 +580,29 @@ func (s *PricingService) GetModelPricing(modelName string) *LiteLLMModelPricing 
 	}
 
 	return nil
+}
+
+func (s *PricingService) ListModelPricing() []LiteLLMModelPricingEntry {
+	if s == nil {
+		return nil
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	result := make([]LiteLLMModelPricingEntry, 0, len(s.pricingData))
+	for model, pricing := range s.pricingData {
+		if pricing == nil {
+			continue
+		}
+		result = append(result, LiteLLMModelPricingEntry{
+			Model:   model,
+			Pricing: *pricing,
+		})
+	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].Model < result[j].Model
+	})
+	return result
 }
 
 func (s *PricingService) buildModelLookupCandidates(modelLower string) []string {

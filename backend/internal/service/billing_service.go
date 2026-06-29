@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
@@ -57,6 +58,15 @@ type ModelPricing struct {
 	LongContextInputMultiplier     float64 // 长上下文整次会话输入倍率
 	LongContextOutputMultiplier    float64 // 长上下文整次会话输出倍率
 	ImageOutputPricePerToken       float64 // 图片输出 token 价格 (USD)
+}
+
+type KnownModelPricing struct {
+	Model              string
+	Provider           string
+	Mode               string
+	Source             string
+	Pricing            ModelPricing
+	OutputCostPerImage float64
 }
 
 const (
@@ -327,28 +337,7 @@ func (s *BillingService) GetModelPricing(model string) (*ModelPricing, error) {
 	if s.pricingService != nil {
 		litellmPricing := s.pricingService.GetModelPricing(model)
 		if litellmPricing != nil {
-			// 启用 5m/1h 分类计费的条件：
-			// 1. 存在 1h 价格
-			// 2. 1h 价格 > 5m 价格（防止 LiteLLM 数据错误导致少收费）
-			price5m := litellmPricing.CacheCreationInputTokenCost
-			price1h := litellmPricing.CacheCreationInputTokenCostAbove1hr
-			enableBreakdown := price1h > 0 && price1h > price5m
-			return s.applyModelSpecificPricingPolicy(model, &ModelPricing{
-				InputPricePerToken:             litellmPricing.InputCostPerToken,
-				InputPricePerTokenPriority:     litellmPricing.InputCostPerTokenPriority,
-				OutputPricePerToken:            litellmPricing.OutputCostPerToken,
-				OutputPricePerTokenPriority:    litellmPricing.OutputCostPerTokenPriority,
-				CacheCreationPricePerToken:     litellmPricing.CacheCreationInputTokenCost,
-				CacheReadPricePerToken:         litellmPricing.CacheReadInputTokenCost,
-				CacheReadPricePerTokenPriority: litellmPricing.CacheReadInputTokenCostPriority,
-				CacheCreation5mPrice:           price5m,
-				CacheCreation1hPrice:           price1h,
-				SupportsCacheBreakdown:         enableBreakdown,
-				LongContextInputThreshold:      litellmPricing.LongContextInputTokenThreshold,
-				LongContextInputMultiplier:     litellmPricing.LongContextInputCostMultiplier,
-				LongContextOutputMultiplier:    litellmPricing.LongContextOutputCostMultiplier,
-				ImageOutputPricePerToken:       litellmPricing.OutputCostPerImageToken,
-			}), nil
+			return s.applyModelSpecificPricingPolicy(model, modelPricingFromLiteLLM(litellmPricing)), nil
 		}
 	}
 
@@ -360,6 +349,100 @@ func (s *BillingService) GetModelPricing(model string) (*ModelPricing, error) {
 	}
 
 	return nil, fmt.Errorf("%w for model: %s", ErrModelPricingUnavailable, model)
+}
+
+func (s *BillingService) ListKnownModelPricing() []KnownModelPricing {
+	byModel := make(map[string]KnownModelPricing)
+
+	if s.pricingService != nil {
+		for _, entry := range s.pricingService.ListModelPricing() {
+			pricing := entry.Pricing
+			modelPricing := s.applyModelSpecificPricingPolicy(entry.Model, modelPricingFromLiteLLM(&pricing))
+			if modelPricing == nil {
+				continue
+			}
+			byModel[strings.ToLower(entry.Model)] = KnownModelPricing{
+				Model:              entry.Model,
+				Provider:           pricing.LiteLLMProvider,
+				Mode:               pricing.Mode,
+				Source:             PricingSourceLiteLLM,
+				Pricing:            *modelPricing,
+				OutputCostPerImage: pricing.OutputCostPerImage,
+			}
+		}
+	}
+
+	for model, pricing := range s.fallbackPrices {
+		if pricing == nil {
+			continue
+		}
+		key := strings.ToLower(model)
+		if _, exists := byModel[key]; exists {
+			continue
+		}
+		cp := *pricing
+		byModel[key] = KnownModelPricing{
+			Model:    model,
+			Provider: inferProviderFromModel(model),
+			Mode:     "chat",
+			Source:   PricingSourceFallback,
+			Pricing:  cp,
+		}
+	}
+
+	result := make([]KnownModelPricing, 0, len(byModel))
+	for _, item := range byModel {
+		result = append(result, item)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].Provider == result[j].Provider {
+			return result[i].Model < result[j].Model
+		}
+		return result[i].Provider < result[j].Provider
+	})
+	return result
+}
+
+func modelPricingFromLiteLLM(litellmPricing *LiteLLMModelPricing) *ModelPricing {
+	if litellmPricing == nil {
+		return nil
+	}
+	// 启用 5m/1h 分类计费的条件：
+	// 1. 存在 1h 价格
+	// 2. 1h 价格 > 5m 价格（防止 LiteLLM 数据错误导致少收费）
+	price5m := litellmPricing.CacheCreationInputTokenCost
+	price1h := litellmPricing.CacheCreationInputTokenCostAbove1hr
+	enableBreakdown := price1h > 0 && price1h > price5m
+	return &ModelPricing{
+		InputPricePerToken:             litellmPricing.InputCostPerToken,
+		InputPricePerTokenPriority:     litellmPricing.InputCostPerTokenPriority,
+		OutputPricePerToken:            litellmPricing.OutputCostPerToken,
+		OutputPricePerTokenPriority:    litellmPricing.OutputCostPerTokenPriority,
+		CacheCreationPricePerToken:     litellmPricing.CacheCreationInputTokenCost,
+		CacheReadPricePerToken:         litellmPricing.CacheReadInputTokenCost,
+		CacheReadPricePerTokenPriority: litellmPricing.CacheReadInputTokenCostPriority,
+		CacheCreation5mPrice:           price5m,
+		CacheCreation1hPrice:           price1h,
+		SupportsCacheBreakdown:         enableBreakdown,
+		LongContextInputThreshold:      litellmPricing.LongContextInputTokenThreshold,
+		LongContextInputMultiplier:     litellmPricing.LongContextInputCostMultiplier,
+		LongContextOutputMultiplier:    litellmPricing.LongContextOutputCostMultiplier,
+		ImageOutputPricePerToken:       litellmPricing.OutputCostPerImageToken,
+	}
+}
+
+func inferProviderFromModel(model string) string {
+	model = strings.ToLower(model)
+	switch {
+	case strings.HasPrefix(model, "claude"):
+		return "anthropic"
+	case strings.HasPrefix(model, "gpt-") || strings.HasPrefix(model, "o1") || strings.HasPrefix(model, "o3"):
+		return "openai"
+	case strings.HasPrefix(model, "gemini"):
+		return "gemini"
+	default:
+		return ""
+	}
 }
 
 // GetModelPricingWithChannel 获取模型定价，渠道配置的价格覆盖默认值

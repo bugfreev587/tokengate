@@ -334,6 +334,7 @@ export default {
     users: 'Users',
     groups: 'Groups',
     channels: 'Channels',
+    modelPricing: 'Model Pricing',
     availableChannels: 'Available Channels',
     subscriptions: 'Subscriptions',
     accounts: 'Accounts',
@@ -2214,6 +2215,61 @@ export default {
         intervals: 'Tiered Pricing',
         unitPerMillion: '/ 1M tokens',
         unitPerRequest: '/ request'
+      }
+    },
+
+    modelPricing: {
+      title: 'Model Pricing',
+      description: 'Manage global model pricing overrides used as the default rate card outside channel exceptions',
+      searchPlaceholder: 'Search model or provider',
+      addOverride: 'Add Override',
+      editOverride: 'Edit Override',
+      clear: 'Clear',
+      clearOverride: 'Clear Override',
+      blankUsesFallback: 'Leave a price blank to keep using the fallback value shown as placeholder.',
+      failedToLoad: 'Failed to load model pricing',
+      failedToSave: 'Failed to save model pricing override',
+      failedToClear: 'Failed to clear model pricing override',
+      saved: 'Model pricing override saved',
+      cleared: 'Model pricing override cleared',
+      modelRequired: 'Model is required',
+      emptyTitle: 'No model prices found',
+      emptyDescription: 'Try another search or add a global override for a custom model.',
+      columns: {
+        model: 'Model',
+        provider: 'Provider',
+        source: 'Source',
+        mode: 'Mode',
+        input: 'Input',
+        output: 'Output',
+        cacheWrite: 'Cache W',
+        cacheRead: 'Cache R',
+        imageOutput: 'Image Out',
+        perRequest: 'Per Req'
+      },
+      fields: {
+        model: 'Model',
+        provider: 'Provider',
+        billingMode: 'Billing Mode',
+        input: 'Input',
+        output: 'Output',
+        cacheWrite: 'Cache Write',
+        cacheRead: 'Cache Read',
+        imageOutput: 'Image Output',
+        perRequest: 'Per Request / Image'
+      },
+      filters: {
+        allProviders: 'All Providers',
+        allSources: 'All Sources',
+        allModes: 'All Modes'
+      },
+      sources: {
+        globalOverride: 'Global Override',
+        fallback: 'Fallback'
+      },
+      modes: {
+        perRequest: 'Per Request',
+        image: 'Image'
       }
     },
 

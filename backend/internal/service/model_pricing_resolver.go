@@ -7,9 +7,10 @@ import (
 
 // PricingSource 定价来源标识
 const (
-	PricingSourceChannel  = "channel"
-	PricingSourceLiteLLM  = "litellm"
-	PricingSourceFallback = "fallback"
+	PricingSourceChannel        = "channel"
+	PricingSourceGlobalOverride = "global_override"
+	PricingSourceLiteLLM        = "litellm"
+	PricingSourceFallback       = "fallback"
 )
 
 // ResolvedPricing 统一定价解析结果
@@ -39,8 +40,9 @@ type ResolvedPricing struct {
 // ModelPricingResolver 统一模型定价解析器。
 // 解析链：Channel → LiteLLM → Fallback。
 type ModelPricingResolver struct {
-	channelService *ChannelService
-	billingService *BillingService
+	channelService     *ChannelService
+	billingService     *BillingService
+	globalOverrideRepo GlobalModelPricingOverrideRepository
 }
 
 // NewModelPricingResolver 创建定价解析器实例
@@ -48,6 +50,18 @@ func NewModelPricingResolver(channelService *ChannelService, billingService *Bil
 	return &ModelPricingResolver{
 		channelService: channelService,
 		billingService: billingService,
+	}
+}
+
+func NewModelPricingResolverWithGlobalOverrides(
+	channelService *ChannelService,
+	billingService *BillingService,
+	globalOverrideRepo GlobalModelPricingOverrideRepository,
+) *ModelPricingResolver {
+	return &ModelPricingResolver{
+		channelService:     channelService,
+		billingService:     billingService,
+		globalOverrideRepo: globalOverrideRepo,
 	}
 }
 
@@ -80,6 +94,22 @@ func (r *ModelPricingResolver) Resolve(ctx context.Context, input PricingInput) 
 		}
 	}
 
+	globalOverride := r.getGlobalOverride(ctx, input.Model)
+	if chPricing == nil && globalOverride != nil {
+		mode := globalOverride.BillingMode
+		if mode == "" {
+			mode = BillingModeToken
+		}
+		if mode == BillingModePerRequest || mode == BillingModeImage {
+			resolved := &ResolvedPricing{
+				Mode:   mode,
+				Source: PricingSourceGlobalOverride,
+			}
+			r.applyRequestTierOverrides(globalOverride.ToChannelPricing(), resolved)
+			return resolved
+		}
+	}
+
 	// 1. 获取基础定价
 	basePricing, source := r.resolveBasePricing(input.Model)
 
@@ -90,15 +120,32 @@ func (r *ModelPricingResolver) Resolve(ctx context.Context, input PricingInput) 
 		SupportsCacheBreakdown: basePricing != nil && basePricing.SupportsCacheBreakdown,
 	}
 
-	// 2. 如果有 GroupID，尝试渠道覆盖
+	// 2. 应用全局覆盖，再应用渠道覆盖。渠道字段允许局部覆盖，因此其 nil 字段会继续继承全局或 fallback。
+	if globalOverride != nil {
+		resolved.Source = PricingSourceGlobalOverride
+		r.applyTokenOverrides(globalOverride.ToChannelPricing(), resolved)
+	}
+
 	if chPricing != nil {
 		resolved.Source = PricingSourceChannel
 		r.applyTokenOverrides(chPricing, resolved)
-	} else if input.GroupID != nil {
+	} else if input.GroupID != nil && r.channelService != nil {
 		r.applyChannelOverrides(ctx, *input.GroupID, input.Model, resolved)
 	}
 
 	return resolved
+}
+
+func (r *ModelPricingResolver) getGlobalOverride(ctx context.Context, model string) *GlobalModelPricingOverride {
+	if r == nil || r.globalOverrideRepo == nil || model == "" {
+		return nil
+	}
+	override, err := r.globalOverrideRepo.GetByModel(ctx, model)
+	if err != nil {
+		slog.Debug("failed to get global model pricing override", "model", model, "error", err)
+		return nil
+	}
+	return override
 }
 
 // resolveBasePricing 从 LiteLLM 或 Fallback 获取基础定价
