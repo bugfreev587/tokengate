@@ -20,6 +20,16 @@ assert_contains() {
   fi
 }
 
+assert_not_contains() {
+  local haystack="$1"
+  local needle="$2"
+  local label="$3"
+  if [[ "$haystack" == *"$needle"* ]]; then
+    printf 'FAIL: %s\nExpected not to contain: %s\nActual: %s\n' "$label" "$needle" "$haystack" >&2
+    exit 1
+  fi
+}
+
 assert_before() {
   local haystack="$1"
   local first="$2"
@@ -66,8 +76,26 @@ write_statusline_cache() {
 JSON
 }
 
+write_usage_cache() {
+  mkdir -p "$TMP/usage-cache"
+  cat > "$TMP/usage-cache/tokengate-statusline-cache.json" <<'JSON'
+{
+  "mode": "unrestricted",
+  "usage": {
+    "today": { "cost": 0.50 },
+    "total": { "cost": 9.99 }
+  },
+  "model_stats": [
+    { "model": "claude-opus-4-8", "cost": 1.25 },
+    { "model": "claude-sonnet-4-6", "cost": 2.00 }
+  ]
+}
+JSON
+}
+
 write_input
 write_statusline_cache
+write_usage_cache
 
 default_output="$(
   TOKENGATE_STATUSLINE_CACHE_DIR="$TMP/cache" \
@@ -87,6 +115,16 @@ assert_contains "$default_output" "\$38/\$100 38%" "default mode includes month 
 assert_contains "$default_output" "day" "default mode includes day budget"
 assert_contains "$default_output" "\$4/\$20 20%" "default mode includes day budget amount"
 
+usage_fallback_output="$(
+  TOKENGATE_STATUSLINE_CACHE_DIR="$TMP/usage-cache" \
+  TOKENGATE_API_KEY="tg_test" \
+  ANTHROPIC_BASE_URL="https://api.tokengate.to" \
+  COLUMNS=240 \
+  sh "$SCRIPT" < "$TMP/input.json" | strip_ansi
+)"
+assert_contains "$usage_fallback_output" "\$0.50 today" "usage fallback includes today cost"
+assert_contains "$usage_fallback_output" "\$3.25 30d" "usage fallback sums model stats as 30d cost"
+
 env_claude_output="$(
   TOKENGATE_STATUSLINE_MODE="claude" \
   TOKENGATE_STATUSLINE_CACHE_DIR="$TMP/cache" \
@@ -97,6 +135,8 @@ env_claude_output="$(
 )"
 assert_contains "$env_claude_output" "21% used" "env mode selects Claude renderer"
 assert_contains "$env_claude_output" "79% remain" "env mode keeps Claude remain segment"
+assert_not_contains "$env_claude_output" "\$1.28 today" "env Claude mode omits TokenGate today cost"
+assert_not_contains "$env_claude_output" "\$12.34 30d" "env Claude mode omits TokenGate 30d cost"
 
 arg_claude_output="$(
   TOKENGATE_STATUSLINE_MODE="tokengate" \
@@ -107,6 +147,8 @@ arg_claude_output="$(
   sh "$SCRIPT" --mode claude < "$TMP/input.json" | strip_ansi
 )"
 assert_contains "$arg_claude_output" "21% used" "argument mode overrides env mode"
+assert_not_contains "$arg_claude_output" "\$1.28 today" "argument Claude mode omits TokenGate today cost"
+assert_not_contains "$arg_claude_output" "\$12.34 30d" "argument Claude mode omits TokenGate 30d cost"
 
 unavailable_output="$(
   TOKENGATE_STATUSLINE_CACHE_DIR="$TMP/empty-cache" \

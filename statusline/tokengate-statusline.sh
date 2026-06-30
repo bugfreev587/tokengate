@@ -350,6 +350,16 @@ extract_last_30d_cost() {
         .usage.thirty_days.actual_cost //
         .usage["30d"].cost //
         .usage["30d"].actual_cost //
+        ([
+            .model_stats[]? |
+            (.cost // .actual_cost // .account_cost // 0) |
+            tonumber
+        ] | add) //
+        ([
+            .usage.model_stats[]? |
+            (.cost // .actual_cost // .account_cost // 0) |
+            tonumber
+        ] | add) //
         empty
     ' 2>/dev/null
 }
@@ -545,14 +555,6 @@ render_claude_mode() {
 
     if [ "$billing_mode" = "MONTHLY_SUBSCRIPTION" ]; then
         fetch_oauth_usage
-    elif [ -n "$tg_key" ] && [ -n "$tg_base" ]; then
-        local data
-        data=$(fetch_tokengate_data)
-        if [ -n "$data" ]; then
-            build_tokengate_parts "$data"
-        elif [ -n "$tg_key" ]; then
-            tokengate_parts+=("${dim}TokenGate: unavailable${reset}")
-        fi
     fi
 
     local out s part
