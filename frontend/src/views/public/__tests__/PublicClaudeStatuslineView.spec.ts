@@ -29,6 +29,7 @@ describe('PublicClaudeStatuslineView', () => {
     expect(text).toContain('--mode tokengate')
     expect(text).toContain('--mode claude')
     expect(text).toContain('TokenGate unavailable')
+    expect(text).toContain('$12.34 30d')
     expect(text).toContain('https://api.tokengate.to')
     expect(text).toContain('statusLine')
     expect(text).toContain('tokengate')

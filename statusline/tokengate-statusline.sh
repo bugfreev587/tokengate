@@ -332,24 +332,54 @@ append_usage_rate_limit() {
     tokengate_parts+=("${white}${label}${reset} ${color}${bar}${reset} ${orange}$(format_money "$used")/$(format_money "$limit") ${pct}%${reset}")
 }
 
+extract_last_30d_cost() {
+    local data="$1"
+    echo "$data" | jq -r '
+        .cost.last_30_days //
+        .cost.last30_days //
+        .cost.last_30d //
+        .cost.thirty_days //
+        .cost["30d"] //
+        .usage.last_30_days.cost //
+        .usage.last_30_days.actual_cost //
+        .usage.last30_days.cost //
+        .usage.last30_days.actual_cost //
+        .usage.last_30d.cost //
+        .usage.last_30d.actual_cost //
+        .usage.thirty_days.cost //
+        .usage.thirty_days.actual_cost //
+        .usage["30d"].cost //
+        .usage["30d"].actual_cost //
+        empty
+    ' 2>/dev/null
+}
+
 build_tokengate_parts() {
     local data="$1"
     tokengate_parts=()
 
     if echo "$data" | jq -e '.ok == true' >/dev/null 2>&1; then
-        local today
+        local today last_30d
         today=$(echo "$data" | jq -r '.cost.today // empty')
         if [ -n "$today" ] && [ "$today" != "null" ]; then
             tokengate_parts+=("${magenta}$(format_money "$today") today${reset}")
+        fi
+        last_30d=$(extract_last_30d_cost "$data")
+        if [ -n "$last_30d" ] && [ "$last_30d" != "null" ]; then
+            tokengate_parts+=("${magenta}$(format_money "$last_30d") 30d${reset}")
         fi
         append_statusline_budget "$data" "monthly" "month"
         append_statusline_budget "$data" "weekly" "week"
         append_statusline_budget "$data" "daily" "day"
     else
-        local today
+        local today last_30d
         today=$(echo "$data" | jq -r '.usage.today.cost // .usage.today.actual_cost // empty' 2>/dev/null)
         if [ -n "$today" ] && [ "$today" != "null" ]; then
             tokengate_parts+=("${magenta}$(format_money "$today") today${reset}")
+        fi
+        last_30d=$(extract_last_30d_cost "$data")
+        if [ -n "$last_30d" ] && [ "$last_30d" != "null" ]; then
+            tokengate_parts+=("${magenta}$(format_money "$last_30d") 30d${reset}")
         fi
 
         local quota_limit quota_used

@@ -192,7 +192,8 @@ Preferred response shape:
   "ok": true,
   "billing_mode": "API_USAGE",
   "cost": {
-    "today": "1.28"
+    "today": "1.28",
+    "last_30_days": "12.34"
   },
   "budgets": {
     "monthly": {
@@ -214,6 +215,7 @@ Current TokenGate routing already exposes `GET /v1/usage`, which can provide API
 The fallback mapping from `/v1/usage` is:
 
 - `usage.today.cost` or `usage.today.actual_cost` maps to today's spend.
+- `cost.last_30_days` or `usage.last_30_days.cost` maps to the rolling 30-day spend segment.
 - `quota.limit` and `quota.used` map to a total budget-like segment when available.
 - `rate_limits[]` can map to day/week/hour quota segments if present.
 
@@ -229,8 +231,9 @@ TokenGate mode order:
 2. Project directory and git branch.
 3. Context usage as `ctx used/total percent`.
 4. Today's spend.
-5. Budget segments sorted by product value: month, week, day, total, then other windows.
-6. Degraded TokenGate status if no remote data is available.
+5. Rolling 30-day spend as `$xxx 30d`.
+6. Budget segments sorted by product value: month, week, day, total, then other windows.
+7. Degraded TokenGate status if no remote data is available.
 
 Colors:
 

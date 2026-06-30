@@ -20,6 +20,18 @@ assert_contains() {
   fi
 }
 
+assert_before() {
+  local haystack="$1"
+  local first="$2"
+  local second="$3"
+  local label="$4"
+  local rest="${haystack#*"$first"}"
+  if [[ "$rest" == "$haystack" || "$rest" != *"$second"* ]]; then
+    printf 'FAIL: %s\nExpected "%s" before "%s"\nActual: %s\n' "$label" "$first" "$second" "$haystack" >&2
+    exit 1
+  fi
+}
+
 write_input() {
   cat > "$TMP/input.json" <<JSON
 {
@@ -45,7 +57,7 @@ write_statusline_cache() {
 {
   "ok": true,
   "billing_mode": "API_USAGE",
-  "cost": { "today": "1.28" },
+  "cost": { "today": "1.28", "last_30_days": "12.34" },
   "budgets": {
     "monthly": { "used": "38", "limit": "100", "percent": 38 },
     "daily": { "used": "4", "limit": "20", "percent": 20 }
@@ -68,6 +80,8 @@ assert_contains "$default_output" "Claude Sonnet" "default mode includes model"
 assert_contains "$default_output" "token-gate@" "default mode includes project and branch"
 assert_contains "$default_output" "ctx 42k/200k 21%" "default mode includes context"
 assert_contains "$default_output" "\$1.28 today" "default mode includes today cost"
+assert_contains "$default_output" "\$12.34 30d" "default mode includes last 30 days cost"
+assert_before "$default_output" "\$1.28 today" "\$12.34 30d" "30d cost appears after today cost"
 assert_contains "$default_output" "month" "default mode includes month budget"
 assert_contains "$default_output" "\$38/\$100 38%" "default mode includes month budget amount"
 assert_contains "$default_output" "day" "default mode includes day budget"

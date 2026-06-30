@@ -257,7 +257,7 @@ const settingsModeEnv = `{
   }
 }`
 
-const tokengateExample = `Claude Sonnet | token-gate@main | ctx 42k/200k 21% | $1.28 today | month ●●●○○○ $38/$100 38% | day ●○○○○○ $4/$20 20%
+const tokengateExample = `Claude Sonnet | token-gate@main | ctx 42k/200k 21% | $1.28 today | $12.34 30d | month ●●●○○○ $38/$100 38% | day ●○○○○○ $4/$20 20%
 Claude Sonnet | token-gate@main | ctx 42k/200k 21% | TokenGate unavailable`
 
 const claudeModeCommand = `{
