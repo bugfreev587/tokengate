@@ -69,6 +69,13 @@
         <p class="mt-4 text-sm leading-7 text-gray-600">
           Claude Code reads Anthropic-compatible environment variables. Use the TokenGate backend root as <code class="tg-inline-code">ANTHROPIC_BASE_URL</code>; do not append <code class="tg-inline-code">/v1</code>.
         </p>
+        <p class="mt-3 text-sm leading-7 text-gray-600">
+          After routing Claude Code through TokenGate, add the
+          <RouterLink to="/docs/cli/statusline" class="font-semibold text-gray-950 underline decoration-gray-300 underline-offset-4 hover:decoration-gray-950">
+            Claude Code statusline
+          </RouterLink>
+          to show live spend and budget progress in the terminal.
+        </p>
 
         <CodePanel
           id="claude-shell"

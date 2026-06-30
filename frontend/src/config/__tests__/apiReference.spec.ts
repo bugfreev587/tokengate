@@ -12,5 +12,9 @@ describe('tokenGateApiSidebarGroups', () => {
       title: 'CLI setup',
       href: '/docs/cli',
     })
+    expect(guideItems).toContainEqual({
+      title: 'Claude Code statusline',
+      href: '/docs/cli/statusline',
+    })
   })
 })

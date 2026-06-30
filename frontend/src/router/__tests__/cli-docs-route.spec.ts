@@ -52,4 +52,13 @@ describe('router CLI docs route', () => {
     expect(route?.meta.requiresAuth).toBe(false)
     expect(route?.meta.title).toBe('CLI Setup')
   })
+
+  it('registers the public Claude statusline docs page', async () => {
+    const { default: router } = await import('@/router')
+    const route = router.getRoutes().find((record) => record.name === 'ClaudeStatuslineDocs')
+
+    expect(route?.path).toBe('/docs/cli/statusline')
+    expect(route?.meta.requiresAuth).toBe(false)
+    expect(route?.meta.title).toBe('Claude Code Statusline')
+  })
 })

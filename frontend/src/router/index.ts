@@ -163,6 +163,15 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/docs/cli/statusline',
+    name: 'ClaudeStatuslineDocs',
+    component: () => import('@/views/public/PublicClaudeStatuslineView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Claude Code Statusline'
+    }
+  },
+  {
     path: '/pricing',
     name: 'PublicPricing',
     component: () => import('@/views/public/PublicPricingView.vue'),

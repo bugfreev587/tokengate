@@ -40,11 +40,16 @@ describe('PublicCliDocsView', () => {
     expect(text).toContain('https://api.tokengate.to')
     expect(text).toContain('https://api.tokengate.to/v1')
     expect(text).toContain('wire_api = "responses"')
+    expect(text).toContain('Claude Code statusline')
   })
 
   it('keeps docs code text readable when selected', () => {
     expect(viewSource).toContain('.tg-code-line::selection')
     expect(viewSource).toContain('.tg-inline-code::selection')
     expect(viewSource).toContain('color: #111827;')
+  })
+
+  it('links to the Claude Code statusline guide', () => {
+    expect(viewSource).toContain('/docs/cli/statusline')
   })
 })

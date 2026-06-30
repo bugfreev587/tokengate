@@ -88,6 +88,48 @@ Claude Code configuration:
 }
 ```
 
+Mode resolution order:
+
+1. `--mode <tokengate|claude>` or `--mode=<tokengate|claude>` in the Claude Code status line command.
+2. `TOKENGATE_STATUSLINE_MODE` from Claude Code `settings.json` `env` or the user's shell environment.
+3. Default `tokengate`.
+
+Users can choose TokenGate mode directly in the Claude Code status line command:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "sh ~/.claude/tokengate-statusline.sh --mode tokengate"
+  }
+}
+```
+
+Users can choose Claude compatibility mode the same way:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "sh ~/.claude/tokengate-statusline.sh --mode claude"
+  }
+}
+```
+
+Alternatively, users can set the mode through Claude Code settings env:
+
+```json
+{
+  "env": {
+    "TOKENGATE_STATUSLINE_MODE": "tokengate"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "sh ~/.claude/tokengate-statusline.sh"
+  }
+}
+```
+
 TokenGate mode uses the same environment users already configure for Claude Code routing:
 
 - `ANTHROPIC_BASE_URL`: TokenGate gateway root, such as `https://api.tokengate.to`.

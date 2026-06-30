@@ -1109,6 +1109,7 @@ export const tokenGateApiSidebarGroups: ApiSidebarGroup[] = [
     title: 'Guides',
     items: [
       { title: 'CLI setup', href: '/docs/cli' },
+      { title: 'Claude Code statusline', href: '/docs/cli/statusline' },
     ],
   },
   {
