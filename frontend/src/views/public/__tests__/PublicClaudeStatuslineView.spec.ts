@@ -1,7 +1,9 @@
 import { mount, RouterLinkStub } from '@vue/test-utils'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import PublicClaudeStatuslineView from '../PublicClaudeStatuslineView.vue'
+
+const routerReplace = vi.hoisted(() => vi.fn())
 
 vi.mock('@/stores/app', () => ({
   useAppStore: () => ({
@@ -12,7 +14,18 @@ vi.mock('@/stores/app', () => ({
   }),
 }))
 
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    replace: routerReplace,
+  }),
+}))
+
 describe('PublicClaudeStatuslineView', () => {
+  beforeEach(() => {
+    routerReplace.mockReset()
+    window.history.replaceState(null, '', '/docs/cli/statusline')
+  })
+
   it('documents TokenGate Claude Code statusline setup and mode selection', () => {
     const wrapper = mount(PublicClaudeStatuslineView, {
       global: {
@@ -34,5 +47,35 @@ describe('PublicClaudeStatuslineView', () => {
     expect(text).toContain('statusLine')
     expect(text).toContain('tokengate')
     expect(text).toContain('claude')
+  })
+
+  it('links API sidebar entries back to the API reference page', () => {
+    const wrapper = mount(PublicClaudeStatuslineView, {
+      global: {
+        stubs: {
+          RouterLink: RouterLinkStub,
+        },
+      },
+    })
+
+    const imageGenerationLink = wrapper
+      .findAllComponents(RouterLinkStub)
+      .find((link) => link.text().includes('Image generation'))
+
+    expect(imageGenerationLink?.props('to')).toBe('/docs#images-api')
+  })
+
+  it('redirects stale API hashes on the statusline route to the API reference page', () => {
+    window.history.replaceState(null, '', '/docs/cli/statusline#images-api')
+
+    mount(PublicClaudeStatuslineView, {
+      global: {
+        stubs: {
+          RouterLink: RouterLinkStub,
+        },
+      },
+    })
+
+    expect(routerReplace).toHaveBeenCalledWith('/docs#images-api')
   })
 })

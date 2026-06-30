@@ -164,6 +164,7 @@
 
 <script setup lang="ts">
 import { computed, defineComponent, h, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import DocsLayout from '@/components/docs/api/DocsLayout.vue'
 import DocsSidebar from '@/components/docs/api/DocsSidebar.vue'
 import { tokenGateApiSidebarGroups, type ApiSidebarGroup } from '@/config/apiReference'
@@ -203,6 +204,7 @@ const CodePanel = defineComponent({
 })
 
 const appStore = useAppStore()
+const router = useRouter()
 const mobileSidebarOpen = ref(false)
 const copiedSnippetId = ref<string>()
 let copyTimer: number | undefined
@@ -214,10 +216,17 @@ const sidebarGroups = computed<ApiSidebarGroup[]>(() => tokenGateApiSidebarGroup
   ...group,
   items: group.items.map((item) => ({
     ...item,
-    href: item.href.startsWith('#') ? `/docs/cli/statusline${item.href}` : item.href,
+    href: item.href.startsWith('#') ? `/docs${item.href}` : item.href,
     active: item.href === '/docs/cli/statusline',
   })),
 })))
+
+const apiReferenceHashes = new Set(
+  tokenGateApiSidebarGroups
+    .flatMap((group) => group.items)
+    .map((item) => item.href)
+    .filter((href) => href.startsWith('#')),
+)
 
 const installScript = `mkdir -p ~/.claude
 curl -o ~/.claude/tokengate-statusline.sh \\
@@ -319,6 +328,13 @@ function selectSidebarItem(href: string) {
   document.querySelector(href)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
+function redirectApiHashToReference() {
+  const hash = window.location.hash
+  if (apiReferenceHashes.has(hash)) {
+    router.replace(`/docs${hash}`)
+  }
+}
+
 async function copySnippet(id: string, code: string) {
   if (!navigator.clipboard) {
     return
@@ -337,6 +353,8 @@ async function copySnippet(id: string, code: string) {
 }
 
 onMounted(() => {
+  redirectApiHashToReference()
+
   if (!appStore.cachedPublicSettings) {
     appStore.fetchPublicSettings().catch(() => {})
   }
