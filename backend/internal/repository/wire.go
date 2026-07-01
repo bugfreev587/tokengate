@@ -62,12 +62,16 @@ func ProvideSchedulerCache(rdb *redis.Client, cfg *config.Config) service.Schedu
 	return newSchedulerCacheWithChunkSizes(rdb, mgetChunkSize, writeChunkSize)
 }
 
+func ProvideAccountRepository(client *ent.Client, db *sql.DB, schedulerCache service.SchedulerCache, encryptor service.SecretEncryptor) service.AccountRepository {
+	return NewAccountRepository(client, db, schedulerCache, encryptor)
+}
+
 // ProviderSet is the Wire provider set for all repositories
 var ProviderSet = wire.NewSet(
 	NewUserRepository,
 	NewAPIKeyRepository,
 	NewGroupRepository,
-	NewAccountRepository,
+	ProvideAccountRepository,
 	NewScheduledTestPlanRepository,   // 定时测试计划仓储
 	NewScheduledTestResultRepository, // 定时测试结果仓储
 	NewProxyRepository,
