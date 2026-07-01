@@ -32,6 +32,16 @@ func RegisterUserRoutes(
 			user.DELETE("/account-bindings/:provider", h.User.UnbindIdentity)
 			user.POST("/auth-identities/bind/start", h.User.StartIdentityBinding)
 
+			// 用户自带 AI 账号（BYO connected accounts）
+			accounts := user.Group("/accounts")
+			{
+				accounts.GET("", h.ConnectedAccount.List)
+				accounts.POST("/openai/auth-url", h.ConnectedAccount.GenerateOpenAIAuthURL)
+				accounts.POST("/openai/exchange-code", h.ConnectedAccount.ExchangeOpenAICode)
+				accounts.POST("/:id/refresh", h.ConnectedAccount.RefreshOpenAI)
+				accounts.DELETE("/:id", h.ConnectedAccount.Delete)
+			}
+
 			// 通知邮箱管理
 			notifyEmail := user.Group("/notify-email")
 			{

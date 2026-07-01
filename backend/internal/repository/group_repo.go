@@ -30,6 +30,10 @@ type groupRepository struct {
 }
 
 func NewGroupRepository(client *dbent.Client, sqlDB *sql.DB) service.GroupRepository {
+	return NewGroupRepositoryConcrete(client, sqlDB)
+}
+
+func NewGroupRepositoryConcrete(client *dbent.Client, sqlDB *sql.DB) *groupRepository {
 	return newGroupRepositoryWithSQL(client, sqlDB)
 }
 

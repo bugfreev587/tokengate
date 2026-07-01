@@ -71,6 +71,10 @@ func NewAccountRepository(client *dbent.Client, sqlDB *sql.DB, schedulerCache se
 	return newAccountRepositoryWithSQL(client, sqlDB, schedulerCache, encryptors...)
 }
 
+func NewAccountRepositoryConcrete(client *dbent.Client, sqlDB *sql.DB, schedulerCache service.SchedulerCache, encryptor service.SecretEncryptor) *accountRepository {
+	return newAccountRepositoryWithSQL(client, sqlDB, schedulerCache, encryptor)
+}
+
 // newAccountRepositoryWithSQL 是内部构造函数，支持依赖注入 SQL 执行器。
 // 这种设计便于单元测试时注入 mock 对象。
 func newAccountRepositoryWithSQL(client *dbent.Client, sqlq sqlExecutor, schedulerCache service.SchedulerCache, encryptors ...service.SecretEncryptor) *accountRepository {
