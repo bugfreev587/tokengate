@@ -242,6 +242,57 @@ func TestOpenAIGatewayServiceRecordUsage_ZeroUsageStillWritesUsageLog(t *testing
 	require.Zero(t, billingRepo.lastCmd.AccountQuotaCost)
 }
 
+func TestOpenAIGatewayServiceRecordUsage_ConnectedAccountWritesUsageWithoutTokenGateBilling(t *testing.T) {
+	usageRepo := &openAIRecordUsageLogRepoStub{}
+	billingRepo := &openAIRecordUsageBillingRepoStub{result: &UsageBillingApplyResult{Applied: true}}
+	userRepo := &openAIRecordUsageUserRepoStub{}
+	subRepo := &openAIRecordUsageSubRepoStub{}
+	quotaSvc := &openAIRecordUsageAPIKeyQuotaStub{}
+	svc := newOpenAIRecordUsageServiceWithBillingRepoForTest(usageRepo, billingRepo, userRepo, subRepo, nil)
+
+	ownerID := int64(2000)
+	groupID := int64(3000)
+	err := svc.RecordUsage(context.Background(), &OpenAIRecordUsageInput{
+		Result: &OpenAIForwardResult{
+			RequestID: "openai_byo_usage",
+			Usage: OpenAIUsage{
+				InputTokens:          10,
+				OutputTokens:         6,
+				CacheReadInputTokens: 2,
+			},
+			Model:    "gpt-5.1",
+			Duration: time.Second,
+		},
+		APIKey: &APIKey{
+			ID:      1000,
+			Quota:   100,
+			GroupID: &groupID,
+			Group: &Group{
+				ID:               groupID,
+				OwnerUserID:      &ownerID,
+				CapacitySource:   CapacitySourceConnectedAccount,
+				SubscriptionType: SubscriptionTypeStandard,
+				RateMultiplier:   1,
+			},
+		},
+		User:          &User{ID: ownerID},
+		Account:       &Account{ID: 4000, OwnerUserID: &ownerID, Type: AccountTypeOAuth, Platform: PlatformOpenAI},
+		APIKeyService: quotaSvc,
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, 0, billingRepo.calls)
+	require.Equal(t, 0, userRepo.deductCalls)
+	require.Equal(t, 0, subRepo.incrementCalls)
+	require.Equal(t, 0, quotaSvc.quotaCalls)
+	require.Equal(t, 0, quotaSvc.rateLimitCalls)
+	require.Equal(t, 1, usageRepo.calls)
+	require.NotNil(t, usageRepo.lastLog)
+	require.Equal(t, CapacitySourceConnectedAccount, usageRepo.lastLog.CapacitySource)
+	require.Zero(t, usageRepo.lastLog.ActualCost)
+	require.Greater(t, usageRepo.lastLog.TotalCost, 0.0)
+}
+
 func TestOpenAIGatewayServiceRecordUsage_MissingPricingRecordsZeroCostUsageLog(t *testing.T) {
 	usageRepo := &openAIRecordUsageLogRepoStub{inserted: true}
 	billingRepo := &openAIRecordUsageBillingRepoStub{result: &UsageBillingApplyResult{Applied: true}}

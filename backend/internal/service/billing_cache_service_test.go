@@ -102,3 +102,28 @@ func TestBillingCacheServiceEnqueueAfterStopReturnsFalse(t *testing.T) {
 	})
 	require.False(t, enqueued)
 }
+
+func TestBillingCacheServiceCheckBillingEligibility_ConnectedAccountSkipsTokenGateBillingChecks(t *testing.T) {
+	cache := &billingCacheWorkerStub{}
+	svc := NewBillingCacheService(cache, nil, nil, nil, nil, nil, &config.Config{})
+	t.Cleanup(svc.Stop)
+
+	ownerID := int64(42)
+	group := &Group{
+		ID:             10,
+		OwnerUserID:    &ownerID,
+		CapacitySource: CapacitySourceConnectedAccount,
+	}
+
+	err := svc.CheckBillingEligibility(
+		context.Background(),
+		&User{ID: ownerID, Balance: 0},
+		&APIKey{ID: 1},
+		group,
+		nil,
+	)
+
+	require.NoError(t, err)
+	require.Zero(t, atomic.LoadInt64(&cache.balanceUpdates))
+	require.Zero(t, atomic.LoadInt64(&cache.subscriptionUpdates))
+}

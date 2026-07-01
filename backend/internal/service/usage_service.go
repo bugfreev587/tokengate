@@ -36,6 +36,7 @@ type CreateUsageLogRequest struct {
 	TotalCost             float64 `json:"total_cost"`
 	ActualCost            float64 `json:"actual_cost"`
 	RateMultiplier        float64 `json:"rate_multiplier"`
+	CapacitySource        string  `json:"capacity_source"`
 	Stream                bool    `json:"stream"`
 	DurationMs            *int    `json:"duration_ms"`
 }
@@ -90,6 +91,12 @@ func (s *UsageService) Create(ctx context.Context, req CreateUsageLogRequest) (*
 		return nil, fmt.Errorf("get user: %w", err)
 	}
 
+	capacitySource := NormalizeCapacitySource(req.CapacitySource)
+	actualCost := req.ActualCost
+	if !shouldChargeTokenGateCapacity(capacitySource) {
+		actualCost = 0
+	}
+
 	// 创建使用日志
 	usageLog := &UsageLog{
 		UserID:                req.UserID,
@@ -108,8 +115,9 @@ func (s *UsageService) Create(ctx context.Context, req CreateUsageLogRequest) (*
 		CacheCreationCost:     req.CacheCreationCost,
 		CacheReadCost:         req.CacheReadCost,
 		TotalCost:             req.TotalCost,
-		ActualCost:            req.ActualCost,
+		ActualCost:            actualCost,
 		RateMultiplier:        req.RateMultiplier,
+		CapacitySource:        capacitySource,
 		Stream:                req.Stream,
 		DurationMs:            req.DurationMs,
 	}
@@ -121,8 +129,8 @@ func (s *UsageService) Create(ctx context.Context, req CreateUsageLogRequest) (*
 
 	// 扣除用户余额
 	balanceUpdated := false
-	if inserted && req.ActualCost > 0 {
-		if err := s.userRepo.UpdateBalance(txCtx, req.UserID, -req.ActualCost); err != nil {
+	if inserted && actualCost > 0 && shouldChargeTokenGateCapacity(capacitySource) {
+		if err := s.userRepo.UpdateBalance(txCtx, req.UserID, -actualCost); err != nil {
 			return nil, fmt.Errorf("update user balance: %w", err)
 		}
 		balanceUpdated = true

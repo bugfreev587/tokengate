@@ -141,6 +141,56 @@ func TestGatewayServiceRecordUsage_BillingFingerprintIncludesRequestPayloadHash(
 	require.Equal(t, payloadHash, billingRepo.lastCmd.RequestPayloadHash)
 }
 
+func TestGatewayServiceRecordUsage_ConnectedAccountWritesUsageWithoutTokenGateBilling(t *testing.T) {
+	usageRepo := &openAIRecordUsageLogRepoStub{}
+	billingRepo := &openAIRecordUsageBillingRepoStub{result: &UsageBillingApplyResult{Applied: true}}
+	userRepo := &openAIRecordUsageUserRepoStub{}
+	subRepo := &openAIRecordUsageSubRepoStub{}
+	quotaSvc := &openAIRecordUsageAPIKeyQuotaStub{}
+	svc := newGatewayRecordUsageServiceWithBillingRepoForTest(usageRepo, billingRepo, userRepo, subRepo)
+
+	ownerID := int64(601)
+	groupID := int64(701)
+	err := svc.RecordUsage(context.Background(), &RecordUsageInput{
+		Result: &ForwardResult{
+			RequestID: "gateway_byo_usage",
+			Usage: ClaudeUsage{
+				InputTokens:  10,
+				OutputTokens: 6,
+			},
+			Model:    "claude-sonnet-4",
+			Duration: time.Second,
+		},
+		APIKey: &APIKey{
+			ID:      501,
+			Quota:   100,
+			GroupID: &groupID,
+			Group: &Group{
+				ID:               groupID,
+				OwnerUserID:      &ownerID,
+				CapacitySource:   CapacitySourceConnectedAccount,
+				SubscriptionType: SubscriptionTypeStandard,
+				RateMultiplier:   1,
+			},
+		},
+		User:          &User{ID: ownerID},
+		Account:       &Account{ID: 801, OwnerUserID: &ownerID, Type: AccountTypeOAuth},
+		APIKeyService: quotaSvc,
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, 0, billingRepo.calls)
+	require.Equal(t, 0, userRepo.deductCalls)
+	require.Equal(t, 0, subRepo.incrementCalls)
+	require.Equal(t, 0, quotaSvc.quotaCalls)
+	require.Equal(t, 0, quotaSvc.rateLimitCalls)
+	require.Equal(t, 1, usageRepo.calls)
+	require.NotNil(t, usageRepo.lastLog)
+	require.Equal(t, CapacitySourceConnectedAccount, usageRepo.lastLog.CapacitySource)
+	require.Zero(t, usageRepo.lastLog.ActualCost)
+	require.Greater(t, usageRepo.lastLog.TotalCost, 0.0)
+}
+
 func TestGatewayServiceRecordUsage_BillingFingerprintFallsBackToContextRequestID(t *testing.T) {
 	usageRepo := &openAIRecordUsageLogRepoStub{}
 	billingRepo := &openAIRecordUsageBillingRepoStub{result: &UsageBillingApplyResult{Applied: true}}

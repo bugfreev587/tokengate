@@ -21,6 +21,17 @@ func TestCapacitySourceHelpers(t *testing.T) {
 
 	require.False(t, (&Group{CapacitySource: CapacitySourceTokenGate}).IsUserOwnedConnectedAccount())
 	require.False(t, (&Group{CapacitySource: CapacitySourceConnectedAccount}).IsUserOwnedConnectedAccount())
+
+	user := &User{ID: ownerID}
+	otherUser := &User{ID: 99}
+	connectedGroup := &Group{
+		OwnerUserID:    &ownerID,
+		CapacitySource: CapacitySourceConnectedAccount,
+	}
+	require.True(t, isUserOwnedConnectedAccountCapacity(user, connectedGroup))
+	require.Equal(t, CapacitySourceConnectedAccount, resolveCapacitySourceForUserGroup(user, connectedGroup))
+	require.Equal(t, CapacitySourceTokenGate, resolveCapacitySourceForUserGroup(otherUser, connectedGroup))
+	require.Equal(t, CapacitySourceTokenGate, resolveCapacitySourceForUserGroup(user, nil))
 }
 
 // TestGroup_GetImagePrice_1K 测试 1K 尺寸返回正确价格
