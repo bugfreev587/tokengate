@@ -167,6 +167,27 @@ func (r *accountRepository) GetByID(ctx context.Context, id int64) (*service.Acc
 	return &accounts[0], nil
 }
 
+func (r *accountRepository) GetByIDAndOwnerUserID(ctx context.Context, id int64, ownerUserID int64) (*service.Account, error) {
+	m, err := r.client.Account.Query().
+		Where(
+			dbaccount.IDEQ(id),
+			dbaccount.OwnerUserIDEQ(ownerUserID),
+		).
+		Only(ctx)
+	if err != nil {
+		return nil, translatePersistenceError(err, service.ErrAccountNotFound, nil)
+	}
+
+	accounts, err := r.accountsToService(ctx, []*dbent.Account{m})
+	if err != nil {
+		return nil, err
+	}
+	if len(accounts) == 0 {
+		return nil, service.ErrAccountNotFound
+	}
+	return &accounts[0], nil
+}
+
 func (r *accountRepository) GetByIDs(ctx context.Context, ids []int64) ([]*service.Account, error) {
 	if len(ids) == 0 {
 		return []*service.Account{}, nil
@@ -487,6 +508,34 @@ func (r *accountRepository) Delete(ctx context.Context, id int64) error {
 
 func (r *accountRepository) List(ctx context.Context, params pagination.PaginationParams) ([]service.Account, *pagination.PaginationResult, error) {
 	return r.ListWithFilters(ctx, params, "", "", "", "", 0, "")
+}
+
+func (r *accountRepository) ListByOwnerUserID(ctx context.Context, ownerUserID int64, params pagination.PaginationParams) ([]service.Account, *pagination.PaginationResult, error) {
+	q := r.client.Account.Query().
+		Where(dbaccount.OwnerUserIDEQ(ownerUserID))
+
+	total, err := q.Count(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	accountsQuery := q.
+		Offset(params.Offset()).
+		Limit(params.Limit())
+	for _, order := range accountListOrder(params) {
+		accountsQuery = accountsQuery.Order(order)
+	}
+
+	accounts, err := accountsQuery.All(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	outAccounts, err := r.accountsToService(ctx, accounts)
+	if err != nil {
+		return nil, nil, err
+	}
+	return outAccounts, paginationResultFromTotal(int64(total), params), nil
 }
 
 func (r *accountRepository) ListWithFilters(ctx context.Context, params pagination.PaginationParams, platform, accountType, status, search string, groupID int64, privacyMode string) ([]service.Account, *pagination.PaginationResult, error) {

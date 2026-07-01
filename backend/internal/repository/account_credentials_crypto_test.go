@@ -12,6 +12,7 @@ import (
 
 	dbent "github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/enttest"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 	"github.com/stretchr/testify/require"
 
@@ -125,6 +126,60 @@ func TestAccountRepositoryUpdateCredentialsKeepsEncryptedAtRest(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "new-secret", got.Credentials["access_token"])
 	require.Equal(t, "refresh-secret", got.Credentials["refresh_token"])
+}
+
+func TestAccountRepositoryListAndGetByOwnerUserID(t *testing.T) {
+	ctx := context.Background()
+	client := newAccountCredentialSQLiteClient(t)
+	repo := newAccountRepositoryWithSQL(client, nil, nil, accountCredentialEncryptorStub{})
+	ownerID := int64(101)
+	otherOwnerID := int64(202)
+
+	owned := &service.Account{
+		Name:                 "owned-byo-openai",
+		Platform:             service.PlatformOpenAI,
+		Type:                 service.AccountTypeOAuth,
+		OwnerUserID:          &ownerID,
+		Credentials:          map[string]any{"access_token": "owned-secret"},
+		CredentialsEncrypted: true,
+		Concurrency:          1,
+		Priority:             50,
+		Status:               service.StatusActive,
+		Schedulable:          true,
+		AutoPauseOnExpired:   true,
+	}
+	otherOwned := &service.Account{
+		Name:                 "other-byo-openai",
+		Platform:             service.PlatformOpenAI,
+		Type:                 service.AccountTypeOAuth,
+		OwnerUserID:          &otherOwnerID,
+		Credentials:          map[string]any{"access_token": "other-secret"},
+		CredentialsEncrypted: true,
+		Concurrency:          1,
+		Priority:             50,
+		Status:               service.StatusActive,
+		Schedulable:          true,
+		AutoPauseOnExpired:   true,
+	}
+	require.NoError(t, repo.Create(ctx, owned))
+	require.NoError(t, repo.Create(ctx, otherOwned))
+
+	list, page, err := repo.ListByOwnerUserID(ctx, ownerID, pagination.PaginationParams{Page: 1, PageSize: 20, SortBy: "id"})
+	require.NoError(t, err)
+	require.Equal(t, int64(1), page.Total)
+	require.Len(t, list, 1)
+	require.Equal(t, owned.ID, list[0].ID)
+	require.NotNil(t, list[0].OwnerUserID)
+	require.Equal(t, ownerID, *list[0].OwnerUserID)
+	require.Equal(t, "owned-secret", list[0].Credentials["access_token"])
+
+	got, err := repo.GetByIDAndOwnerUserID(ctx, owned.ID, ownerID)
+	require.NoError(t, err)
+	require.NotNil(t, got)
+	require.Equal(t, "owned-secret", got.Credentials["access_token"])
+
+	_, err = repo.GetByIDAndOwnerUserID(ctx, otherOwned.ID, ownerID)
+	require.ErrorIs(t, err, service.ErrAccountNotFound)
 }
 
 func newAccountCredentialSQLiteClient(t *testing.T) *dbent.Client {

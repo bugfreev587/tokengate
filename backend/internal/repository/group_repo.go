@@ -42,6 +42,8 @@ func (r *groupRepository) Create(ctx context.Context, groupIn *service.Group) er
 		SetName(groupIn.Name).
 		SetDescription(groupIn.Description).
 		SetPlatform(groupIn.Platform).
+		SetNillableOwnerUserID(groupIn.OwnerUserID).
+		SetCapacitySource(service.NormalizeCapacitySource(groupIn.CapacitySource)).
 		SetRateMultiplier(groupIn.RateMultiplier).
 		SetSortOrder(groupIn.SortOrder).
 		SetIsExclusive(groupIn.IsExclusive).
@@ -116,6 +118,7 @@ func (r *groupRepository) Update(ctx context.Context, groupIn *service.Group) er
 		SetName(groupIn.Name).
 		SetDescription(groupIn.Description).
 		SetPlatform(groupIn.Platform).
+		SetCapacitySource(service.NormalizeCapacitySource(groupIn.CapacitySource)).
 		SetRateMultiplier(groupIn.RateMultiplier).
 		SetIsExclusive(groupIn.IsExclusive).
 		SetStatus(groupIn.Status).
@@ -170,6 +173,11 @@ func (r *groupRepository) Update(ctx context.Context, groupIn *service.Group) er
 		builder = builder.SetImagePrice4k(*groupIn.ImagePrice4K)
 	} else {
 		builder = builder.ClearImagePrice4k()
+	}
+	if groupIn.OwnerUserID != nil {
+		builder = builder.SetOwnerUserID(*groupIn.OwnerUserID)
+	} else {
+		builder = builder.ClearOwnerUserID()
 	}
 
 	// 处理 FallbackGroupID：nil 时清除，否则设置

@@ -34,6 +34,28 @@ func TestGroupEntityToService_PreservesMessagesDispatchModelConfig(t *testing.T)
 	require.Equal(t, group.MessagesDispatchModelConfig, got.MessagesDispatchModelConfig)
 }
 
+func TestGroupEntityToService_PreservesOwnerAndCapacitySource(t *testing.T) {
+	ownerID := int64(42)
+	group := &dbent.Group{
+		ID:                  2,
+		Name:                "byo-openai",
+		Platform:            service.PlatformOpenAI,
+		Status:              service.StatusActive,
+		SubscriptionType:    service.SubscriptionTypeStandard,
+		RateMultiplier:      1,
+		OwnerUserID:         &ownerID,
+		CapacitySource:      service.CapacitySourceConnectedAccount,
+		DefaultValidityDays: 30,
+	}
+
+	got := groupEntityToService(group)
+	require.NotNil(t, got)
+	require.NotNil(t, got.OwnerUserID)
+	require.Equal(t, ownerID, *got.OwnerUserID)
+	require.Equal(t, service.CapacitySourceConnectedAccount, got.CapacitySource)
+	require.True(t, got.IsUserOwnedConnectedAccount())
+}
+
 func TestAPIKeyRepository_GetByKeyForAuth_PreservesMessagesDispatchModelConfig_SQLite(t *testing.T) {
 	repo, client := newAPIKeyRepoSQLite(t)
 	ctx := context.Background()
