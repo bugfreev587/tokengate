@@ -34,6 +34,10 @@ const (
 	FieldStatus = "status"
 	// FieldPlatform holds the string denoting the platform field in the database.
 	FieldPlatform = "platform"
+	// FieldOwnerUserID holds the string denoting the owner_user_id field in the database.
+	FieldOwnerUserID = "owner_user_id"
+	// FieldCapacitySource holds the string denoting the capacity_source field in the database.
+	FieldCapacitySource = "capacity_source"
 	// FieldSubscriptionType holds the string denoting the subscription_type field in the database.
 	FieldSubscriptionType = "subscription_type"
 	// FieldDailyLimitUsd holds the string denoting the daily_limit_usd field in the database.
@@ -168,6 +172,8 @@ var Columns = []string{
 	FieldIsExclusive,
 	FieldStatus,
 	FieldPlatform,
+	FieldOwnerUserID,
+	FieldCapacitySource,
 	FieldSubscriptionType,
 	FieldDailyLimitUsd,
 	FieldWeeklyLimitUsd,
@@ -242,6 +248,10 @@ var (
 	DefaultPlatform string
 	// PlatformValidator is a validator for the "platform" field. It is called by the builders before save.
 	PlatformValidator func(string) error
+	// DefaultCapacitySource holds the default value on creation for the "capacity_source" field.
+	DefaultCapacitySource string
+	// CapacitySourceValidator is a validator for the "capacity_source" field. It is called by the builders before save.
+	CapacitySourceValidator func(string) error
 	// DefaultSubscriptionType holds the default value on creation for the "subscription_type" field.
 	DefaultSubscriptionType string
 	// SubscriptionTypeValidator is a validator for the "subscription_type" field. It is called by the builders before save.
@@ -331,6 +341,16 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByPlatform orders the results by the platform field.
 func ByPlatform(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPlatform, opts...).ToFunc()
+}
+
+// ByOwnerUserID orders the results by the owner_user_id field.
+func ByOwnerUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOwnerUserID, opts...).ToFunc()
+}
+
+// ByCapacitySource orders the results by the capacity_source field.
+func ByCapacitySource(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCapacitySource, opts...).ToFunc()
 }
 
 // BySubscriptionType orders the results by the subscription_type field.

@@ -169,6 +169,20 @@ func (_c *UsageLogCreate) SetNillableSubscriptionID(v *int64) *UsageLogCreate {
 	return _c
 }
 
+// SetCapacitySource sets the "capacity_source" field.
+func (_c *UsageLogCreate) SetCapacitySource(v string) *UsageLogCreate {
+	_c.mutation.SetCapacitySource(v)
+	return _c
+}
+
+// SetNillableCapacitySource sets the "capacity_source" field if the given value is not nil.
+func (_c *UsageLogCreate) SetNillableCapacitySource(v *string) *UsageLogCreate {
+	if v != nil {
+		_c.SetCapacitySource(*v)
+	}
+	return _c
+}
+
 // SetInputTokens sets the "input_tokens" field.
 func (_c *UsageLogCreate) SetInputTokens(v int) *UsageLogCreate {
 	_c.mutation.SetInputTokens(v)
@@ -565,6 +579,10 @@ func (_c *UsageLogCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UsageLogCreate) defaults() {
+	if _, ok := _c.mutation.CapacitySource(); !ok {
+		v := usagelog.DefaultCapacitySource
+		_c.mutation.SetCapacitySource(v)
+	}
 	if _, ok := _c.mutation.InputTokens(); !ok {
 		v := usagelog.DefaultInputTokens
 		_c.mutation.SetInputTokens(v)
@@ -689,6 +707,14 @@ func (_c *UsageLogCreate) check() error {
 	if v, ok := _c.mutation.BillingMode(); ok {
 		if err := usagelog.BillingModeValidator(v); err != nil {
 			return &ValidationError{Name: "billing_mode", err: fmt.Errorf(`ent: validator failed for field "UsageLog.billing_mode": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CapacitySource(); !ok {
+		return &ValidationError{Name: "capacity_source", err: errors.New(`ent: missing required field "UsageLog.capacity_source"`)}
+	}
+	if v, ok := _c.mutation.CapacitySource(); ok {
+		if err := usagelog.CapacitySourceValidator(v); err != nil {
+			return &ValidationError{Name: "capacity_source", err: fmt.Errorf(`ent: validator failed for field "UsageLog.capacity_source": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.InputTokens(); !ok {
@@ -827,6 +853,10 @@ func (_c *UsageLogCreate) createSpec() (*UsageLog, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.BillingMode(); ok {
 		_spec.SetField(usagelog.FieldBillingMode, field.TypeString, value)
 		_node.BillingMode = &value
+	}
+	if value, ok := _c.mutation.CapacitySource(); ok {
+		_spec.SetField(usagelog.FieldCapacitySource, field.TypeString, value)
+		_node.CapacitySource = value
 	}
 	if value, ok := _c.mutation.InputTokens(); ok {
 		_spec.SetField(usagelog.FieldInputTokens, field.TypeInt, value)
@@ -1268,6 +1298,18 @@ func (u *UsageLogUpsert) UpdateSubscriptionID() *UsageLogUpsert {
 // ClearSubscriptionID clears the value of the "subscription_id" field.
 func (u *UsageLogUpsert) ClearSubscriptionID() *UsageLogUpsert {
 	u.SetNull(usagelog.FieldSubscriptionID)
+	return u
+}
+
+// SetCapacitySource sets the "capacity_source" field.
+func (u *UsageLogUpsert) SetCapacitySource(v string) *UsageLogUpsert {
+	u.Set(usagelog.FieldCapacitySource, v)
+	return u
+}
+
+// UpdateCapacitySource sets the "capacity_source" field to the value that was provided on create.
+func (u *UsageLogUpsert) UpdateCapacitySource() *UsageLogUpsert {
+	u.SetExcluded(usagelog.FieldCapacitySource)
 	return u
 }
 
@@ -1978,6 +2020,20 @@ func (u *UsageLogUpsertOne) UpdateSubscriptionID() *UsageLogUpsertOne {
 func (u *UsageLogUpsertOne) ClearSubscriptionID() *UsageLogUpsertOne {
 	return u.Update(func(s *UsageLogUpsert) {
 		s.ClearSubscriptionID()
+	})
+}
+
+// SetCapacitySource sets the "capacity_source" field.
+func (u *UsageLogUpsertOne) SetCapacitySource(v string) *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetCapacitySource(v)
+	})
+}
+
+// UpdateCapacitySource sets the "capacity_source" field to the value that was provided on create.
+func (u *UsageLogUpsertOne) UpdateCapacitySource() *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateCapacitySource()
 	})
 }
 
@@ -2924,6 +2980,20 @@ func (u *UsageLogUpsertBulk) UpdateSubscriptionID() *UsageLogUpsertBulk {
 func (u *UsageLogUpsertBulk) ClearSubscriptionID() *UsageLogUpsertBulk {
 	return u.Update(func(s *UsageLogUpsert) {
 		s.ClearSubscriptionID()
+	})
+}
+
+// SetCapacitySource sets the "capacity_source" field.
+func (u *UsageLogUpsertBulk) SetCapacitySource(v string) *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetCapacitySource(v)
+	})
+}
+
+// UpdateCapacitySource sets the "capacity_source" field to the value that was provided on create.
+func (u *UsageLogUpsertBulk) UpdateCapacitySource() *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateCapacitySource()
 	})
 }
 

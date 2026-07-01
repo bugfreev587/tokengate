@@ -120,6 +120,11 @@ func SubscriptionID(v int64) predicate.UsageLog {
 	return predicate.UsageLog(sql.FieldEQ(FieldSubscriptionID, v))
 }
 
+// CapacitySource applies equality check predicate on the "capacity_source" field. It's identical to CapacitySourceEQ.
+func CapacitySource(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldEQ(FieldCapacitySource, v))
+}
+
 // InputTokens applies equality check predicate on the "input_tokens" field. It's identical to InputTokensEQ.
 func InputTokens(v int) predicate.UsageLog {
 	return predicate.UsageLog(sql.FieldEQ(FieldInputTokens, v))
@@ -913,6 +918,71 @@ func SubscriptionIDIsNil() predicate.UsageLog {
 // SubscriptionIDNotNil applies the NotNil predicate on the "subscription_id" field.
 func SubscriptionIDNotNil() predicate.UsageLog {
 	return predicate.UsageLog(sql.FieldNotNull(FieldSubscriptionID))
+}
+
+// CapacitySourceEQ applies the EQ predicate on the "capacity_source" field.
+func CapacitySourceEQ(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldEQ(FieldCapacitySource, v))
+}
+
+// CapacitySourceNEQ applies the NEQ predicate on the "capacity_source" field.
+func CapacitySourceNEQ(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldNEQ(FieldCapacitySource, v))
+}
+
+// CapacitySourceIn applies the In predicate on the "capacity_source" field.
+func CapacitySourceIn(vs ...string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldIn(FieldCapacitySource, vs...))
+}
+
+// CapacitySourceNotIn applies the NotIn predicate on the "capacity_source" field.
+func CapacitySourceNotIn(vs ...string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldNotIn(FieldCapacitySource, vs...))
+}
+
+// CapacitySourceGT applies the GT predicate on the "capacity_source" field.
+func CapacitySourceGT(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldGT(FieldCapacitySource, v))
+}
+
+// CapacitySourceGTE applies the GTE predicate on the "capacity_source" field.
+func CapacitySourceGTE(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldGTE(FieldCapacitySource, v))
+}
+
+// CapacitySourceLT applies the LT predicate on the "capacity_source" field.
+func CapacitySourceLT(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldLT(FieldCapacitySource, v))
+}
+
+// CapacitySourceLTE applies the LTE predicate on the "capacity_source" field.
+func CapacitySourceLTE(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldLTE(FieldCapacitySource, v))
+}
+
+// CapacitySourceContains applies the Contains predicate on the "capacity_source" field.
+func CapacitySourceContains(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldContains(FieldCapacitySource, v))
+}
+
+// CapacitySourceHasPrefix applies the HasPrefix predicate on the "capacity_source" field.
+func CapacitySourceHasPrefix(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldHasPrefix(FieldCapacitySource, v))
+}
+
+// CapacitySourceHasSuffix applies the HasSuffix predicate on the "capacity_source" field.
+func CapacitySourceHasSuffix(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldHasSuffix(FieldCapacitySource, v))
+}
+
+// CapacitySourceEqualFold applies the EqualFold predicate on the "capacity_source" field.
+func CapacitySourceEqualFold(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldEqualFold(FieldCapacitySource, v))
+}
+
+// CapacitySourceContainsFold applies the ContainsFold predicate on the "capacity_source" field.
+func CapacitySourceContainsFold(v string) predicate.UsageLog {
+	return predicate.UsageLog(sql.FieldContainsFold(FieldCapacitySource, v))
 }
 
 // InputTokensEQ applies the EQ predicate on the "input_tokens" field.

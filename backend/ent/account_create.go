@@ -105,6 +105,34 @@ func (_c *AccountCreate) SetCredentials(v map[string]interface{}) *AccountCreate
 	return _c
 }
 
+// SetOwnerUserID sets the "owner_user_id" field.
+func (_c *AccountCreate) SetOwnerUserID(v int64) *AccountCreate {
+	_c.mutation.SetOwnerUserID(v)
+	return _c
+}
+
+// SetNillableOwnerUserID sets the "owner_user_id" field if the given value is not nil.
+func (_c *AccountCreate) SetNillableOwnerUserID(v *int64) *AccountCreate {
+	if v != nil {
+		_c.SetOwnerUserID(*v)
+	}
+	return _c
+}
+
+// SetCredentialsEncrypted sets the "credentials_encrypted" field.
+func (_c *AccountCreate) SetCredentialsEncrypted(v bool) *AccountCreate {
+	_c.mutation.SetCredentialsEncrypted(v)
+	return _c
+}
+
+// SetNillableCredentialsEncrypted sets the "credentials_encrypted" field if the given value is not nil.
+func (_c *AccountCreate) SetNillableCredentialsEncrypted(v *bool) *AccountCreate {
+	if v != nil {
+		_c.SetCredentialsEncrypted(*v)
+	}
+	return _c
+}
+
 // SetExtra sets the "extra" field.
 func (_c *AccountCreate) SetExtra(v map[string]interface{}) *AccountCreate {
 	_c.mutation.SetExtra(v)
@@ -470,6 +498,10 @@ func (_c *AccountCreate) defaults() error {
 		v := account.DefaultCredentials()
 		_c.mutation.SetCredentials(v)
 	}
+	if _, ok := _c.mutation.CredentialsEncrypted(); !ok {
+		v := account.DefaultCredentialsEncrypted
+		_c.mutation.SetCredentialsEncrypted(v)
+	}
 	if _, ok := _c.mutation.Extra(); !ok {
 		if account.DefaultExtra == nil {
 			return fmt.Errorf("ent: uninitialized account.DefaultExtra (forgotten import ent/runtime?)")
@@ -538,6 +570,9 @@ func (_c *AccountCreate) check() error {
 	}
 	if _, ok := _c.mutation.Credentials(); !ok {
 		return &ValidationError{Name: "credentials", err: errors.New(`ent: missing required field "Account.credentials"`)}
+	}
+	if _, ok := _c.mutation.CredentialsEncrypted(); !ok {
+		return &ValidationError{Name: "credentials_encrypted", err: errors.New(`ent: missing required field "Account.credentials_encrypted"`)}
 	}
 	if _, ok := _c.mutation.Extra(); !ok {
 		return &ValidationError{Name: "extra", err: errors.New(`ent: missing required field "Account.extra"`)}
@@ -628,6 +663,14 @@ func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Credentials(); ok {
 		_spec.SetField(account.FieldCredentials, field.TypeJSON, value)
 		_node.Credentials = value
+	}
+	if value, ok := _c.mutation.OwnerUserID(); ok {
+		_spec.SetField(account.FieldOwnerUserID, field.TypeInt64, value)
+		_node.OwnerUserID = &value
+	}
+	if value, ok := _c.mutation.CredentialsEncrypted(); ok {
+		_spec.SetField(account.FieldCredentialsEncrypted, field.TypeBool, value)
+		_node.CredentialsEncrypted = value
 	}
 	if value, ok := _c.mutation.Extra(); ok {
 		_spec.SetField(account.FieldExtra, field.TypeJSON, value)
@@ -903,6 +946,42 @@ func (u *AccountUpsert) SetCredentials(v map[string]interface{}) *AccountUpsert 
 // UpdateCredentials sets the "credentials" field to the value that was provided on create.
 func (u *AccountUpsert) UpdateCredentials() *AccountUpsert {
 	u.SetExcluded(account.FieldCredentials)
+	return u
+}
+
+// SetOwnerUserID sets the "owner_user_id" field.
+func (u *AccountUpsert) SetOwnerUserID(v int64) *AccountUpsert {
+	u.Set(account.FieldOwnerUserID, v)
+	return u
+}
+
+// UpdateOwnerUserID sets the "owner_user_id" field to the value that was provided on create.
+func (u *AccountUpsert) UpdateOwnerUserID() *AccountUpsert {
+	u.SetExcluded(account.FieldOwnerUserID)
+	return u
+}
+
+// AddOwnerUserID adds v to the "owner_user_id" field.
+func (u *AccountUpsert) AddOwnerUserID(v int64) *AccountUpsert {
+	u.Add(account.FieldOwnerUserID, v)
+	return u
+}
+
+// ClearOwnerUserID clears the value of the "owner_user_id" field.
+func (u *AccountUpsert) ClearOwnerUserID() *AccountUpsert {
+	u.SetNull(account.FieldOwnerUserID)
+	return u
+}
+
+// SetCredentialsEncrypted sets the "credentials_encrypted" field.
+func (u *AccountUpsert) SetCredentialsEncrypted(v bool) *AccountUpsert {
+	u.Set(account.FieldCredentialsEncrypted, v)
+	return u
+}
+
+// UpdateCredentialsEncrypted sets the "credentials_encrypted" field to the value that was provided on create.
+func (u *AccountUpsert) UpdateCredentialsEncrypted() *AccountUpsert {
+	u.SetExcluded(account.FieldCredentialsEncrypted)
 	return u
 }
 
@@ -1402,6 +1481,48 @@ func (u *AccountUpsertOne) SetCredentials(v map[string]interface{}) *AccountUpse
 func (u *AccountUpsertOne) UpdateCredentials() *AccountUpsertOne {
 	return u.Update(func(s *AccountUpsert) {
 		s.UpdateCredentials()
+	})
+}
+
+// SetOwnerUserID sets the "owner_user_id" field.
+func (u *AccountUpsertOne) SetOwnerUserID(v int64) *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetOwnerUserID(v)
+	})
+}
+
+// AddOwnerUserID adds v to the "owner_user_id" field.
+func (u *AccountUpsertOne) AddOwnerUserID(v int64) *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.AddOwnerUserID(v)
+	})
+}
+
+// UpdateOwnerUserID sets the "owner_user_id" field to the value that was provided on create.
+func (u *AccountUpsertOne) UpdateOwnerUserID() *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateOwnerUserID()
+	})
+}
+
+// ClearOwnerUserID clears the value of the "owner_user_id" field.
+func (u *AccountUpsertOne) ClearOwnerUserID() *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.ClearOwnerUserID()
+	})
+}
+
+// SetCredentialsEncrypted sets the "credentials_encrypted" field.
+func (u *AccountUpsertOne) SetCredentialsEncrypted(v bool) *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetCredentialsEncrypted(v)
+	})
+}
+
+// UpdateCredentialsEncrypted sets the "credentials_encrypted" field to the value that was provided on create.
+func (u *AccountUpsertOne) UpdateCredentialsEncrypted() *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateCredentialsEncrypted()
 	})
 }
 
@@ -2124,6 +2245,48 @@ func (u *AccountUpsertBulk) SetCredentials(v map[string]interface{}) *AccountUps
 func (u *AccountUpsertBulk) UpdateCredentials() *AccountUpsertBulk {
 	return u.Update(func(s *AccountUpsert) {
 		s.UpdateCredentials()
+	})
+}
+
+// SetOwnerUserID sets the "owner_user_id" field.
+func (u *AccountUpsertBulk) SetOwnerUserID(v int64) *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetOwnerUserID(v)
+	})
+}
+
+// AddOwnerUserID adds v to the "owner_user_id" field.
+func (u *AccountUpsertBulk) AddOwnerUserID(v int64) *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.AddOwnerUserID(v)
+	})
+}
+
+// UpdateOwnerUserID sets the "owner_user_id" field to the value that was provided on create.
+func (u *AccountUpsertBulk) UpdateOwnerUserID() *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateOwnerUserID()
+	})
+}
+
+// ClearOwnerUserID clears the value of the "owner_user_id" field.
+func (u *AccountUpsertBulk) ClearOwnerUserID() *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.ClearOwnerUserID()
+	})
+}
+
+// SetCredentialsEncrypted sets the "credentials_encrypted" field.
+func (u *AccountUpsertBulk) SetCredentialsEncrypted(v bool) *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetCredentialsEncrypted(v)
+	})
+}
+
+// UpdateCredentialsEncrypted sets the "credentials_encrypted" field to the value that was provided on create.
+func (u *AccountUpsertBulk) UpdateCredentialsEncrypted() *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateCredentialsEncrypted()
 	})
 }
 

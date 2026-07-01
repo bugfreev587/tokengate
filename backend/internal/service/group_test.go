@@ -8,6 +8,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestCapacitySourceHelpers(t *testing.T) {
+	require.Equal(t, CapacitySourceTokenGate, NormalizeCapacitySource(""))
+	require.Equal(t, CapacitySourceTokenGate, NormalizeCapacitySource("unexpected"))
+	require.Equal(t, CapacitySourceConnectedAccount, NormalizeCapacitySource("connected_account"))
+
+	ownerID := int64(42)
+	require.True(t, (&Group{
+		OwnerUserID:    &ownerID,
+		CapacitySource: CapacitySourceConnectedAccount,
+	}).IsUserOwnedConnectedAccount())
+
+	require.False(t, (&Group{CapacitySource: CapacitySourceTokenGate}).IsUserOwnedConnectedAccount())
+	require.False(t, (&Group{CapacitySource: CapacitySourceConnectedAccount}).IsUserOwnedConnectedAccount())
+}
+
 // TestGroup_GetImagePrice_1K 测试 1K 尺寸返回正确价格
 func TestGroup_GetImagePrice_1K(t *testing.T) {
 	price := 0.10

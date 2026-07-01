@@ -55,6 +55,14 @@ func (Group) Fields() []ent.Field {
 		field.String("platform").
 			MaxLen(50).
 			Default(domain.PlatformAnthropic),
+		field.Int64("owner_user_id").
+			Optional().
+			Nillable().
+			Comment("Owner user ID for private BYO groups; NULL for TokenGate-managed groups."),
+		field.String("capacity_source").
+			MaxLen(32).
+			Default("tokengate").
+			Comment("Capacity source: tokengate or connected_account."),
 		field.String("subscription_type").
 			MaxLen(20).
 			Default(domain.SubscriptionTypeStandard),
@@ -185,6 +193,7 @@ func (Group) Indexes() []ent.Index {
 		// name 字段已在 Fields() 中声明 Unique()，无需重复索引
 		index.Fields("status"),
 		index.Fields("platform"),
+		index.Fields("owner_user_id", "capacity_source"),
 		index.Fields("subscription_type"),
 		index.Fields("is_exclusive"),
 		index.Fields("deleted_at"),

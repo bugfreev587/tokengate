@@ -269,6 +269,20 @@ func (_u *UsageLogUpdate) ClearSubscriptionID() *UsageLogUpdate {
 	return _u
 }
 
+// SetCapacitySource sets the "capacity_source" field.
+func (_u *UsageLogUpdate) SetCapacitySource(v string) *UsageLogUpdate {
+	_u.mutation.SetCapacitySource(v)
+	return _u
+}
+
+// SetNillableCapacitySource sets the "capacity_source" field if the given value is not nil.
+func (_u *UsageLogUpdate) SetNillableCapacitySource(v *string) *UsageLogUpdate {
+	if v != nil {
+		_u.SetCapacitySource(*v)
+	}
+	return _u
+}
+
 // SetInputTokens sets the "input_tokens" field.
 func (_u *UsageLogUpdate) SetInputTokens(v int) *UsageLogUpdate {
 	_u.mutation.ResetInputTokens()
@@ -877,6 +891,11 @@ func (_u *UsageLogUpdate) check() error {
 			return &ValidationError{Name: "billing_mode", err: fmt.Errorf(`ent: validator failed for field "UsageLog.billing_mode": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.CapacitySource(); ok {
+		if err := usagelog.CapacitySourceValidator(v); err != nil {
+			return &ValidationError{Name: "capacity_source", err: fmt.Errorf(`ent: validator failed for field "UsageLog.capacity_source": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.UserAgent(); ok {
 		if err := usagelog.UserAgentValidator(v); err != nil {
 			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "UsageLog.user_agent": %w`, err)}
@@ -960,6 +979,9 @@ func (_u *UsageLogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.BillingModeCleared() {
 		_spec.ClearField(usagelog.FieldBillingMode, field.TypeString)
+	}
+	if value, ok := _u.mutation.CapacitySource(); ok {
+		_spec.SetField(usagelog.FieldCapacitySource, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.InputTokens(); ok {
 		_spec.SetField(usagelog.FieldInputTokens, field.TypeInt, value)
@@ -1501,6 +1523,20 @@ func (_u *UsageLogUpdateOne) SetNillableSubscriptionID(v *int64) *UsageLogUpdate
 // ClearSubscriptionID clears the value of the "subscription_id" field.
 func (_u *UsageLogUpdateOne) ClearSubscriptionID() *UsageLogUpdateOne {
 	_u.mutation.ClearSubscriptionID()
+	return _u
+}
+
+// SetCapacitySource sets the "capacity_source" field.
+func (_u *UsageLogUpdateOne) SetCapacitySource(v string) *UsageLogUpdateOne {
+	_u.mutation.SetCapacitySource(v)
+	return _u
+}
+
+// SetNillableCapacitySource sets the "capacity_source" field if the given value is not nil.
+func (_u *UsageLogUpdateOne) SetNillableCapacitySource(v *string) *UsageLogUpdateOne {
+	if v != nil {
+		_u.SetCapacitySource(*v)
+	}
 	return _u
 }
 
@@ -2125,6 +2161,11 @@ func (_u *UsageLogUpdateOne) check() error {
 			return &ValidationError{Name: "billing_mode", err: fmt.Errorf(`ent: validator failed for field "UsageLog.billing_mode": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.CapacitySource(); ok {
+		if err := usagelog.CapacitySourceValidator(v); err != nil {
+			return &ValidationError{Name: "capacity_source", err: fmt.Errorf(`ent: validator failed for field "UsageLog.capacity_source": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.UserAgent(); ok {
 		if err := usagelog.UserAgentValidator(v); err != nil {
 			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "UsageLog.user_agent": %w`, err)}
@@ -2225,6 +2266,9 @@ func (_u *UsageLogUpdateOne) sqlSave(ctx context.Context) (_node *UsageLog, err 
 	}
 	if _u.mutation.BillingModeCleared() {
 		_spec.ClearField(usagelog.FieldBillingMode, field.TypeString)
+	}
+	if value, ok := _u.mutation.CapacitySource(); ok {
+		_spec.SetField(usagelog.FieldCapacitySource, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.InputTokens(); ok {
 		_spec.SetField(usagelog.FieldInputTokens, field.TypeInt, value)

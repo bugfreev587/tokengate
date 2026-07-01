@@ -79,6 +79,13 @@ func (Account) Fields() []ent.Field {
 		field.JSON("credentials", map[string]any{}).
 			Default(func() map[string]any { return map[string]any{} }).
 			SchemaType(map[string]string{dialect.Postgres: "jsonb"}),
+		field.Int64("owner_user_id").
+			Optional().
+			Nillable().
+			Comment("Owner user ID for BYO connected accounts; NULL for TokenGate-managed accounts."),
+		field.Bool("credentials_encrypted").
+			Default(false).
+			Comment("Whether credentials contains an encrypted wrapper instead of plaintext credential JSON."),
 
 		// extra: 扩展数据，存储平台特定的额外信息
 		// 如 CRS 账户的 crs_account_id、组织信息等
@@ -224,6 +231,7 @@ func (Account) Indexes() []ent.Index {
 		index.Fields("proxy_id"),            // 按代理筛选
 		index.Fields("priority"),            // 按优先级排序
 		index.Fields("last_used_at"),        // 按最后使用时间排序
+		index.Fields("owner_user_id"),       // 用户自带账号查询
 		index.Fields("schedulable"),         // 筛选可调度账户
 		index.Fields("rate_limited_at"),     // 筛选速率限制账户
 		index.Fields("rate_limit_reset_at"), // 筛选速率限制解除时间

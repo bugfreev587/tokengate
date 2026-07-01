@@ -17,6 +17,9 @@ type Group struct {
 	RateMultiplier float64
 	IsExclusive    bool
 	Status         string
+	// OwnerUserID is nil for TokenGate-managed groups and set for user-owned private groups.
+	OwnerUserID    *int64
+	CapacitySource string
 	Hydrated       bool // indicates the group was loaded from a trusted repository source
 
 	SubscriptionType    string
@@ -81,6 +84,13 @@ func (g *Group) IsActive() bool {
 
 func (g *Group) IsSubscriptionType() bool {
 	return g.SubscriptionType == SubscriptionTypeSubscription
+}
+
+func (g *Group) IsUserOwnedConnectedAccount() bool {
+	return g != nil &&
+		NormalizeCapacitySource(g.CapacitySource) == CapacitySourceConnectedAccount &&
+		g.OwnerUserID != nil &&
+		*g.OwnerUserID > 0
 }
 
 func (g *Group) HasDailyLimit() bool {

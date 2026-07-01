@@ -100,6 +100,16 @@ func Platform(v string) predicate.Group {
 	return predicate.Group(sql.FieldEQ(FieldPlatform, v))
 }
 
+// OwnerUserID applies equality check predicate on the "owner_user_id" field. It's identical to OwnerUserIDEQ.
+func OwnerUserID(v int64) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldOwnerUserID, v))
+}
+
+// CapacitySource applies equality check predicate on the "capacity_source" field. It's identical to CapacitySourceEQ.
+func CapacitySource(v string) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldCapacitySource, v))
+}
+
 // SubscriptionType applies equality check predicate on the "subscription_type" field. It's identical to SubscriptionTypeEQ.
 func SubscriptionType(v string) predicate.Group {
 	return predicate.Group(sql.FieldEQ(FieldSubscriptionType, v))
@@ -658,6 +668,121 @@ func PlatformEqualFold(v string) predicate.Group {
 // PlatformContainsFold applies the ContainsFold predicate on the "platform" field.
 func PlatformContainsFold(v string) predicate.Group {
 	return predicate.Group(sql.FieldContainsFold(FieldPlatform, v))
+}
+
+// OwnerUserIDEQ applies the EQ predicate on the "owner_user_id" field.
+func OwnerUserIDEQ(v int64) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDNEQ applies the NEQ predicate on the "owner_user_id" field.
+func OwnerUserIDNEQ(v int64) predicate.Group {
+	return predicate.Group(sql.FieldNEQ(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDIn applies the In predicate on the "owner_user_id" field.
+func OwnerUserIDIn(vs ...int64) predicate.Group {
+	return predicate.Group(sql.FieldIn(FieldOwnerUserID, vs...))
+}
+
+// OwnerUserIDNotIn applies the NotIn predicate on the "owner_user_id" field.
+func OwnerUserIDNotIn(vs ...int64) predicate.Group {
+	return predicate.Group(sql.FieldNotIn(FieldOwnerUserID, vs...))
+}
+
+// OwnerUserIDGT applies the GT predicate on the "owner_user_id" field.
+func OwnerUserIDGT(v int64) predicate.Group {
+	return predicate.Group(sql.FieldGT(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDGTE applies the GTE predicate on the "owner_user_id" field.
+func OwnerUserIDGTE(v int64) predicate.Group {
+	return predicate.Group(sql.FieldGTE(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDLT applies the LT predicate on the "owner_user_id" field.
+func OwnerUserIDLT(v int64) predicate.Group {
+	return predicate.Group(sql.FieldLT(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDLTE applies the LTE predicate on the "owner_user_id" field.
+func OwnerUserIDLTE(v int64) predicate.Group {
+	return predicate.Group(sql.FieldLTE(FieldOwnerUserID, v))
+}
+
+// OwnerUserIDIsNil applies the IsNil predicate on the "owner_user_id" field.
+func OwnerUserIDIsNil() predicate.Group {
+	return predicate.Group(sql.FieldIsNull(FieldOwnerUserID))
+}
+
+// OwnerUserIDNotNil applies the NotNil predicate on the "owner_user_id" field.
+func OwnerUserIDNotNil() predicate.Group {
+	return predicate.Group(sql.FieldNotNull(FieldOwnerUserID))
+}
+
+// CapacitySourceEQ applies the EQ predicate on the "capacity_source" field.
+func CapacitySourceEQ(v string) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldCapacitySource, v))
+}
+
+// CapacitySourceNEQ applies the NEQ predicate on the "capacity_source" field.
+func CapacitySourceNEQ(v string) predicate.Group {
+	return predicate.Group(sql.FieldNEQ(FieldCapacitySource, v))
+}
+
+// CapacitySourceIn applies the In predicate on the "capacity_source" field.
+func CapacitySourceIn(vs ...string) predicate.Group {
+	return predicate.Group(sql.FieldIn(FieldCapacitySource, vs...))
+}
+
+// CapacitySourceNotIn applies the NotIn predicate on the "capacity_source" field.
+func CapacitySourceNotIn(vs ...string) predicate.Group {
+	return predicate.Group(sql.FieldNotIn(FieldCapacitySource, vs...))
+}
+
+// CapacitySourceGT applies the GT predicate on the "capacity_source" field.
+func CapacitySourceGT(v string) predicate.Group {
+	return predicate.Group(sql.FieldGT(FieldCapacitySource, v))
+}
+
+// CapacitySourceGTE applies the GTE predicate on the "capacity_source" field.
+func CapacitySourceGTE(v string) predicate.Group {
+	return predicate.Group(sql.FieldGTE(FieldCapacitySource, v))
+}
+
+// CapacitySourceLT applies the LT predicate on the "capacity_source" field.
+func CapacitySourceLT(v string) predicate.Group {
+	return predicate.Group(sql.FieldLT(FieldCapacitySource, v))
+}
+
+// CapacitySourceLTE applies the LTE predicate on the "capacity_source" field.
+func CapacitySourceLTE(v string) predicate.Group {
+	return predicate.Group(sql.FieldLTE(FieldCapacitySource, v))
+}
+
+// CapacitySourceContains applies the Contains predicate on the "capacity_source" field.
+func CapacitySourceContains(v string) predicate.Group {
+	return predicate.Group(sql.FieldContains(FieldCapacitySource, v))
+}
+
+// CapacitySourceHasPrefix applies the HasPrefix predicate on the "capacity_source" field.
+func CapacitySourceHasPrefix(v string) predicate.Group {
+	return predicate.Group(sql.FieldHasPrefix(FieldCapacitySource, v))
+}
+
+// CapacitySourceHasSuffix applies the HasSuffix predicate on the "capacity_source" field.
+func CapacitySourceHasSuffix(v string) predicate.Group {
+	return predicate.Group(sql.FieldHasSuffix(FieldCapacitySource, v))
+}
+
+// CapacitySourceEqualFold applies the EqualFold predicate on the "capacity_source" field.
+func CapacitySourceEqualFold(v string) predicate.Group {
+	return predicate.Group(sql.FieldEqualFold(FieldCapacitySource, v))
+}
+
+// CapacitySourceContainsFold applies the ContainsFold predicate on the "capacity_source" field.
+func CapacitySourceContainsFold(v string) predicate.Group {
+	return predicate.Group(sql.FieldContainsFold(FieldCapacitySource, v))
 }
 
 // SubscriptionTypeEQ applies the EQ predicate on the "subscription_type" field.

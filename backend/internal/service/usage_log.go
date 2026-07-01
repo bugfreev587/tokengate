@@ -125,6 +125,7 @@ type UsageLog struct {
 
 	GroupID        *int64
 	SubscriptionID *int64
+	CapacitySource string
 
 	InputTokens         int
 	OutputTokens        int

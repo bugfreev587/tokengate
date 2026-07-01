@@ -31,6 +31,10 @@ const (
 	FieldType = "type"
 	// FieldCredentials holds the string denoting the credentials field in the database.
 	FieldCredentials = "credentials"
+	// FieldOwnerUserID holds the string denoting the owner_user_id field in the database.
+	FieldOwnerUserID = "owner_user_id"
+	// FieldCredentialsEncrypted holds the string denoting the credentials_encrypted field in the database.
+	FieldCredentialsEncrypted = "credentials_encrypted"
 	// FieldExtra holds the string denoting the extra field in the database.
 	FieldExtra = "extra"
 	// FieldProxyID holds the string denoting the proxy_id field in the database.
@@ -120,6 +124,8 @@ var Columns = []string{
 	FieldPlatform,
 	FieldType,
 	FieldCredentials,
+	FieldOwnerUserID,
+	FieldCredentialsEncrypted,
 	FieldExtra,
 	FieldProxyID,
 	FieldConcurrency,
@@ -180,6 +186,8 @@ var (
 	TypeValidator func(string) error
 	// DefaultCredentials holds the default value on creation for the "credentials" field.
 	DefaultCredentials func() map[string]interface{}
+	// DefaultCredentialsEncrypted holds the default value on creation for the "credentials_encrypted" field.
+	DefaultCredentialsEncrypted bool
 	// DefaultExtra holds the default value on creation for the "extra" field.
 	DefaultExtra func() map[string]interface{}
 	// DefaultConcurrency holds the default value on creation for the "concurrency" field.
@@ -241,6 +249,16 @@ func ByPlatform(opts ...sql.OrderTermOption) OrderOption {
 // ByType orders the results by the type field.
 func ByType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByOwnerUserID orders the results by the owner_user_id field.
+func ByOwnerUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOwnerUserID, opts...).ToFunc()
+}
+
+// ByCredentialsEncrypted orders the results by the credentials_encrypted field.
+func ByCredentialsEncrypted(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCredentialsEncrypted, opts...).ToFunc()
 }
 
 // ByProxyID orders the results by the proxy_id field.
