@@ -93,6 +93,10 @@ Admin and backend docs may continue to use "group" and "account" precisely.
 Recommended approach: extend the existing account and group model with
 user-owned private accounts.
 
+This is not a UI-only feature. The current account and group schema is
+admin-global, so BYO requires new ownership, access-control, and billing
+invariants before the user-facing page can be safely exposed.
+
 When a user connects an AI provider account:
 
 1. TokenGate stores the OAuth credentials as a user-owned account.
@@ -101,6 +105,11 @@ When a user connects an AI provider account:
 4. API keys that select the private group route only to that user's connected
    account.
 5. Usage logs are created, but TokenGate model usage charge is 0.
+
+V1 decision: create one private group per connected account. This keeps
+deletion, disable, health attribution, and scheduler isolation simple. A
+per-provider group with multiple user-owned accounts should wait until paid
+multi-account BYO routing is intentionally designed.
 
 Alternatives considered:
 
@@ -129,6 +138,10 @@ My Account
 
 For admin users, the same Accounts item should appear under the personal My
 Account section, not under admin account management.
+
+An admin's personal connected account is still a user-owned BYO account. It must
+be scoped to that admin user's owner ID and must never leak into the admin-managed
+public account pool.
 
 The user Accounts page should be inspired by the admin Accounts page, but it
 must be narrower:
@@ -184,8 +197,7 @@ action.
   providers.
 - A regular authenticated user can finish the OAuth flow and create a connected
   account.
-- TokenGate automatically creates a private group for each connected account or
-  for each connected account/provider pair.
+- TokenGate automatically creates one private group for each connected account.
 - The private group is selectable only by the owner in API key creation/edit.
 - The connected account is never schedulable by other users or by public
   TokenGate groups.
@@ -214,11 +226,19 @@ Each provider can be feature-gated independently.
 - TokenGate-managed groups continue to deduct usage according to model pricing,
   subscription included usage, and balance.
 - BYO private groups must not deduct TokenGate model usage charges.
+- BYO must use an explicit capacity marker, such as
+  `capacity_source=connected_account`, on the private group, API key, or resolved
+  request context. Do not implement BYO billing as a magic `rate_multiplier=0`.
 - BYO usage logs must still record model, tokens/units, endpoint, latency,
   status, upstream account, and API key.
-- BYO usage records should show TokenGate usage charge as 0.
+- BYO usage records should preserve provider-estimated usage cost in
+  `total_cost` where TokenGate can estimate it, and force TokenGate charged usage
+  to 0 in `actual_cost`.
 - BYO usage records should clearly label source as "Connected account" or
   equivalent.
+- BYO capacity must short-circuit pre-request balance, quota, and subscription
+  checks for model usage. TokenGate may still apply API key status, user
+  concurrency, abuse controls, and future BYO management-plan checks.
 - Future management fees should be modeled separately from model usage charges.
   Examples: monthly BYO access plan, connected-account seat limit, or per-account
   hosting fee.
@@ -230,9 +250,22 @@ Each provider can be feature-gated independently.
 - Admin-managed public groups must never schedule user-owned BYO accounts.
 - Sticky sessions, failover, model visibility, and account health logic should
   respect user ownership.
+- BYO requires defense-in-depth, not UI filtering only. Ownership must be
+  enforced at all of these points:
+  - group/account schema and repository queries
+  - user group list and connected account list
+  - API key create/edit group validation
+  - API key auth/cache snapshots
+  - scheduler account selection
+  - fallback and sticky-session paths
+- A crafted request or API call using another user's private `group_id` must be
+  rejected server-side before routing.
 - If a BYO account is unavailable, fail within the user's private source rather
   than falling back to TokenGate capacity unless the user explicitly configured
   such fallback in a later phase.
+- V1 must not automatically fall back from BYO to TokenGate capacity. A request
+  that starts in BYO has `$0` TokenGate model usage semantics; fallback to
+  TokenGate capacity would require explicit user consent and charged billing.
 
 ### 9.5 Admin Controls
 
@@ -247,7 +280,35 @@ Admins should be able to:
 
 Admins should not see raw OAuth tokens.
 
-## 10. Error Handling
+Disabling BYO globally or disabling a provider must stop new BYO routing for
+affected API keys immediately, with a clear user-facing error.
+
+## 10. Security, Compliance, And Abuse
+
+BYO materially increases TokenGate's security and compliance responsibility
+because TokenGate stores and operates end-user provider credentials.
+
+Requirements:
+
+- Add explicit owner fields to user-owned accounts and private groups. The exact
+  schema can be refined during implementation, but ownership must be first-class
+  and queryable.
+- Encrypt BYO OAuth credentials at rest with envelope encryption or an equivalent
+  key-management pattern. Plain JSONB token storage is not acceptable for
+  user-owned BYO credentials.
+- Do not expose raw OAuth tokens to admins, users, logs, exports, or support
+  tooling.
+- Run provider-specific Terms of Service and OAuth-client policy review before
+  enabling each provider in production.
+- Treat provider launch as blocked until the relevant ToS/OAuth review is
+  complete.
+- Add BYO abuse controls for stolen-account and anonymized-access scenarios,
+  including anomalous connect patterns, repeated re-auth failures, and sudden
+  high-volume BYO traffic.
+- Support admin emergency disable for a user-owned account, a provider, or BYO
+  globally.
+
+## 11. Error Handling
 
 BYO errors need clear attribution.
 
@@ -257,11 +318,16 @@ Examples:
 - "Your connected Gemini account is rate limited by Google."
 - "Your connected account does not currently support this model."
 - "This API key is linked to a deleted connected account."
+- "Connected account routing is disabled by the administrator."
 
 Avoid generic platform phrasing such as "No available accounts" when the cause
 is specifically the user's connected account.
 
-## 11. Metrics
+If a refresh token expires, is revoked, or fails mid-request, TokenGate should
+fail the request with a BYO-specific auth error, mark the connected account as
+needs re-authentication, and not fall back to TokenGate capacity.
+
+## 12. Metrics
 
 Track:
 
@@ -273,8 +339,11 @@ Track:
 - BYO vs TokenGate capacity usage share
 - BYO users who later upgrade to management-fee plans
 - support tickets tied to BYO provider errors
+- BYO auth-failure rate distinct from provider rate-limit failures
+- BYO credential encryption and key-rotation health
+- anomalous BYO connect or traffic patterns
 
-## 12. Acceptance Criteria
+## 13. Acceptance Criteria
 
 - A regular user sees Accounts under My Account.
 - A regular user can connect a supported AI account through OAuth.
@@ -289,20 +358,35 @@ Track:
 - Account re-auth, disable, delete, and error states are visible and actionable.
 - The UI warns that provider-side charges and quota consumption are the user's
   responsibility.
+- Server-side API key create/edit rejects cross-user private group IDs.
+- Scheduler selection rejects any user-owned account whose owner does not match
+  the authenticated API key user.
+- Global BYO disable and provider-level disable immediately stop affected BYO key
+  routing.
+- BYO credentials are encrypted at rest and excluded from logs, exports, and
+  support payloads.
+- Provider ToS/OAuth policy review is complete before a provider is enabled in
+  production.
 
-## 13. Phased Rollout
+## 14. Phased Rollout
 
 ### Phase 1: BYO Foundation
 
 - Add user-owned account ownership and private group isolation.
+- Add explicit `capacity_source=connected_account` or equivalent billing marker.
+- Add encrypted storage for BYO credentials.
+- Complete ToS/OAuth policy review for the first launch provider.
 - Add My Account > Accounts.
 - Add API key capacity source selector.
 - Support one or two OAuth providers behind feature flags.
 - Record BYO usage with 0 TokenGate model charge.
+- Keep BYO fallback to TokenGate capacity disabled.
 
 ### Phase 2: Provider Expansion And Polish
 
 - Add more supported OAuth providers.
+- Repeat ToS/OAuth policy review for each additional provider before production
+  enablement.
 - Add richer account health checks and re-auth prompts.
 - Improve model visibility for connected accounts.
 - Add admin support filters for user-owned accounts.
@@ -314,12 +398,22 @@ Track:
 - Add optional managed fallback or multi-account BYO routing for paid tiers.
 - Add team/shared ownership if there is clear demand.
 
-## 14. Open Decisions
+## 15. Product Decisions And Open Questions
 
-- Whether V1 creates one private group per connected account or one private group
-  per provider with multiple accounts under it.
-- Whether BYO API keys can optionally fall back to TokenGate capacity when the
-  connected account fails.
-- Which provider should be the first production BYO OAuth launch provider.
-- Whether BYO should require an active paid TokenGate subscription at launch, or
-  only require authentication until management fees are introduced.
+V1 product decisions:
+
+- Create one private group per connected account.
+- Do not automatically fall back from BYO to TokenGate capacity.
+- Do not require a paid TokenGate subscription for BYO model usage at launch.
+  Authentication is enough until BYO management fees are introduced.
+- Model BYO with an explicit capacity source or billing marker, not a zero
+  multiplier.
+
+Open questions:
+
+- Which provider should be the first production BYO OAuth launch provider after
+  ToS and OAuth-client policy review.
+- Which envelope-encryption key-management implementation should be used for BYO
+  credentials.
+- Whether future management fees should be sold as a monthly BYO feature, a
+  connected-account limit by plan, or a standalone per-account hosting fee.
