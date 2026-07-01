@@ -30,3 +30,9 @@ describe('AppSidebar header styles', () => {
     expect(sidebarBrandBlockMatch?.[0]).not.toContain('overflow: hidden;')
   })
 })
+
+describe('AppSidebar user account navigation', () => {
+  it('includes user-owned AI accounts under the shared My Account menu', () => {
+    expect(componentSource).toContain("{ path: '/accounts', label: t('nav.accounts'), icon: GlobeIcon }")
+  })
+})

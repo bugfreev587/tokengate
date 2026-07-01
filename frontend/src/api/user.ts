@@ -10,13 +10,53 @@ import {
   type WeChatOAuthPublicSettings,
 } from './auth'
 import type {
+  AccountPlatform,
+  AccountType,
   User,
   ChangePasswordRequest,
   NotifyEmailEntry,
   UserAuthProvider,
   UserAffiliateDetail,
-  AffiliateTransferResponse
+  AffiliateTransferResponse,
+  PaginatedResponse,
 } from '@/types'
+
+export interface ConnectedAccountSummary {
+  id: number
+  name: string
+  platform: AccountPlatform
+  type: AccountType
+  status: 'active' | 'inactive' | 'error' | string
+  email?: string
+  plan_type?: string
+  group_id?: number
+  group_name?: string
+  capacity_source: 'connected_account' | 'tokengate' | string
+  last_used_at?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface OpenAIConnectedAccountAuthUrlRequest {
+  proxy_id?: number | null
+  redirect_uri?: string
+}
+
+export interface OpenAIConnectedAccountAuthUrlResponse {
+  auth_url: string
+  session_id: string
+}
+
+export interface OpenAIConnectedAccountExchangeRequest {
+  session_id: string
+  code: string
+  state: string
+  redirect_uri?: string
+  proxy_id?: number | null
+  name?: string
+  concurrency?: number
+  priority?: number
+}
 
 /**
  * Get current user profile
@@ -185,6 +225,49 @@ export async function transferAffiliateQuota(): Promise<AffiliateTransferRespons
   return data
 }
 
+export async function listConnectedAccounts(
+  page: number = 1,
+  pageSize: number = 20
+): Promise<PaginatedResponse<ConnectedAccountSummary>> {
+  const { data } = await apiClient.get<PaginatedResponse<ConnectedAccountSummary>>('/user/accounts', {
+    params: {
+      page,
+      page_size: pageSize,
+    },
+  })
+  return data
+}
+
+export async function generateOpenAIConnectedAccountAuthUrl(
+  payload: OpenAIConnectedAccountAuthUrlRequest = {}
+): Promise<OpenAIConnectedAccountAuthUrlResponse> {
+  const { data } = await apiClient.post<OpenAIConnectedAccountAuthUrlResponse>(
+    '/user/accounts/openai/auth-url',
+    payload
+  )
+  return data
+}
+
+export async function exchangeOpenAIConnectedAccountCode(
+  payload: OpenAIConnectedAccountExchangeRequest
+): Promise<ConnectedAccountSummary> {
+  const { data } = await apiClient.post<ConnectedAccountSummary>(
+    '/user/accounts/openai/exchange-code',
+    payload
+  )
+  return data
+}
+
+export async function refreshOpenAIConnectedAccount(id: number): Promise<ConnectedAccountSummary> {
+  const { data } = await apiClient.post<ConnectedAccountSummary>(`/user/accounts/${id}/refresh`)
+  return data
+}
+
+export async function deleteConnectedAccount(id: number): Promise<{ deleted: boolean }> {
+  const { data } = await apiClient.delete<{ deleted: boolean }>(`/user/accounts/${id}`)
+  return data
+}
+
 export const userAPI = {
   getProfile,
   updateProfile,
@@ -199,7 +282,12 @@ export const userAPI = {
   buildOAuthBindingStartURL,
   startOAuthBinding,
   getAffiliateDetail,
-  transferAffiliateQuota
+  transferAffiliateQuota,
+  listConnectedAccounts,
+  generateOpenAIConnectedAccountAuthUrl,
+  exchangeOpenAIConnectedAccountCode,
+  refreshOpenAIConnectedAccount,
+  deleteConnectedAccount,
 }
 
 export default userAPI

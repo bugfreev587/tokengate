@@ -6544,6 +6544,45 @@ export default {
     usageOf: '已用 {used} / {limit}'
   },
 
+  // User Connected Accounts Page
+  userAccounts: {
+    title: 'Accounts',
+    description: '连接您自己的 AI 账号，为 API Key 创建仅自己可用的私有分组。',
+    connectOpenAI: '连接 OpenAI',
+    openAIConnectTitle: '连接 OpenAI 账号',
+    openAIConnectSubtitle: '授权 TokenGate 后，将返回的 OAuth code 和 state 粘贴回来完成绑定。',
+    openAuthorization: '打开授权页面',
+    oauthReadyState: '授权已准备好。请在新标签页完成服务商授权，然后回到这里继续。',
+    accountName: '账号名称',
+    accountNamePlaceholder: '我的 OpenAI 账号',
+    oauthCode: 'OAuth code',
+    oauthState: 'OAuth state',
+    finishConnection: '完成绑定',
+    privateGroupPending: '账号绑定成功后会自动生成私有分组。',
+    capacitySourceConnected: '自带账号',
+    refresh: '刷新',
+    refreshSuccess: '账号已刷新',
+    refreshFailed: '刷新账号失败',
+    deleteTitle: '移除账号',
+    deleteMessage: '确认移除这个已连接账号及其私有分组？正在使用该分组的 API Key 将无法继续调用。',
+    deleteSuccess: '账号已移除',
+    deleteFailed: '移除账号失败',
+    emptyTitle: '暂无已连接账号',
+    emptyDescription: '连接您自己的 OpenAI 账号后，会生成一个只有您的 API Key 可使用的私有分组。',
+    loadFailed: '加载已连接账号失败',
+    authUrlFailed: '启动 OAuth 授权失败',
+    exchangeFailed: '完成 OAuth 绑定失败',
+    oauthFieldsRequired: '请填写 OAuth code 和 state',
+    connectedSuccess: '账号已连接',
+    columns: {
+      name: '名称',
+      platform: '平台',
+      status: '状态',
+      group: '私有分组',
+      lastUsed: '最后使用'
+    }
+  },
+
   // Onboarding Tour
   onboarding: {
     restartTour: '重新查看新手引导',

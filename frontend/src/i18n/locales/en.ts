@@ -6388,6 +6388,45 @@ export default {
     usageOf: '{used} of {limit}'
   },
 
+  // User Connected Accounts Page
+  userAccounts: {
+    title: 'Accounts',
+    description: 'Connect your own AI accounts for private API key groups.',
+    connectOpenAI: 'Connect OpenAI',
+    openAIConnectTitle: 'Connect an OpenAI account',
+    openAIConnectSubtitle: 'Authorize TokenGate, then paste the returned OAuth code and state to finish linking this account.',
+    openAuthorization: 'Open authorization',
+    oauthReadyState: 'Authorization prepared. Complete the provider flow in the new tab, then return here.',
+    accountName: 'Account name',
+    accountNamePlaceholder: 'My OpenAI account',
+    oauthCode: 'OAuth code',
+    oauthState: 'OAuth state',
+    finishConnection: 'Finish connection',
+    privateGroupPending: 'Private group will appear after the account is linked.',
+    capacitySourceConnected: 'BYO account',
+    refresh: 'Refresh',
+    refreshSuccess: 'Account refreshed',
+    refreshFailed: 'Failed to refresh account',
+    deleteTitle: 'Remove account',
+    deleteMessage: 'Remove this connected account and its private group? Existing API keys using that group will stop working.',
+    deleteSuccess: 'Account removed',
+    deleteFailed: 'Failed to remove account',
+    emptyTitle: 'No connected accounts',
+    emptyDescription: 'Connect your own OpenAI account to create a private group only your API keys can use.',
+    loadFailed: 'Failed to load connected accounts',
+    authUrlFailed: 'Failed to start OAuth authorization',
+    exchangeFailed: 'Failed to finish OAuth connection',
+    oauthFieldsRequired: 'OAuth code and state are required',
+    connectedSuccess: 'Account connected',
+    columns: {
+      name: 'Name',
+      platform: 'Platform',
+      status: 'Status',
+      group: 'Private group',
+      lastUsed: 'Last used'
+    }
+  },
+
   // Onboarding Tour
   onboarding: {
     restartTour: 'Restart Onboarding Tour',
