@@ -474,7 +474,7 @@ function statusLabel(status: string): string {
 
 function formatDateTime(value?: string | null): string {
   if (!value) {
-    return t('common.never')
+    return t('common.time.never')
   }
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) {
