@@ -35,6 +35,7 @@ interface Props {
   subscriptionType?: SubscriptionType
   rateMultiplier?: number
   userRateMultiplier?: number | null // 用户专属倍率
+  capacitySource?: string
   showRate?: boolean
   daysRemaining?: number | null // 剩余天数（订阅类型时使用）
   /**
@@ -56,10 +57,12 @@ const props = withDefaults(defineProps<Props>(), {
 const { t } = useI18n()
 
 const isSubscription = computed(() => props.subscriptionType === 'subscription')
+const isConnectedAccountCapacity = computed(() => props.capacitySource === 'connected_account')
 
 // 是否有专属倍率（且与默认倍率不同）
 const hasCustomRate = computed(() => {
   return (
+    !isConnectedAccountCapacity.value &&
     props.userRateMultiplier !== null &&
     props.userRateMultiplier !== undefined &&
     props.rateMultiplier !== undefined &&
@@ -70,6 +73,7 @@ const hasCustomRate = computed(() => {
 // 是否显示右侧标签
 const showLabel = computed(() => {
   if (!props.showRate) return false
+  if (isConnectedAccountCapacity.value) return true
   // 订阅类型：显示天数或"订阅"
   if (isSubscription.value) return true
   // 标准类型：显示倍率（包括专属倍率）
@@ -78,6 +82,9 @@ const showLabel = computed(() => {
 
 // Label text
 const labelText = computed(() => {
+  if (isConnectedAccountCapacity.value) {
+    return t('keys.byoGroupLabel')
+  }
   const rateLabel = props.rateMultiplier !== undefined ? `${props.rateMultiplier}x` : ''
   if (isSubscription.value && !props.alwaysShowRate) {
     // 如果有剩余天数，显示天数
@@ -96,6 +103,10 @@ const labelText = computed(() => {
 // Label style based on type and days remaining
 const labelClass = computed(() => {
   const base = 'px-1.5 py-0.5 rounded text-[10px] font-semibold'
+
+  if (isConnectedAccountCapacity.value) {
+    return `${base} bg-emerald-200/70 text-emerald-800 dark:bg-emerald-800/50 dark:text-emerald-200`
+  }
 
   if (!isSubscription.value) {
     // Standard: subtle background (不再为专属倍率使用不同的背景色)
@@ -129,6 +140,10 @@ const labelClass = computed(() => {
 
 // Badge color based on platform and subscription type
 const badgeClass = computed(() => {
+  if (isConnectedAccountCapacity.value) {
+    return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+  }
+
   if (props.platform === 'anthropic') {
     // Claude: orange theme
     return isSubscription.value

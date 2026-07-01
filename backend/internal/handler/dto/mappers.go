@@ -172,6 +172,7 @@ func groupFromServiceBase(g *service.Group) Group {
 		RateMultiplier:                  g.RateMultiplier,
 		IsExclusive:                     g.IsExclusive,
 		Status:                          g.Status,
+		CapacitySource:                  service.NormalizeCapacitySource(g.CapacitySource),
 		SubscriptionType:                g.SubscriptionType,
 		DailyLimitUSD:                   g.DailyLimitUSD,
 		WeeklyLimitUSD:                  g.WeeklyLimitUSD,

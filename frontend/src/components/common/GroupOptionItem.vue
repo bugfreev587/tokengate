@@ -10,6 +10,7 @@
         :name="name"
         :platform="platform"
         :subscription-type="subscriptionType"
+        :capacity-source="capacitySource"
         :show-rate="false"
         class="groupOptionItemBadge"
       />
@@ -20,12 +21,24 @@
       >
         {{ description }}
       </span>
+      <span
+        v-if="isConnectedAccountCapacity"
+        class="mt-1.5 w-full text-left text-xs leading-relaxed text-emerald-700 dark:text-emerald-300"
+      >
+        {{ t('keys.byoGroupDescription') }}
+      </span>
     </div>
 
     <!-- Right: rate pill + checkmark (vertically centered to first row) -->
     <div class="flex shrink-0 items-center gap-2 pt-0.5">
+      <span
+        v-if="isConnectedAccountCapacity"
+        class="inline-flex items-center whitespace-nowrap rounded-md bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
+      >
+        {{ t('keys.byoGroupLabel') }}
+      </span>
       <!-- Rate pill (platform color) -->
-      <span v-if="rateMultiplier !== undefined" :class="['inline-flex items-center whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold', ratePillClass]">
+      <span v-else-if="rateMultiplier !== undefined" :class="['inline-flex items-center whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold', ratePillClass]">
         <template v-if="hasCustomRate">
           <span class="mr-1 line-through opacity-50">{{ rateMultiplier }}x</span>
           <span class="font-bold">{{ userRateMultiplier }}x</span>
@@ -51,6 +64,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import GroupBadge from './GroupBadge.vue'
 import type { SubscriptionType, GroupPlatform } from '@/types'
 
@@ -60,6 +74,7 @@ interface Props {
   subscriptionType?: SubscriptionType
   rateMultiplier?: number
   userRateMultiplier?: number | null
+  capacitySource?: string
   description?: string | null
   selected?: boolean
   showCheckmark?: boolean
@@ -72,9 +87,13 @@ const props = withDefaults(defineProps<Props>(), {
   userRateMultiplier: null
 })
 
+const { t } = useI18n()
+const isConnectedAccountCapacity = computed(() => props.capacitySource === 'connected_account')
+
 // Whether user has a custom rate different from default
 const hasCustomRate = computed(() => {
   return (
+    !isConnectedAccountCapacity.value &&
     props.userRateMultiplier !== null &&
     props.userRateMultiplier !== undefined &&
     props.rateMultiplier !== undefined &&

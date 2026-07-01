@@ -112,6 +112,7 @@
                   :subscription-type="row.group.subscription_type"
                   :rate-multiplier="row.group.rate_multiplier"
                   :user-rate-multiplier="userGroupRates[row.group.id]"
+                  :capacity-source="row.group.capacity_source"
                 />
                 <span v-else class="text-sm text-gray-400 dark:text-dark-500">{{
                   t('keys.noGroup')
@@ -451,6 +452,7 @@
                 :subscription-type="(option as unknown as GroupOption).subscriptionType"
                 :rate-multiplier="(option as unknown as GroupOption).rate"
                 :user-rate-multiplier="(option as unknown as GroupOption).userRate"
+                :capacity-source="(option as unknown as GroupOption).capacitySource"
               />
               <span v-else class="text-gray-400">{{ t('keys.selectGroup') }}</span>
             </template>
@@ -461,6 +463,7 @@
                 :subscription-type="(option as unknown as GroupOption).subscriptionType"
                 :rate-multiplier="(option as unknown as GroupOption).rate"
                 :user-rate-multiplier="(option as unknown as GroupOption).userRate"
+                :capacity-source="(option as unknown as GroupOption).capacitySource"
                 :description="(option as unknown as GroupOption).description"
                 :selected="selected"
               />
@@ -1195,6 +1198,7 @@
               :subscription-type="option.subscriptionType"
               :rate-multiplier="option.rate"
               :user-rate-multiplier="option.userRate"
+              :capacity-source="option.capacitySource"
               :description="option.description"
               :selected="
                 selectedKeyForGroup?.group_id === option.value ||
@@ -1265,6 +1269,7 @@ interface GroupOption {
   userRate: number | null
   subscriptionType: SubscriptionType
   platform: GroupPlatform
+  capacitySource?: 'tokengate' | 'connected_account'
 }
 
 const appStore = useAppStore()
@@ -1425,7 +1430,8 @@ const groupOptions = computed(() =>
     rate: group.rate_multiplier,
     userRate: userGroupRates.value[group.id] ?? null,
     subscriptionType: group.subscription_type,
-    platform: group.platform
+    platform: group.platform,
+    capacitySource: group.capacity_source
   }))
 )
 

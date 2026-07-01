@@ -642,6 +642,8 @@ export default {
     group: '分组',
     noGroup: '无分组',
     searchGroup: '搜索分组...',
+    byoGroupLabel: '自带账号',
+    byoGroupDescription: '使用您连接的 AI 账号，不消耗 TokenGate 余额。',
     noGroupFound: '未找到匹配的分组',
     created: '创建时间',
     copyToClipboard: '复制到剪贴板',

@@ -645,6 +645,8 @@ export default {
     group: 'Group',
     noGroup: 'No group',
     searchGroup: 'Search groups...',
+    byoGroupLabel: 'BYO account',
+    byoGroupDescription: 'Uses your connected AI account. TokenGate token balance is not charged.',
     noGroupFound: 'No groups found',
     created: 'Created',
     copyToClipboard: 'Copy to clipboard',
