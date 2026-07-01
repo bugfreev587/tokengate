@@ -1572,6 +1572,11 @@ func (r *accountRepository) queryAccountsByGroup(ctx context.Context, groupID in
 	// 通过 account_groups 中间表查询账号，并按需叠加状态/平台/调度能力过滤。
 	preds := make([]dbpredicate.Account, 0, 6)
 	preds = append(preds, dbaccount.DeletedAtIsNil())
+	if ownerUserID, ok, err := r.connectedGroupOwnerUserID(ctx, groupID); err != nil {
+		return nil, err
+	} else if ok {
+		preds = append(preds, dbaccount.OwnerUserIDEQ(ownerUserID))
+	}
 	if opts.status != "" {
 		preds = append(preds, dbaccount.StatusEQ(opts.status))
 	}
@@ -1625,6 +1630,24 @@ func (r *accountRepository) queryAccountsByGroup(ctx context.Context, groupID in
 	}
 
 	return r.accountsToService(ctx, accounts)
+}
+
+func (r *accountRepository) connectedGroupOwnerUserID(ctx context.Context, groupID int64) (int64, bool, error) {
+	groupModel, err := r.client.Group.Query().
+		Where(dbgroup.IDEQ(groupID)).
+		Select(dbgroup.FieldOwnerUserID, dbgroup.FieldCapacitySource).
+		Only(ctx)
+	if err != nil {
+		if dbent.IsNotFound(err) {
+			return 0, false, nil
+		}
+		return 0, false, err
+	}
+	group := groupEntityToService(groupModel)
+	if !group.IsUserOwnedConnectedAccount() || group.OwnerUserID == nil {
+		return 0, false, nil
+	}
+	return *group.OwnerUserID, true, nil
 }
 
 func (r *accountRepository) accountsToService(ctx context.Context, accounts []*dbent.Account) ([]service.Account, error) {
