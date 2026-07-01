@@ -321,6 +321,7 @@ func TestAPIContracts(t *testing.T) {
 						"rate_multiplier": 1.5,
 						"is_exclusive": false,
 						"status": "active",
+						"capacity_source": "tokengate",
 						"subscription_type": "standard",
 						"daily_limit_usd": null,
 						"weekly_limit_usd": null,
