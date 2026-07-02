@@ -204,6 +204,38 @@ describe('User AccountsView', () => {
     expect(exchangePayload).not.toHaveProperty('redirect_uri')
   })
 
+  it('extracts OpenAI code and state from a pasted localhost callback URL', async () => {
+    generateConnectedAccountAuthUrl.mockResolvedValueOnce({
+      auth_url: 'https://auth.example.com/start',
+      session_id: 'session-parse-callback',
+    })
+
+    const wrapper = mountView()
+    await flushPromises()
+
+    await wrapper.get('[data-testid="connect-account"]').trigger('click')
+    await wrapper.get('[data-testid="provider-option-openai"]').trigger('click')
+    await flushPromises()
+
+    await wrapper.get('[data-testid="oauth-code"]').setValue(
+      'http://localhost:1455/auth/callback?code=ac_test-code&scope=openid+profile+email+offline_access&state=state-from-callback'
+    )
+    await flushPromises()
+
+    expect((wrapper.get('[data-testid="oauth-code"]').element as HTMLInputElement).value).toBe('ac_test-code')
+    expect((wrapper.get('[data-testid="oauth-state"]').element as HTMLInputElement).value).toBe('state-from-callback')
+
+    await wrapper.get('[data-testid="finish-oauth"]').trigger('click')
+    await flushPromises()
+
+    expect(exchangeConnectedAccountCode).toHaveBeenCalledWith('openai', {
+      session_id: 'session-parse-callback',
+      code: 'ac_test-code',
+      state: 'state-from-callback',
+      name: undefined,
+    })
+  })
+
   it('refreshes and deletes an account from row actions', async () => {
     const wrapper = mountView()
     await flushPromises()

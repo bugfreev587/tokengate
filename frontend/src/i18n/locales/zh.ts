@@ -6575,6 +6575,8 @@ export default {
     accountName: '账号名称',
     accountNamePlaceholder: '我的 AI 账号',
     oauthCode: 'OAuth code',
+    oauthCodePlaceholder: '粘贴完整回调 URL，或只粘贴 code',
+    oauthCodeHint: '如果授权后浏览器跳到 localhost，把地址栏里的完整地址粘贴到这里。',
     oauthState: 'OAuth state',
     finishConnection: '完成绑定',
     privateGroupPending: '账号绑定成功后会自动生成私有分组。',

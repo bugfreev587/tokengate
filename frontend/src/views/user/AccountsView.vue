@@ -135,12 +135,16 @@
               <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ t('userAccounts.oauthCode') }}
               </label>
-              <input
+              <textarea
                 v-model="oauthCode"
                 data-testid="oauth-code"
-                class="input w-full font-mono text-sm"
+                class="input min-h-[88px] w-full resize-none font-mono text-sm"
                 autocomplete="off"
+                :placeholder="t('userAccounts.oauthCodePlaceholder')"
               />
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {{ t('userAccounts.oauthCodeHint') }}
+              </p>
             </div>
             <div v-if="requiresOAuthState">
               <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -279,7 +283,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   deleteConnectedAccount,
@@ -378,6 +382,10 @@ const canFinishOAuth = computed(() => (
   && (!requiresOAuthState.value || !!oauthState.value.trim())
 ))
 
+watch(oauthCode, (value) => {
+  applyOAuthCallbackInput(value)
+})
+
 const columns = computed<Column[]>(() => [
   { key: 'name', label: t('userAccounts.columns.name') },
   { key: 'platform', label: t('userAccounts.columns.platform') },
@@ -436,6 +444,7 @@ async function startConnection(provider: ConnectedAccountOAuthProvider) {
 }
 
 async function finishOAuth() {
+  applyOAuthCallbackInput(oauthCode.value)
   if (!canFinishOAuth.value) {
     appStore.showError(t('userAccounts.oauthFieldsRequired'))
     return
@@ -444,7 +453,7 @@ async function finishOAuth() {
   try {
     await exchangeConnectedAccountCode(selectedProvider.value, {
       session_id: sessionId.value,
-      code: oauthCode.value.trim(),
+      code: normalizeOAuthCode(oauthCode.value),
       ...(oauthState.value.trim() ? { state: oauthState.value.trim() } : {}),
       ...(providerNeedsRedirectURI(selectedProvider.value) ? { redirect_uri: redirectUri.value || resolveRedirectUri() } : {}),
       ...(selectedProviderOption.value.defaultOAuthType ? { oauth_type: selectedProviderOption.value.defaultOAuthType } : {}),
@@ -535,10 +544,10 @@ function restoreOAuthState() {
     }
   }
 
-  const currentURL = new URL(window.location.href)
-  oauthCode.value = currentURL.searchParams.get('code') || oauthCode.value
-  oauthState.value = currentURL.searchParams.get('state') || oauthState.value
-  if (oauthCode.value || oauthState.value) {
+  const callback = parseOAuthCallback(window.location.href)
+  if (callback) {
+    oauthCode.value = callback.code
+    oauthState.value = callback.state || oauthState.value
     authPanelOpen.value = true
   }
 }
@@ -587,6 +596,44 @@ function parseOAuthState(url: string): string {
   } catch {
     const match = url.match(/[?&]state=([^&]+)/)
     return match?.[1] ? decodeURIComponent(match[1]) : ''
+  }
+}
+
+function applyOAuthCallbackInput(value: string) {
+  const callback = parseOAuthCallback(value)
+  if (!callback) return
+  if (requiresOAuthState.value && callback.state) {
+    oauthState.value = callback.state
+  }
+  if (callback.code && callback.code !== value.trim()) {
+    oauthCode.value = callback.code
+  }
+}
+
+function normalizeOAuthCode(value: string): string {
+  return parseOAuthCallback(value)?.code || value.trim()
+}
+
+function parseOAuthCallback(value: string): { code: string; state: string } | null {
+  const trimmed = value.trim()
+  if (!trimmed.includes('code=')) return null
+  try {
+    const parsed = new URL(trimmed)
+    const code = parsed.searchParams.get('code') || ''
+    if (!code) return null
+    return {
+      code,
+      state: parsed.searchParams.get('state') || '',
+    }
+  } catch {
+    const codeMatch = trimmed.match(/[?&]code=([^&]+)/)
+    const code = codeMatch?.[1] ? decodeURIComponent(codeMatch[1]) : ''
+    if (!code) return null
+    const stateMatch = trimmed.match(/[?&]state=([^&]+)/)
+    return {
+      code,
+      state: stateMatch?.[1] ? decodeURIComponent(stateMatch[1]) : '',
+    }
   }
 }
 

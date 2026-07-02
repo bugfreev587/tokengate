@@ -6419,6 +6419,8 @@ export default {
     accountName: 'Account name',
     accountNamePlaceholder: 'My AI account',
     oauthCode: 'OAuth code',
+    oauthCodePlaceholder: 'Paste the full callback URL or only the code',
+    oauthCodeHint: 'If the browser lands on localhost after authorization, paste that full address here.',
     oauthState: 'OAuth state',
     finishConnection: 'Finish connection',
     privateGroupPending: 'Private group will appear after the account is linked.',
