@@ -6570,6 +6570,7 @@ export default {
     connectProviderSubtitle: '授权 TokenGate 后，将返回的 OAuth code 和 state 粘贴回来完成绑定。',
     openAIConnectTitle: '连接 OpenAI 账号',
     openAIConnectSubtitle: '授权 TokenGate 后，将返回的 OAuth code 和 state 粘贴回来完成绑定。',
+    cancelConnection: '取消连接',
     openAuthorization: '打开授权页面',
     oauthReadyState: '授权已准备好。请在新标签页完成服务商授权，然后回到这里继续。',
     accountName: '账号名称',

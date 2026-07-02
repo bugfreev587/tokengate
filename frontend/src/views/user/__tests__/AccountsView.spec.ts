@@ -96,6 +96,8 @@ function mountView() {
 describe('User AccountsView', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    window.sessionStorage.clear()
+    window.history.replaceState({}, '', '/accounts')
     listConnectedAccounts.mockResolvedValue({
       items: [
         {
@@ -206,6 +208,45 @@ describe('User AccountsView', () => {
     expect(exchangePayload).toMatchObject({
       redirect_uri: expect.stringMatching(/\/auth\/callback$/),
     })
+  })
+
+  it('does not reopen stale OAuth drafts on normal page entry', async () => {
+    window.sessionStorage.setItem(
+      'tokengate:user-connected-account-oauth',
+      JSON.stringify({
+        provider: 'openai',
+        authUrl: 'https://auth.example.com/stale-openai-draft',
+        sessionId: 'stale-session',
+        redirectUri: 'https://api.tokengate.to/auth/callback',
+        oauthState: 'stale-state',
+      })
+    )
+
+    const wrapper = mountView()
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('https://auth.example.com/stale-openai-draft')
+    expect(wrapper.find('[data-testid="cancel-oauth"]').exists()).toBe(false)
+    expect(window.sessionStorage.getItem('tokengate:user-connected-account-oauth')).toBeNull()
+  })
+
+  it('lets users cancel an in-progress OAuth draft', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+
+    await wrapper.get('[data-testid="connect-account"]').trigger('click')
+    await wrapper.get('[data-testid="provider-option-openai"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('https://auth.example.com/start')
+    expect(window.sessionStorage.getItem('tokengate:user-connected-account-oauth')).not.toBeNull()
+
+    await wrapper.get('[data-testid="cancel-oauth"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('https://auth.example.com/start')
+    expect(wrapper.find('[data-testid="cancel-oauth"]').exists()).toBe(false)
+    expect(window.sessionStorage.getItem('tokengate:user-connected-account-oauth')).toBeNull()
   })
 
   it('extracts OpenAI code and state from a pasted localhost callback URL', async () => {

@@ -77,18 +77,30 @@
       >
         <div class="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
           <div class="space-y-4">
-            <div class="flex items-center gap-3">
-              <div :class="['flex h-10 w-10 items-center justify-center rounded-lg', selectedProviderOption.iconClass]">
-                <Icon :name="selectedProviderOption.icon" size="md" />
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex min-w-0 items-start gap-3">
+                <div :class="['flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', selectedProviderOption.iconClass]">
+                  <Icon :name="selectedProviderOption.icon" size="md" />
+                </div>
+                <div class="min-w-0">
+                  <h2 class="text-base font-semibold text-gray-900 dark:text-white">
+                    {{ t('userAccounts.connectProviderTitle', { provider: selectedProviderOption.label }) }}
+                  </h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ t('userAccounts.connectProviderSubtitle', { provider: selectedProviderOption.label }) }}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 class="text-base font-semibold text-gray-900 dark:text-white">
-                  {{ t('userAccounts.connectProviderTitle', { provider: selectedProviderOption.label }) }}
-                </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ t('userAccounts.connectProviderSubtitle', { provider: selectedProviderOption.label }) }}
-                </p>
-              </div>
+              <button
+                type="button"
+                data-testid="cancel-oauth"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-dark-700 dark:hover:text-gray-200"
+                :title="t('userAccounts.cancelConnection')"
+                :aria-label="t('userAccounts.cancelConnection')"
+                @click="cancelOAuthDraft"
+              >
+                <Icon name="x" size="sm" :stroke-width="2" />
+              </button>
             </div>
 
             <div
@@ -411,8 +423,8 @@ async function loadAccounts() {
 }
 
 function openProviderPicker() {
+  resetOAuthState()
   providerPickerOpen.value = true
-  authPanelOpen.value = false
   loadError.value = ''
 }
 
@@ -511,45 +523,53 @@ function resetOAuthState() {
   oauthCode.value = ''
   oauthState.value = ''
   accountName.value = ''
-  if (typeof window !== 'undefined') {
-    window.sessionStorage.removeItem(OAUTH_STORAGE_KEY)
-    window.sessionStorage.removeItem(LEGACY_OPENAI_OAUTH_STORAGE_KEY)
-  }
+  clearStoredOAuthSession()
+}
+
+function cancelOAuthDraft() {
+  resetOAuthState()
 }
 
 function restoreOAuthState() {
   if (typeof window === 'undefined') return
-  const raw = window.sessionStorage.getItem(OAUTH_STORAGE_KEY)
-    || window.sessionStorage.getItem(LEGACY_OPENAI_OAUTH_STORAGE_KEY)
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw) as {
-        provider?: string
-        authUrl?: string
-        sessionId?: string
-        redirectUri?: string
-        oauthState?: string
-      }
-      if (isConnectedAccountOAuthProvider(parsed.provider)) {
-        selectedProvider.value = parsed.provider
-      }
-      authUrl.value = parsed.authUrl || ''
-      sessionId.value = parsed.sessionId || ''
-      redirectUri.value = parsed.redirectUri || ''
-      oauthState.value = parsed.oauthState || parseOAuthState(parsed.authUrl || '') || ''
-      authPanelOpen.value = !!sessionId.value
-    } catch {
-      window.sessionStorage.removeItem(OAUTH_STORAGE_KEY)
-      window.sessionStorage.removeItem(LEGACY_OPENAI_OAUTH_STORAGE_KEY)
-    }
+  const callback = parseOAuthCallback(window.location.href)
+  if (!callback) {
+    clearStoredOAuthSession()
+    return
   }
 
-  const callback = parseOAuthCallback(window.location.href)
-  if (callback) {
-    oauthCode.value = callback.code
-    oauthState.value = callback.state || oauthState.value
-    authPanelOpen.value = true
+  const raw = window.sessionStorage.getItem(OAUTH_STORAGE_KEY)
+    || window.sessionStorage.getItem(LEGACY_OPENAI_OAUTH_STORAGE_KEY)
+  if (!raw) return
+
+  try {
+    const parsed = JSON.parse(raw) as {
+      provider?: string
+      authUrl?: string
+      sessionId?: string
+      redirectUri?: string
+      oauthState?: string
+    }
+    if (isConnectedAccountOAuthProvider(parsed.provider)) {
+      selectedProvider.value = parsed.provider
+    }
+    authUrl.value = parsed.authUrl || ''
+    sessionId.value = parsed.sessionId || ''
+    redirectUri.value = parsed.redirectUri || ''
+    oauthState.value = parsed.oauthState || parseOAuthState(parsed.authUrl || '') || ''
+  } catch {
+    clearStoredOAuthSession()
+    return
   }
+
+  if (!sessionId.value) {
+    clearStoredOAuthSession()
+    return
+  }
+
+  oauthCode.value = callback.code
+  oauthState.value = callback.state || oauthState.value
+  authPanelOpen.value = true
 }
 
 function persistOAuthSession() {
@@ -564,6 +584,12 @@ function persistOAuthSession() {
       oauthState: oauthState.value,
     })
   )
+}
+
+function clearStoredOAuthSession() {
+  if (typeof window === 'undefined') return
+  window.sessionStorage.removeItem(OAUTH_STORAGE_KEY)
+  window.sessionStorage.removeItem(LEGACY_OPENAI_OAUTH_STORAGE_KEY)
 }
 
 function buildAuthURLPayload(provider: ConnectedAccountOAuthProvider) {

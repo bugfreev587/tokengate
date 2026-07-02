@@ -6414,6 +6414,7 @@ export default {
     connectProviderSubtitle: 'Authorize TokenGate, then paste the returned OAuth code and state to finish linking this account.',
     openAIConnectTitle: 'Connect an OpenAI account',
     openAIConnectSubtitle: 'Authorize TokenGate, then paste the returned OAuth code and state to finish linking this account.',
+    cancelConnection: 'Cancel connection',
     openAuthorization: 'Open authorization',
     oauthReadyState: 'Authorization prepared. Complete the provider flow in the new tab, then return here.',
     accountName: 'Account name',
