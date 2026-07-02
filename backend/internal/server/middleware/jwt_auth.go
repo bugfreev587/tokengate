@@ -10,6 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	AuthAccessCookieName  = "tokengate_access_token"
+	AuthRefreshCookieName = "tokengate_refresh_token"
+)
+
 // NewJWTAuthMiddleware 创建 JWT 认证中间件
 func NewJWTAuthMiddleware(authService *service.AuthService, userService *service.UserService) JWTAuthMiddleware {
 	return JWTAuthMiddleware(jwtAuth(authService, userService, userService))
@@ -26,24 +31,29 @@ type userActivityToucher interface {
 // jwtAuth JWT认证中间件实现
 func jwtAuth(authService *service.AuthService, userService jwtUserReader, activityToucher userActivityToucher) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 从Authorization header中提取token
+		// 从 Authorization header 提取 token；没有 header 时回退到 HttpOnly cookie。
 		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			AbortWithError(c, 401, "UNAUTHORIZED", "Authorization header is required")
-			return
-		}
+		tokenString := ""
+		if strings.TrimSpace(authHeader) == "" {
+			cookie, err := c.Request.Cookie(AuthAccessCookieName)
+			if err != nil || strings.TrimSpace(cookie.Value) == "" {
+				AbortWithError(c, 401, "UNAUTHORIZED", "Authorization header is required")
+				return
+			}
+			tokenString = strings.TrimSpace(cookie.Value)
+		} else {
+			// 验证Bearer scheme
+			parts := strings.SplitN(authHeader, " ", 2)
+			if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
+				AbortWithError(c, 401, "INVALID_AUTH_HEADER", "Authorization header format must be 'Bearer {token}'")
+				return
+			}
 
-		// 验证Bearer scheme
-		parts := strings.SplitN(authHeader, " ", 2)
-		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
-			AbortWithError(c, 401, "INVALID_AUTH_HEADER", "Authorization header format must be 'Bearer {token}'")
-			return
-		}
-
-		tokenString := strings.TrimSpace(parts[1])
-		if tokenString == "" {
-			AbortWithError(c, 401, "EMPTY_TOKEN", "Token cannot be empty")
-			return
+			tokenString = strings.TrimSpace(parts[1])
+			if tokenString == "" {
+				AbortWithError(c, 401, "EMPTY_TOKEN", "Token cannot be empty")
+				return
+			}
 		}
 
 		// 验证token

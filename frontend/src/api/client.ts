@@ -112,7 +112,10 @@ apiClient.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean
+      suppressAuthRedirect?: boolean
+    }
 
     // Handle common errors
     if (error.response) {
@@ -154,9 +157,10 @@ apiClient.interceptors.response.use(
         const refreshToken = localStorage.getItem('refresh_token')
         const isAuthEndpoint =
           url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh')
+        const canAttemptCookieRefresh = !refreshToken && !isAuthEndpoint
 
-        // If we have a refresh token and this is not an auth endpoint, try to refresh
-        if (refreshToken && !isAuthEndpoint) {
+        // If we have a refresh token, or may have an HttpOnly refresh cookie, try to refresh.
+        if ((refreshToken || canAttemptCookieRefresh) && !isAuthEndpoint) {
           if (isRefreshing) {
             // Wait for the ongoing refresh to complete
             return new Promise((resolve, reject) => {
@@ -187,8 +191,8 @@ apiClient.interceptors.response.use(
             // Call refresh endpoint directly to avoid circular dependency
             const refreshResponse = await axios.post(
               `${API_BASE_URL}/auth/refresh`,
-              { refresh_token: refreshToken },
-              { headers: { 'Content-Type': 'application/json' } }
+              refreshToken ? { refresh_token: refreshToken } : {},
+              { headers: { 'Content-Type': 'application/json' }, withCredentials: true }
             )
 
             const refreshData = refreshResponse.data as ApiResponse<{
@@ -229,9 +233,11 @@ apiClient.interceptors.response.use(
             localStorage.removeItem('refresh_token')
             localStorage.removeItem('auth_user')
             localStorage.removeItem('token_expires_at')
-            sessionStorage.setItem('auth_expired', '1')
+            if (!originalRequest.suppressAuthRedirect) {
+              sessionStorage.setItem('auth_expired', '1')
+            }
 
-            if (!window.location.pathname.includes('/login')) {
+            if (!originalRequest.suppressAuthRedirect && !window.location.pathname.includes('/login')) {
               window.location.href = '/login'
             }
 
@@ -258,11 +264,11 @@ apiClient.interceptors.response.use(
         localStorage.removeItem('refresh_token')
         localStorage.removeItem('auth_user')
         localStorage.removeItem('token_expires_at')
-        if ((hasToken || sentAuth) && !isAuthEndpoint) {
+        if ((hasToken || sentAuth) && !isAuthEndpoint && !originalRequest.suppressAuthRedirect) {
           sessionStorage.setItem('auth_expired', '1')
         }
         // Only redirect if not already on login page
-        if (!window.location.pathname.includes('/login')) {
+        if (!originalRequest.suppressAuthRedirect && !window.location.pathname.includes('/login')) {
           window.location.href = '/login'
         }
       }

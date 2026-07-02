@@ -152,8 +152,13 @@ export async function register(userData: RegisterRequest): Promise<AuthResponse>
  * Get current authenticated user
  * @returns User profile data
  */
-export async function getCurrentUser() {
-  return apiClient.get<CurrentUserResponse>('/auth/me')
+export async function getCurrentUser(options?: { suppressAuthRedirect?: boolean }) {
+  return apiClient.get<CurrentUserResponse>(
+    '/auth/me',
+    options?.suppressAuthRedirect
+      ? ({ suppressAuthRedirect: true } as any)
+      : undefined
+  )
 }
 
 /**
@@ -164,13 +169,11 @@ export async function getCurrentUser() {
 export async function logout(): Promise<void> {
   const refreshToken = getRefreshToken()
 
-  // Try to revoke the refresh token on the server
-  if (refreshToken) {
-    try {
-      await apiClient.post('/auth/logout', { refresh_token: refreshToken })
-    } catch {
-      // Ignore errors - we still want to clear local state
-    }
+  // Try to revoke the refresh token on the server and clear HttpOnly auth cookies.
+  try {
+    await apiClient.post('/auth/logout', refreshToken ? { refresh_token: refreshToken } : {})
+  } catch {
+    // Ignore errors - we still want to clear local state
   }
 
   clearAuthToken()
@@ -294,13 +297,11 @@ export async function prepareOAuthBindAccessTokenCookie(): Promise<void> {
  */
 export async function refreshToken(): Promise<RefreshTokenResponse> {
   const currentRefreshToken = getRefreshToken()
-  if (!currentRefreshToken) {
-    throw new Error('No refresh token available')
-  }
 
-  const { data } = await apiClient.post<RefreshTokenResponse>('/auth/refresh', {
-    refresh_token: currentRefreshToken
-  })
+  const { data } = await apiClient.post<RefreshTokenResponse>(
+    '/auth/refresh',
+    currentRefreshToken ? { refresh_token: currentRefreshToken } : {}
+  )
 
   // Update tokens in localStorage
   setAuthToken(data.access_token)

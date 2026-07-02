@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"log/slog"
+	"net/http"
 	"strings"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
@@ -79,6 +80,8 @@ type AuthResponse struct {
 	User         *dto.User `json:"user"`
 }
 
+const authTokenCookiePath = "/"
+
 func ensureLoginUserActive(user *service.User) error {
 	if user == nil {
 		return infraerrors.Unauthorized("INVALID_USER", "user not found")
@@ -87,6 +90,63 @@ func ensureLoginUserActive(user *service.User) error {
 		return service.ErrUserNotActive
 	}
 	return nil
+}
+
+func (h *AuthHandler) refreshTokenCookieMaxAge() int {
+	if h != nil && h.cfg != nil && h.cfg.JWT.RefreshTokenExpireDays > 0 {
+		return h.cfg.JWT.RefreshTokenExpireDays * 24 * 60 * 60
+	}
+	return 0
+}
+
+func (h *AuthHandler) setAuthTokenCookies(c *gin.Context, accessToken, refreshToken string, accessMaxAge int) {
+	if c == nil {
+		return
+	}
+	secureCookie := isRequestHTTPS(c)
+	accessToken = strings.TrimSpace(accessToken)
+	if accessToken != "" {
+		http.SetCookie(c.Writer, &http.Cookie{
+			Name:     middleware2.AuthAccessCookieName,
+			Value:    accessToken,
+			Path:     authTokenCookiePath,
+			MaxAge:   accessMaxAge,
+			HttpOnly: true,
+			Secure:   secureCookie,
+			SameSite: http.SameSiteLaxMode,
+		})
+	}
+
+	refreshToken = strings.TrimSpace(refreshToken)
+	if refreshToken != "" {
+		http.SetCookie(c.Writer, &http.Cookie{
+			Name:     middleware2.AuthRefreshCookieName,
+			Value:    refreshToken,
+			Path:     authTokenCookiePath,
+			MaxAge:   h.refreshTokenCookieMaxAge(),
+			HttpOnly: true,
+			Secure:   secureCookie,
+			SameSite: http.SameSiteLaxMode,
+		})
+	}
+}
+
+func clearAuthTokenCookies(c *gin.Context) {
+	if c == nil {
+		return
+	}
+	secureCookie := isRequestHTTPS(c)
+	for _, name := range []string{middleware2.AuthAccessCookieName, middleware2.AuthRefreshCookieName} {
+		http.SetCookie(c.Writer, &http.Cookie{
+			Name:     name,
+			Value:    "",
+			Path:     authTokenCookiePath,
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   secureCookie,
+			SameSite: http.SameSiteLaxMode,
+		})
+	}
 }
 
 // respondWithTokenPair 生成 Token 对并返回认证响应
@@ -106,6 +166,7 @@ func (h *AuthHandler) respondWithTokenPair(c *gin.Context, user *service.User) {
 			response.InternalError(c, "Failed to generate token")
 			return
 		}
+		h.setAuthTokenCookies(c, token, "", h.authService.GetAccessTokenExpiresIn())
 		response.Success(c, AuthResponse{
 			AccessToken: token,
 			TokenType:   "Bearer",
@@ -113,6 +174,7 @@ func (h *AuthHandler) respondWithTokenPair(c *gin.Context, user *service.User) {
 		})
 		return
 	}
+	h.setAuthTokenCookies(c, tokenPair.AccessToken, tokenPair.RefreshToken, tokenPair.ExpiresIn)
 	response.Success(c, AuthResponse{
 		AccessToken:  tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
@@ -642,7 +704,7 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 
 // RefreshTokenRequest 刷新Token请求
 type RefreshTokenRequest struct {
-	RefreshToken string `json:"refresh_token" binding:"required"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 // RefreshTokenResponse 刷新Token响应
@@ -657,23 +719,37 @@ type RefreshTokenResponse struct {
 // POST /api/v1/auth/refresh
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	var req RefreshTokenRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "Invalid request: "+err.Error())
+	if c.Request.ContentLength != 0 {
+		if err := c.ShouldBindJSON(&req); err != nil {
+			response.BadRequest(c, "Invalid request: "+err.Error())
+			return
+		}
+	}
+
+	refreshToken := strings.TrimSpace(req.RefreshToken)
+	if refreshToken == "" {
+		if cookie, err := c.Request.Cookie(middleware2.AuthRefreshCookieName); err == nil {
+			refreshToken = strings.TrimSpace(cookie.Value)
+		}
+	}
+	if refreshToken == "" {
+		response.BadRequest(c, "Invalid request: refresh_token is required")
 		return
 	}
 
-	result, err := h.authService.RefreshTokenPair(c.Request.Context(), req.RefreshToken)
+	result, err := h.authService.RefreshTokenPair(c.Request.Context(), refreshToken)
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
 	}
 
 	// Backend mode: block non-admin token refresh
-	if h.settingSvc.IsBackendModeEnabled(c.Request.Context()) && result.UserRole != "admin" {
+	if h.settingSvc != nil && h.settingSvc.IsBackendModeEnabled(c.Request.Context()) && result.UserRole != "admin" {
 		response.Forbidden(c, "Backend mode is active. Only admin login is allowed.")
 		return
 	}
 
+	h.setAuthTokenCookies(c, result.AccessToken, result.RefreshToken, result.ExpiresIn)
 	response.Success(c, RefreshTokenResponse{
 		AccessToken:  result.AccessToken,
 		RefreshToken: result.RefreshToken,
@@ -699,15 +775,23 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	// 允许空请求体（向后兼容）
 	_ = c.ShouldBindJSON(&req)
 
+	refreshToken := strings.TrimSpace(req.RefreshToken)
+	if refreshToken == "" {
+		if cookie, err := c.Request.Cookie(middleware2.AuthRefreshCookieName); err == nil {
+			refreshToken = strings.TrimSpace(cookie.Value)
+		}
+	}
+
 	// 如果提供了Refresh Token，撤销它
-	if req.RefreshToken != "" {
-		if err := h.authService.RevokeRefreshToken(c.Request.Context(), req.RefreshToken); err != nil {
+	if refreshToken != "" {
+		if err := h.authService.RevokeRefreshToken(c.Request.Context(), refreshToken); err != nil {
 			slog.Debug("failed to revoke refresh token", "error", err)
 			// 不影响登出流程
 		}
 	}
 	h.consumePendingOAuthSessionOnLogout(c)
 	clearOAuthLogoutCookies(c)
+	clearAuthTokenCookies(c)
 
 	response.Success(c, LogoutResponse{
 		Message: "Logged out successfully",

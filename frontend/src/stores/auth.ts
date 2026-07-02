@@ -75,6 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null)
   const refreshTokenValue = ref<string | null>(null)
   const tokenExpiresAt = ref<number | null>(null) // 过期时间戳（毫秒）
+  const cookieBackedSession = ref<boolean>(false)
   const runMode = ref<'standard' | 'simple'>('standard')
   const pendingAuthSession = ref<PendingAuthSessionSummary | null>(null)
   let refreshIntervalId: ReturnType<typeof setInterval> | null = null
@@ -83,7 +84,7 @@ export const useAuthStore = defineStore('auth', () => {
   // ==================== Computed ====================
 
   const isAuthenticated = computed(() => {
-    return !!token.value && !!user.value
+    return !!user.value && (!!token.value || cookieBackedSession.value)
   })
 
   const isAdmin = computed(() => {
@@ -100,7 +101,7 @@ export const useAuthStore = defineStore('auth', () => {
    * Call this on app startup to restore session
    * Also starts auto-refresh and immediately fetches latest user data
    */
-  function checkAuth(): void {
+  async function checkAuth(): Promise<void> {
     const savedToken = localStorage.getItem(AUTH_TOKEN_KEY)
     const savedUser = localStorage.getItem(AUTH_USER_KEY)
     const savedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
@@ -110,6 +111,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (savedToken && savedUser) {
       try {
         token.value = savedToken
+        cookieBackedSession.value = false
         user.value = JSON.parse(savedUser)
         refreshTokenValue.value = savedRefreshToken
         tokenExpiresAt.value = savedExpiresAt ? parseInt(savedExpiresAt, 10) : null
@@ -131,6 +133,31 @@ export const useAuthStore = defineStore('auth', () => {
         console.error('Failed to parse saved user data:', error)
         clearAuth({ preservePendingAuthSession: true })
       }
+      return
+    }
+
+    await restoreAuthFromCookie()
+  }
+
+  async function restoreAuthFromCookie(): Promise<void> {
+    try {
+      const response = await authAPI.getCurrentUser({ suppressAuthRedirect: true })
+      if (response.data.run_mode) {
+        runMode.value = response.data.run_mode
+      }
+      const { run_mode: _run_mode, ...userData } = response.data
+
+      token.value = null
+      refreshTokenValue.value = null
+      tokenExpiresAt.value = null
+      user.value = userData
+      cookieBackedSession.value = true
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData))
+      startAutoRefresh()
+    } catch {
+      cookieBackedSession.value = false
+      user.value = null
+      localStorage.removeItem(AUTH_USER_KEY)
     }
   }
 
@@ -143,7 +170,7 @@ export const useAuthStore = defineStore('auth', () => {
     stopAutoRefresh()
 
     refreshIntervalId = setInterval(() => {
-      if (token.value) {
+      if (token.value || cookieBackedSession.value) {
         refreshUser().catch((error) => {
           console.error('Auto-refresh user failed:', error)
         })
@@ -282,6 +309,7 @@ export const useAuthStore = defineStore('auth', () => {
   function setAuthFromResponse(response: AuthResponse): void {
     // Store token and user
     token.value = response.access_token
+    cookieBackedSession.value = false
 
     // Store refresh token if present
     if (response.refresh_token) {
@@ -344,6 +372,7 @@ export const useAuthStore = defineStore('auth', () => {
     stopTokenRefresh()
     token.value = null
     user.value = null
+    cookieBackedSession.value = false
 
     token.value = newToken
     localStorage.setItem(AUTH_TOKEN_KEY, newToken)
@@ -411,7 +440,7 @@ export const useAuthStore = defineStore('auth', () => {
    * @throws Error if not authenticated or request fails
    */
   async function refreshUser(): Promise<User> {
-    if (!token.value) {
+    if (!token.value && !cookieBackedSession.value) {
       throw new Error('Not authenticated')
     }
 
@@ -449,6 +478,7 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     refreshTokenValue.value = null
     tokenExpiresAt.value = null
+    cookieBackedSession.value = false
     user.value = null
     localStorage.removeItem(AUTH_TOKEN_KEY)
     localStorage.removeItem(AUTH_USER_KEY)

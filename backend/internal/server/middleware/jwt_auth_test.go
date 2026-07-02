@@ -126,6 +126,36 @@ func TestJWTAuth_ValidToken_LowercaseBearer(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestJWTAuth_ValidTokenFromHttpOnlyCookie(t *testing.T) {
+	user := &service.User{
+		ID:           1,
+		Email:        "test@example.com",
+		Role:         "user",
+		Status:       service.StatusActive,
+		Concurrency:  5,
+		TokenVersion: 1,
+	}
+	router, authSvc := newJWTTestEnv(map[int64]*service.User{1: user})
+
+	token, err := authSvc.GenerateToken(user)
+	require.NoError(t, err)
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/protected", nil)
+	req.AddCookie(&http.Cookie{
+		Name:  "tokengate_access_token",
+		Value: token,
+	})
+	router.ServeHTTP(w, req)
+
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var body map[string]any
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &body))
+	require.Equal(t, float64(1), body["user_id"])
+	require.Equal(t, "user", body["role"])
+}
+
 func TestJWTAuth_ValidToken_TouchesLastActive(t *testing.T) {
 	user := &service.User{
 		ID:           1,

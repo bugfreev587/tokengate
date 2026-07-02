@@ -185,6 +185,20 @@ describe('useAuthStore', () => {
       expect(store.isAuthenticated).toBe(false)
     })
 
+    it('localStorage 无数据但存在后端 cookie 会从当前用户接口恢复认证状态', async () => {
+      mockGetCurrentUser.mockResolvedValue({ data: fakeUser })
+
+      const store = useAuthStore()
+      await store.checkAuth()
+
+      expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
+      expect(store.token).toBeNull()
+      expect(store.user).toEqual(fakeUser)
+      expect(store.isAuthenticated).toBe(true)
+      expect(localStorage.getItem('auth_user')).toBe(JSON.stringify(fakeUser))
+      expect(localStorage.getItem('auth_token')).toBeNull()
+    })
+
     it('localStorage 中用户数据损坏时清除状态', () => {
       localStorage.setItem('auth_token', 'saved-token')
       localStorage.setItem('auth_user', 'invalid-json{{{')
