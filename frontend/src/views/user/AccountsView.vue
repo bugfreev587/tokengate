@@ -573,7 +573,7 @@ function buildAuthURLPayload(provider: ConnectedAccountOAuthProvider) {
 }
 
 function providerNeedsRedirectURI(provider: ConnectedAccountOAuthProvider): boolean {
-  return provider === 'openai' || provider === 'gemini'
+  return provider === 'gemini'
 }
 
 function isConnectedAccountOAuthProvider(provider: unknown): provider is ConnectedAccountOAuthProvider {

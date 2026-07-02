@@ -184,6 +184,26 @@ describe('User AccountsView', () => {
     expect(listConnectedAccounts).toHaveBeenCalledTimes(2)
   })
 
+  it('uses the Codex OAuth default redirect for OpenAI connections', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+
+    await wrapper.get('[data-testid="connect-account"]').trigger('click')
+    await wrapper.get('[data-testid="provider-option-openai"]').trigger('click')
+    await flushPromises()
+
+    expect(generateConnectedAccountAuthUrl).toHaveBeenCalledWith('openai', {})
+
+    await wrapper.get('[data-testid="oauth-code"]').setValue('oauth-code')
+    await wrapper.get('[data-testid="oauth-state"]').setValue('state-123')
+    await wrapper.get('[data-testid="finish-oauth"]').trigger('click')
+    await flushPromises()
+
+    const exchangePayload = exchangeConnectedAccountCode.mock.calls[0]?.[1]
+    expect(exchangeConnectedAccountCode).toHaveBeenCalledWith('openai', expect.any(Object))
+    expect(exchangePayload).not.toHaveProperty('redirect_uri')
+  })
+
   it('refreshes and deletes an account from row actions', async () => {
     const wrapper = mountView()
     await flushPromises()

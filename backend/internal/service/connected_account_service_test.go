@@ -61,6 +61,36 @@ func TestConnectedAccountServiceCreateOpenAIAccountCreatesPrivateGroup(t *testin
 	require.Equal(t, group.ID, account.Groups[0].ID)
 }
 
+func TestConnectedAccountServiceOpenAIUsesCodexRedirectURI(t *testing.T) {
+	ctx := context.Background()
+	accountRepo := newConnectedAccountRepoFake()
+	groupRepo := newConnectedGroupRepoFake()
+	oauth := &connectedOpenAIOAuthFake{
+		tokenInfo: &OpenAITokenInfo{
+			AccessToken:  "access-secret",
+			RefreshToken: "refresh-secret",
+			ExpiresAt:    time.Now().Add(time.Hour).Unix(),
+			Email:        "owner@example.com",
+		},
+	}
+	svc := NewConnectedAccountService(accountRepo, groupRepo, oauth, nil, nil)
+
+	_, err := svc.GenerateOpenAIAuthURL(ctx, 42, nil, "https://api.tokengate.to/accounts")
+	require.NoError(t, err)
+	require.Empty(t, oauth.generateRedirectURI)
+
+	_, err = svc.CreateOpenAIAccountFromOAuth(ctx, CreateConnectedOpenAIAccountInput{
+		UserID:      42,
+		SessionID:   "session",
+		Code:        "code",
+		State:       "state",
+		RedirectURI: "https://api.tokengate.to/accounts",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, oauth.exchangeInput)
+	require.Empty(t, oauth.exchangeInput.RedirectURI)
+}
+
 func TestConnectedAccountServiceCreateAnthropicAccountCreatesPrivateGroup(t *testing.T) {
 	ctx := context.Background()
 	accountRepo := newConnectedAccountRepoFake()
@@ -223,9 +253,11 @@ func TestConnectedAccountServiceDeleteRemovesOnlyOwnedConnectedGroup(t *testing.
 }
 
 type connectedOpenAIOAuthFake struct {
-	tokenInfo     *OpenAITokenInfo
-	refreshedInfo *OpenAITokenInfo
-	authURLResult *OpenAIAuthURLResult
+	tokenInfo           *OpenAITokenInfo
+	refreshedInfo       *OpenAITokenInfo
+	authURLResult       *OpenAIAuthURLResult
+	generateRedirectURI string
+	exchangeInput       *OpenAIExchangeCodeInput
 }
 
 type connectedAnthropicOAuthFake struct {
@@ -274,14 +306,19 @@ func (f *connectedGeminiOAuthFake) BuildAccountCredentials(tokenInfo *GeminiToke
 	return (&GeminiOAuthService{}).BuildAccountCredentials(tokenInfo)
 }
 
-func (f *connectedOpenAIOAuthFake) GenerateAuthURL(context.Context, *int64, string, string) (*OpenAIAuthURLResult, error) {
+func (f *connectedOpenAIOAuthFake) GenerateAuthURL(_ context.Context, _ *int64, redirectURI string, _ string) (*OpenAIAuthURLResult, error) {
+	f.generateRedirectURI = redirectURI
 	if f.authURLResult != nil {
 		return f.authURLResult, nil
 	}
 	return &OpenAIAuthURLResult{AuthURL: "https://auth.example", SessionID: "session"}, nil
 }
 
-func (f *connectedOpenAIOAuthFake) ExchangeCode(context.Context, *OpenAIExchangeCodeInput) (*OpenAITokenInfo, error) {
+func (f *connectedOpenAIOAuthFake) ExchangeCode(_ context.Context, input *OpenAIExchangeCodeInput) (*OpenAITokenInfo, error) {
+	if input != nil {
+		cp := *input
+		f.exchangeInput = &cp
+	}
 	return f.tokenInfo, nil
 }
 
