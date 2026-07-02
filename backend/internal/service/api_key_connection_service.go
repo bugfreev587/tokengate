@@ -143,9 +143,7 @@ func normalizeConnectionTestBaseURL(raw string) (string, error) {
 		return "", infraerrors.BadRequest("INVALID_BASE_URL", "base url must use http or https")
 	}
 	path := strings.TrimRight(parsed.EscapedPath(), "/")
-	if strings.HasSuffix(path, "/api/v1") {
-		path = strings.TrimSuffix(path, "/api/v1")
-	}
+	path = strings.TrimSuffix(path, "/api/v1")
 	return parsed.Scheme + "://" + parsed.Host + path, nil
 }
 
