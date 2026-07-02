@@ -19,6 +19,7 @@ import {
   deleteConnectedAccount,
   generateConnectedAccountAuthUrl,
   generateOpenAIConnectedAccountAuthUrl,
+  getConnectedAccountModels,
   listConnectedAccounts,
   refreshConnectedAccount,
   type ConnectedAccountSummary,
@@ -186,5 +187,19 @@ describe('user connected accounts api', () => {
       redirect_uri: 'https://tokengate.example.com/auth/callback',
       name: 'OpenAI Main',
     })
+  })
+
+  it('loads available models for an owned connected account', async () => {
+    get.mockResolvedValueOnce({
+      data: [
+        { id: 'gpt-5.4', display_name: 'GPT-5.4' },
+      ],
+    })
+
+    await expect(getConnectedAccountModels(12)).resolves.toEqual([
+      { id: 'gpt-5.4', display_name: 'GPT-5.4' },
+    ])
+
+    expect(get).toHaveBeenCalledWith('/user/accounts/12/models')
   })
 })

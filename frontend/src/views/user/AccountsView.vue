@@ -245,6 +245,16 @@
             <div class="flex items-center justify-end gap-1">
               <button
                 type="button"
+                class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-emerald-50 hover:text-emerald-700 disabled:opacity-50 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-300"
+                :data-testid="`test-account-${row.id}`"
+                :title="t('userAccounts.testConnection')"
+                :disabled="actionLoadingId === row.id"
+                @click="openTestModal(row)"
+              >
+                <Icon name="play" size="sm" />
+              </button>
+              <button
+                type="button"
                 class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 dark:hover:bg-dark-700 dark:hover:text-gray-200"
                 :data-testid="`refresh-account-${row.id}`"
                 :title="t('userAccounts.refresh')"
@@ -291,6 +301,12 @@
       @confirm="confirmDelete"
       @cancel="deleteTarget = null"
     />
+    <AccountTestModal
+      :show="!!testingAccount"
+      :account="testingAccount"
+      scope="user"
+      @close="testingAccount = null"
+    />
   </AppLayout>
 </template>
 
@@ -306,6 +322,7 @@ import {
   type ConnectedAccountOAuthProvider,
   type ConnectedAccountSummary,
 } from '@/api/user'
+import AccountTestModal from '@/components/account/AccountTestModal.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import PlatformTypeBadge from '@/components/common/PlatformTypeBadge.vue'
@@ -353,6 +370,7 @@ const accountName = ref('')
 
 const actionLoadingId = ref<number | null>(null)
 const deleteTarget = ref<ConnectedAccountSummary | null>(null)
+const testingAccount = ref<ConnectedAccountSummary | null>(null)
 
 const providerOptions = computed<ProviderOption[]>(() => [
   {
@@ -492,6 +510,10 @@ async function refreshAccount(account: ConnectedAccountSummary) {
   } finally {
     actionLoadingId.value = null
   }
+}
+
+function openTestModal(account: ConnectedAccountSummary) {
+  testingAccount.value = account
 }
 
 function openDeleteDialog(account: ConnectedAccountSummary) {

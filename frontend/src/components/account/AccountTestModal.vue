@@ -250,8 +250,9 @@ import TextArea from '@/components/common/TextArea.vue'
 import { Icon } from '@/components/icons'
 import { useClipboard } from '@/composables/useClipboard'
 import { adminAPI } from '@/api/admin'
+import { getConnectedAccountModels } from '@/api/user'
 import { useAppStore } from '@/stores/app'
-import type { Account, ClaudeModel } from '@/types'
+import type { ClaudeModel } from '@/types'
 
 const { t } = useI18n()
 const { copyToClipboard } = useClipboard()
@@ -267,10 +268,23 @@ interface PreviewImage {
   mimeType?: string
 }
 
-const props = defineProps<{
+type AccountTestScope = 'admin' | 'user'
+
+interface TestableAccount {
+  id: number
+  name: string
+  platform: string
+  type: string
+  status: string
+}
+
+const props = withDefaults(defineProps<{
   show: boolean
-  account: Account | null
-}>()
+  account: TestableAccount | null
+  scope?: AccountTestScope
+}>(), {
+  scope: 'admin'
+})
 
 const emit = defineEmits<{
   (e: 'close'): void
@@ -324,7 +338,7 @@ const normalizeApiBase = (value?: string | null) => {
   }
 }
 
-const resolvedAdminApiBase = computed(() => {
+const resolvedApiBase = computed(() => {
   const candidates = [
     import.meta.env.VITE_API_BASE_URL as string | undefined,
     appStore.apiBaseUrl,
@@ -347,6 +361,10 @@ const resolvedAdminApiBase = computed(() => {
 
   return '/api/v1'
 })
+
+const accountEndpointPrefix = computed(() => (
+  props.scope === 'user' ? 'user/accounts' : 'admin/accounts'
+))
 
 const sortTestModels = (models: ClaudeModel[]) => {
   const priorityMap = new Map(prioritizedGeminiModels.map((id, index) => [id, index]))
@@ -386,7 +404,9 @@ const loadAvailableModels = async () => {
   loadingModels.value = true
   selectedModelId.value = '' // Reset selection before loading
   try {
-    const models = await adminAPI.accounts.getAvailableModels(props.account.id)
+    const models = props.scope === 'user'
+      ? await getConnectedAccountModels(props.account.id)
+      : await adminAPI.accounts.getAvailableModels(props.account.id)
     availableModels.value = props.account.platform === 'gemini' || props.account.platform === 'antigravity'
       ? sortTestModels(models)
       : models
@@ -458,7 +478,7 @@ const startTest = async () => {
 
   try {
     // Create EventSource for SSE
-    const url = `${resolvedAdminApiBase.value}/admin/accounts/${props.account.id}/test`
+    const url = `${resolvedApiBase.value}/${accountEndpointPrefix.value}/${props.account.id}/test`
 
     // Use fetch with streaming for SSE since EventSource doesn't support POST
     const response = await fetch(url, {

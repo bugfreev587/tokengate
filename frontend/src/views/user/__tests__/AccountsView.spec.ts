@@ -77,11 +77,23 @@ const ConfirmDialogStub = {
     </section>
   `,
 }
+const AccountTestModalStub = {
+  props: ['show', 'account', 'scope'],
+  emits: ['close'],
+  template: `
+    <section v-if="show" data-testid="account-test-modal">
+      <span data-testid="account-test-modal-name">{{ account?.name }}</span>
+      <span data-testid="account-test-modal-scope">{{ scope }}</span>
+      <button data-testid="close-test-modal" @click="$emit('close')">close</button>
+    </section>
+  `,
+}
 
 function mountView() {
   return mount(AccountsView, {
     global: {
       stubs: {
+        AccountTestModal: AccountTestModalStub,
         AppLayout: AppLayoutStub,
         ConfirmDialog: ConfirmDialogStub,
         DataTable: DataTableStub,
@@ -296,5 +308,15 @@ describe('User AccountsView', () => {
 
     expect(deleteConnectedAccount).toHaveBeenCalledWith(12)
     expect(showSuccess).toHaveBeenCalled()
+  })
+
+  it('opens a direct connected account test modal from row actions', async () => {
+    const wrapper = mountView()
+    await flushPromises()
+
+    await wrapper.get('[data-testid="test-account-12"]').trigger('click')
+
+    expect(wrapper.get('[data-testid="account-test-modal-name"]').text()).toBe('OpenAI Main')
+    expect(wrapper.get('[data-testid="account-test-modal-scope"]').text()).toBe('user')
   })
 })

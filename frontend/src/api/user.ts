@@ -12,6 +12,7 @@ import {
 import type {
   AccountPlatform,
   AccountType,
+  ClaudeModel,
   User,
   ChangePasswordRequest,
   NotifyEmailEntry,
@@ -292,6 +293,11 @@ export async function refreshConnectedAccount(id: number): Promise<ConnectedAcco
   return data
 }
 
+export async function getConnectedAccountModels(id: number): Promise<ClaudeModel[]> {
+  const { data } = await apiClient.get<ClaudeModel[]>(`/user/accounts/${id}/models`)
+  return data
+}
+
 export async function deleteConnectedAccount(id: number): Promise<{ deleted: boolean }> {
   const { data } = await apiClient.delete<{ deleted: boolean }>(`/user/accounts/${id}`)
   return data
@@ -319,6 +325,7 @@ export const userAPI = {
   exchangeOpenAIConnectedAccountCode,
   refreshConnectedAccount,
   refreshOpenAIConnectedAccount,
+  getConnectedAccountModels,
   deleteConnectedAccount,
 }
 

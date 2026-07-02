@@ -3,8 +3,9 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { defineComponent } from 'vue'
 import AccountTestModal from '../AccountTestModal.vue'
 
-const { getAvailableModelsMock } = vi.hoisted(() => ({
-  getAvailableModelsMock: vi.fn()
+const { getAvailableModelsMock, getConnectedAccountModelsMock } = vi.hoisted(() => ({
+  getAvailableModelsMock: vi.fn(),
+  getConnectedAccountModelsMock: vi.fn()
 }))
 
 vi.mock('@/api/admin', () => ({
@@ -15,9 +16,21 @@ vi.mock('@/api/admin', () => ({
   }
 }))
 
+vi.mock('@/api/user', () => ({
+  getConnectedAccountModels: getConnectedAccountModelsMock
+}))
+
 vi.mock('@/composables/useClipboard', () => ({
   useClipboard: () => ({
     copyToClipboard: vi.fn()
+  })
+}))
+
+vi.mock('@/stores/app', () => ({
+  useAppStore: () => ({
+    apiBaseUrl: '',
+    showError: vi.fn(),
+    showSuccess: vi.fn()
   })
 }))
 
@@ -99,7 +112,11 @@ describe('AccountTestModal', () => {
 
   beforeEach(() => {
     getAvailableModelsMock.mockReset()
+    getConnectedAccountModelsMock.mockReset()
     getAvailableModelsMock.mockResolvedValue([
+      { id: 'gpt-5.4', display_name: 'GPT-5.4' }
+    ])
+    getConnectedAccountModelsMock.mockResolvedValue([
       { id: 'gpt-5.4', display_name: 'GPT-5.4' }
     ])
     global.fetch = vi.fn().mockResolvedValue({
@@ -146,5 +163,34 @@ describe('AccountTestModal', () => {
       model_id: 'gpt-5.4',
       mode: 'compact'
     })
+  })
+
+  it('uses user connected account endpoints for user-scoped probes', async () => {
+    const wrapper = mount(AccountTestModal, {
+      props: {
+        show: false,
+        account: buildAccount(),
+        scope: 'user'
+      },
+      global: {
+        stubs: {
+          BaseDialog: BaseDialogStub,
+          Select: SelectStub,
+          TextArea: TextAreaStub,
+          Icon: true
+        }
+      }
+    })
+
+    await wrapper.setProps({ show: true })
+    await flushPromises()
+    ;(wrapper.vm as any).selectedModelId = 'gpt-5.4'
+    await (wrapper.vm as any).startTest()
+    await flushPromises()
+
+    expect(getConnectedAccountModelsMock).toHaveBeenCalledWith(1)
+    expect(getAvailableModelsMock).not.toHaveBeenCalled()
+    const [url] = (global.fetch as any).mock.calls[0]
+    expect(url).toContain('/user/accounts/1/test')
   })
 })

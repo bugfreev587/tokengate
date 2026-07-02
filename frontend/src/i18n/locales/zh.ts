@@ -6582,6 +6582,7 @@ export default {
     finishConnection: '完成绑定',
     privateGroupPending: '账号绑定成功后会自动生成私有分组。',
     capacitySourceConnected: '自带账号',
+    testConnection: '测试连接',
     refresh: '刷新',
     refreshSuccess: '账号已刷新',
     refreshFailed: '刷新账号失败',

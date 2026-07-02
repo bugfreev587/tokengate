@@ -284,6 +284,16 @@ func (s *ConnectedAccountService) List(ctx context.Context, userID int64, params
 	return s.accountRepo.ListByOwnerUserID(ctx, userID, params)
 }
 
+func (s *ConnectedAccountService) GetOwnedAccount(ctx context.Context, userID int64, accountID int64) (*Account, error) {
+	if err := validateConnectedAccountUser(userID); err != nil {
+		return nil, err
+	}
+	if s == nil || s.accountRepo == nil {
+		return nil, ErrConnectedAccountUnsupported
+	}
+	return s.accountRepo.GetByIDAndOwnerUserID(ctx, accountID, userID)
+}
+
 func (s *ConnectedAccountService) RefreshAccount(ctx context.Context, userID int64, accountID int64) (*Account, error) {
 	if err := validateConnectedAccountUser(userID); err != nil {
 		return nil, err

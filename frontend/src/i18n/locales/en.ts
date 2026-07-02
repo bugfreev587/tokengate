@@ -6426,6 +6426,7 @@ export default {
     finishConnection: 'Finish connection',
     privateGroupPending: 'Private group will appear after the account is linked.',
     capacitySourceConnected: 'BYO account',
+    testConnection: 'Test connection',
     refresh: 'Refresh',
     refreshSuccess: 'Account refreshed',
     refreshFailed: 'Failed to refresh account',

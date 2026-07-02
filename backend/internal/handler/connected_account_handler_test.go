@@ -48,7 +48,7 @@ func TestConnectedAccountHandlerListRedactsCredentials(t *testing.T) {
 		UpdatedAt: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 	}
 	svc := service.NewConnectedAccountService(accountRepo, groupRepo, &handlerConnectedOpenAIOAuthFake{}, nil, nil)
-	h := NewConnectedAccountHandler(svc)
+	h := NewConnectedAccountHandler(svc, nil, nil)
 	router := gin.New()
 	router.GET("/api/v1/user/accounts", func(c *gin.Context) {
 		c.Set(string(middleware2.ContextKeyUser), middleware2.AuthSubject{UserID: ownerID})
@@ -91,7 +91,7 @@ func TestConnectedAccountHandlerExchangeOpenAICodeCreatesAccount(t *testing.T) {
 		},
 	}
 	svc := service.NewConnectedAccountService(accountRepo, groupRepo, oauth, nil, nil)
-	h := NewConnectedAccountHandler(svc)
+	h := NewConnectedAccountHandler(svc, nil, nil)
 	router := gin.New()
 	router.POST("/api/v1/user/accounts/openai/exchange-code", func(c *gin.Context) {
 		c.Set(string(middleware2.ContextKeyUser), middleware2.AuthSubject{UserID: ownerID})
@@ -132,7 +132,7 @@ func TestConnectedAccountHandlerExchangeAnthropicCodeCreatesAccount(t *testing.T
 		},
 	}
 	svc := service.NewConnectedAccountService(accountRepo, groupRepo, nil, oauth, nil)
-	h := NewConnectedAccountHandler(svc)
+	h := NewConnectedAccountHandler(svc, nil, nil)
 	router := gin.New()
 	router.POST("/api/v1/user/accounts/anthropic/exchange-code", func(c *gin.Context) {
 		c.Set(string(middleware2.ContextKeyUser), middleware2.AuthSubject{UserID: ownerID})
@@ -177,7 +177,7 @@ func TestConnectedAccountHandlerExchangeGeminiCodeCreatesAccount(t *testing.T) {
 		},
 	}
 	svc := service.NewConnectedAccountService(accountRepo, groupRepo, nil, nil, oauth)
-	h := NewConnectedAccountHandler(svc)
+	h := NewConnectedAccountHandler(svc, nil, nil)
 	router := gin.New()
 	router.POST("/api/v1/user/accounts/gemini/exchange-code", func(c *gin.Context) {
 		c.Set(string(middleware2.ContextKeyUser), middleware2.AuthSubject{UserID: ownerID})
@@ -202,6 +202,65 @@ func TestConnectedAccountHandlerExchangeGeminiCodeCreatesAccount(t *testing.T) {
 	require.NotContains(t, w.Body.String(), "gemini-refresh")
 	require.Len(t, accountRepo.accounts, 1)
 	require.Len(t, groupRepo.groups, 1)
+}
+
+func TestConnectedAccountHandlerGetAvailableModelsRequiresOwnership(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ownerID := int64(42)
+	otherOwnerID := int64(99)
+	accountRepo := newHandlerConnectedAccountRepoFake()
+	groupRepo := newHandlerConnectedGroupRepoFake()
+	accountRepo.accounts[12] = &service.Account{
+		ID:          12,
+		Name:        "Other account",
+		Platform:    service.PlatformOpenAI,
+		Type:        service.AccountTypeOAuth,
+		Status:      service.StatusActive,
+		OwnerUserID: &otherOwnerID,
+	}
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, &handlerConnectedOpenAIOAuthFake{}, nil, nil)
+	h := NewConnectedAccountHandler(svc, nil, nil)
+	router := gin.New()
+	router.GET("/api/v1/user/accounts/:id/models", func(c *gin.Context) {
+		c.Set(string(middleware2.ContextKeyUser), middleware2.AuthSubject{UserID: ownerID})
+		h.GetAvailableModels(c)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/user/accounts/12/models", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	require.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func TestConnectedAccountHandlerTestRequiresOwnership(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ownerID := int64(42)
+	otherOwnerID := int64(99)
+	accountRepo := newHandlerConnectedAccountRepoFake()
+	groupRepo := newHandlerConnectedGroupRepoFake()
+	accountRepo.accounts[12] = &service.Account{
+		ID:          12,
+		Name:        "Other account",
+		Platform:    service.PlatformOpenAI,
+		Type:        service.AccountTypeOAuth,
+		Status:      service.StatusActive,
+		OwnerUserID: &otherOwnerID,
+	}
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, &handlerConnectedOpenAIOAuthFake{}, nil, nil)
+	h := NewConnectedAccountHandler(svc, nil, nil)
+	router := gin.New()
+	router.POST("/api/v1/user/accounts/:id/test", func(c *gin.Context) {
+		c.Set(string(middleware2.ContextKeyUser), middleware2.AuthSubject{UserID: ownerID})
+		h.Test(c)
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/user/accounts/12/test", bytes.NewReader([]byte(`{"model_id":"gpt-5.4"}`)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	require.Equal(t, http.StatusNotFound, w.Code)
 }
 
 type handlerConnectedAccountRepoFake struct {

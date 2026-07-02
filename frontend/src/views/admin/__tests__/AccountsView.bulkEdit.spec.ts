@@ -77,6 +77,11 @@ const BulkEditAccountModalStub = {
   template: '<div data-test="bulk-edit-modal" :data-show="String(show)" :data-target-mode="target?.mode ?? \'\'"></div>'
 }
 
+const AccountTestModalStub = {
+  props: ['show', 'account'],
+  template: '<div v-if="show" data-test="account-test-modal">{{ account?.name }}</div>'
+}
+
 describe('admin AccountsView bulk edit scope', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -148,5 +153,81 @@ describe('admin AccountsView bulk edit scope', () => {
 
     expect(wrapper.get('[data-test="bulk-edit-modal"]').attributes('data-show')).toBe('true')
     expect(wrapper.get('[data-test="bulk-edit-modal"]').attributes('data-target-mode')).toBe('filtered')
+  })
+
+  it('opens account test modal from the row actions test button', async () => {
+    listAccounts.mockResolvedValueOnce({
+      items: [
+        {
+          id: 12,
+          name: 'OpenAI Main',
+          platform: 'openai',
+          type: 'oauth',
+          status: 'active',
+          credentials: {},
+          extra: {},
+          groups: [],
+          group_ids: [],
+          created_at: '2026-07-01T09:00:00Z',
+          updated_at: '2026-07-01T09:00:00Z'
+        }
+      ],
+      total: 1,
+      page: 1,
+      page_size: 20,
+      pages: 1
+    })
+
+    const wrapper = mount(AccountsView, {
+      global: {
+        stubs: {
+          AppLayout: { template: '<div><slot /></div>' },
+          TablePageLayout: {
+            template: '<div><slot name="filters" /><slot name="table" /><slot name="pagination" /></div>'
+          },
+          DataTable: {
+            props: ['data'],
+            template: `
+              <div data-test="data-table">
+                <div v-for="row in data" :key="row.id" data-test="account-row">
+                  <slot name="cell-actions" :row="row" />
+                </div>
+              </div>
+            `
+          },
+          Pagination: true,
+          ConfirmDialog: true,
+          AccountTableActions: { template: '<div><slot name="beforeCreate" /><slot name="after" /></div>' },
+          AccountTableFilters: { template: '<div></div>' },
+          AccountBulkActionsBar: true,
+          AccountActionMenu: true,
+          ImportDataModal: true,
+          ReAuthAccountModal: true,
+          AccountTestModal: AccountTestModalStub,
+          AccountStatsModal: true,
+          ScheduledTestsPanel: true,
+          SyncFromCrsModal: true,
+          TempUnschedStatusModal: true,
+          ErrorPassthroughRulesModal: true,
+          TLSFingerprintProfilesModal: true,
+          CreateAccountModal: true,
+          EditAccountModal: true,
+          BulkEditAccountModal: true,
+          PlatformTypeBadge: true,
+          AccountCapacityCell: true,
+          AccountStatusIndicator: true,
+          AccountTodayStatsCell: true,
+          AccountGroupsCell: true,
+          AccountUsageCell: true,
+          Icon: true
+        }
+      }
+    })
+
+    await flushPromises()
+    await wrapper.get('[data-testid="test-account-12"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.get('[data-test="account-test-modal"]').text()).toBe('OpenAI Main')
   })
 })
