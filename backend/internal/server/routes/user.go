@@ -75,6 +75,7 @@ func RegisterUserRoutes(
 		{
 			keys.GET("", h.APIKey.List)
 			keys.GET("/:id", h.APIKey.GetByID)
+			keys.GET("/:id/claude-code/connect", h.APIKey.ClaudeCodeConnect)
 			keys.POST("", h.APIKey.Create)
 			keys.POST("/:id/test-connection", h.APIKey.TestConnection)
 			keys.PUT("/:id", h.APIKey.Update)

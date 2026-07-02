@@ -34,9 +34,14 @@
             <button
               v-for="tab in clientTabs"
               :key="tab.id"
-              @click="activeClientTab = tab.id"
+              :disabled="tab.disabled"
+              :title="tab.disabledReason"
+              @click="activateClientTab(tab)"
               :class="[
                 'whitespace-nowrap py-2.5 px-1 border-b-2 font-medium text-sm transition-colors',
+                tab.disabled
+                  ? 'cursor-not-allowed opacity-50'
+                  : '',
                 activeClientTab === tab.id
                   ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
@@ -138,11 +143,14 @@ import { ref, computed, h, watch, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseDialog from '@/components/common/BaseDialog.vue'
 import Icon from '@/components/icons/Icon.vue'
+import { keysAPI } from '@/api'
 import { useClipboard } from '@/composables/useClipboard'
+import type { ClaudeCodeConnectPayload } from '@/api/keys'
 import type { GroupPlatform } from '@/types'
 
 interface Props {
   show: boolean
+  apiKeyId?: number | null
   apiKey: string
   baseUrl: string
   platform: GroupPlatform | null
@@ -157,6 +165,8 @@ interface TabConfig {
   id: string
   label: string
   icon: Component
+  disabled?: boolean
+  disabledReason?: string
 }
 
 interface FileConfig {
@@ -175,6 +185,10 @@ const { copyToClipboard: clipboardCopy } = useClipboard()
 const copiedIndex = ref<number | null>(null)
 const activeTab = ref<string>('unix')
 const activeClientTab = ref<string>('claude')
+const claudeCodeConnect = ref<ClaudeCodeConnectPayload | null>(null)
+const claudeCodeConnectLoading = ref(false)
+const claudeCodeConnectError = ref<string | null>(null)
+let claudeCodeConnectRequestID = 0
 
 // Reset tabs when platform changes
 const defaultClientTab = computed(() => {
@@ -199,6 +213,11 @@ watch(() => props.platform, () => {
 watch(activeClientTab, () => {
   activeTab.value = 'unix'
 })
+
+const activateClientTab = (tab: TabConfig) => {
+  if (tab.disabled) return
+  activeClientTab.value = tab.id
+}
 
 // Icon components
 const AppleIcon = {
@@ -263,6 +282,19 @@ const SparkleIcon = {
   }
 }
 
+const claudeCodeTabAvailable = computed(() => {
+  if (!props.platform) return false
+  if (props.platform === 'anthropic' || props.platform === 'antigravity') return true
+  return props.platform === 'openai' && props.allowMessagesDispatch === true
+})
+
+const claudeCodeDisabledReason = computed(() => {
+  if (props.platform === 'openai') {
+    return t('keys.useKeyModal.claudeCode.needsDispatch')
+  }
+  return t('keys.useKeyModal.claudeCode.needsCompatibleGroup')
+})
+
 const clientTabs = computed((): TabConfig[] => {
   if (!props.platform) return []
   switch (props.platform) {
@@ -270,15 +302,26 @@ const clientTabs = computed((): TabConfig[] => {
       const tabs: TabConfig[] = [
         { id: 'codex', label: t('keys.useKeyModal.cliTabs.codexCli'), icon: TerminalIcon },
         { id: 'codex-ws', label: t('keys.useKeyModal.cliTabs.codexCliWs'), icon: TerminalIcon },
+        {
+          id: 'claude',
+          label: t('keys.useKeyModal.cliTabs.claudeCode'),
+          icon: TerminalIcon,
+          disabled: !claudeCodeTabAvailable.value,
+          disabledReason: !claudeCodeTabAvailable.value ? claudeCodeDisabledReason.value : undefined
+        },
       ]
-      if (props.allowMessagesDispatch) {
-        tabs.push({ id: 'claude', label: t('keys.useKeyModal.cliTabs.claudeCode'), icon: TerminalIcon })
-      }
       tabs.push({ id: 'opencode', label: t('keys.useKeyModal.cliTabs.opencode'), icon: TerminalIcon })
       return tabs
     }
     case 'gemini':
       return [
+        {
+          id: 'claude',
+          label: t('keys.useKeyModal.cliTabs.claudeCode'),
+          icon: TerminalIcon,
+          disabled: true,
+          disabledReason: claudeCodeDisabledReason.value
+        },
         { id: 'gemini', label: t('keys.useKeyModal.cliTabs.geminiCli'), icon: SparkleIcon },
         { id: 'opencode', label: t('keys.useKeyModal.cliTabs.opencode'), icon: TerminalIcon }
       ]
@@ -356,6 +399,35 @@ const platformNote = computed(() => {
 })
 
 const showPlatformNote = computed(() => activeClientTab.value !== 'opencode')
+
+watch([
+  () => props.show,
+  () => props.apiKeyId,
+  () => activeClientTab.value,
+  () => claudeCodeTabAvailable.value
+], async ([show, apiKeyId, clientTab, available]) => {
+  if (!show || clientTab !== 'claude' || !available || typeof apiKeyId !== 'number' || apiKeyId <= 0) return
+  const requestID = ++claudeCodeConnectRequestID
+  claudeCodeConnectLoading.value = true
+  claudeCodeConnectError.value = null
+  try {
+    const payload = await keysAPI.getClaudeCodeConnect(apiKeyId)
+    if (requestID !== claudeCodeConnectRequestID) return
+    claudeCodeConnect.value = payload
+  } catch (error) {
+    if (requestID !== claudeCodeConnectRequestID) return
+    claudeCodeConnectError.value = error instanceof Error ? error.message : String(error)
+  } finally {
+    if (requestID === claudeCodeConnectRequestID) {
+      claudeCodeConnectLoading.value = false
+    }
+  }
+}, { immediate: true })
+
+watch(() => props.apiKeyId, () => {
+  claudeCodeConnect.value = null
+  claudeCodeConnectError.value = null
+})
 
 const normalizeGatewayBaseUrl = (value?: string | null) => {
   const raw = (value || '').trim()
@@ -455,49 +527,41 @@ const currentFiles = computed((): FileConfig[] => {
 })
 
 function generateAnthropicFiles(baseUrl: string, apiKey: string): FileConfig[] {
-  let path: string
-  let content: string
-
-  switch (activeTab.value) {
-    case 'unix':
-      path = 'Terminal'
-      content = `export ANTHROPIC_BASE_URL="${baseUrl}"
-export ANTHROPIC_AUTH_TOKEN="${apiKey}"
-export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`
-      break
-    case 'cmd':
-      path = 'Command Prompt'
-      content = `set ANTHROPIC_BASE_URL=${baseUrl}
-set ANTHROPIC_AUTH_TOKEN=${apiKey}
-set CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`
-      break
-    case 'powershell':
-      path = 'PowerShell'
-      content = `$env:ANTHROPIC_BASE_URL="${baseUrl}"
-$env:ANTHROPIC_AUTH_TOKEN="${apiKey}"
-$env:CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1`
-      break
-    default:
-      path = 'Terminal'
-      content = ''
-  }
-
-  const vscodeSettingsPath = activeTab.value === 'unix'
+  const settingsPath = activeTab.value === 'unix'
     ? '~/.claude/settings.json'
     : '%userprofile%\\.claude\\settings.json'
 
-  const vscodeContent = `{
-  "env": {
-    "ANTHROPIC_BASE_URL": "${baseUrl}",
-    "ANTHROPIC_AUTH_TOKEN": "${apiKey}",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "CLAUDE_CODE_ATTRIBUTION_HEADER": "0"
-  }
-}`
+  const payloadSettings = claudeCodeConnect.value?.supported
+    ? claudeCodeConnect.value.settings
+    : null
+  const settings = payloadSettings && payloadSettings.env
+    ? payloadSettings
+    : {
+        env: {
+          ANTHROPIC_BASE_URL: baseUrl,
+          ANTHROPIC_AUTH_TOKEN: apiKey,
+          CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY: '1'
+        }
+      }
+  const settingsContent = JSON.stringify(settings, null, 2)
+  const fableModel = claudeCodeConnect.value?.models?.fable
+  const verificationCommand = fableModel
+    ? `claude --model ${fableModel} -p "reply ok"`
+    : 'claude --version\nclaude\n/model'
 
   return [
-    { path, content },
-    { path: vscodeSettingsPath, content: vscodeContent, hint: 'VSCode Claude Code' }
+    {
+      path: settingsPath,
+      content: settingsContent,
+      hint: claudeCodeConnectLoading.value
+        ? t('keys.useKeyModal.claudeCode.loading')
+        : (claudeCodeConnectError.value || t('keys.useKeyModal.claudeCode.settingsHint'))
+    },
+    {
+      path: 'Verification',
+      content: verificationCommand,
+      hint: t('keys.useKeyModal.claudeCode.verifyHint')
+    }
   ]
 }
 

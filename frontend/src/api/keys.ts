@@ -40,6 +40,36 @@ export interface TestApiKeyConnectionRequest {
   models?: string[]
 }
 
+export interface ClaudeCodeConnectSettings {
+  env?: Record<string, string>
+  availableModels?: string[]
+  enforceAvailableModels?: boolean
+}
+
+export interface ClaudeCodeConnectModels {
+  default?: string
+  opus?: string
+  sonnet?: string
+  haiku?: string
+  fable?: string
+  available?: string[]
+}
+
+export interface ClaudeCodeConnectPayload {
+  supported: boolean
+  reason?: string
+  message?: string
+  base_url?: string
+  key_name?: string
+  group_id?: number
+  group_name?: string
+  platform?: string
+  settings: ClaudeCodeConnectSettings
+  optional_policy_settings?: ClaudeCodeConnectSettings
+  models?: ClaudeCodeConnectModels
+  recommended_claude_code_version?: string
+}
+
 /**
  * List all API keys for current user
  * @param page - Page number (default: 1)
@@ -182,6 +212,11 @@ export async function testConnection(
   return data
 }
 
+export async function getClaudeCodeConnect(id: number): Promise<ClaudeCodeConnectPayload> {
+  const { data } = await apiClient.get<ClaudeCodeConnectPayload>(`/keys/${id}/claude-code/connect`)
+  return data
+}
+
 export const keysAPI = {
   list,
   getById,
@@ -189,7 +224,8 @@ export const keysAPI = {
   update,
   delete: deleteKey,
   toggleStatus,
-  testConnection
+  testConnection,
+  getClaudeCodeConnect
 }
 
 export default keysAPI

@@ -964,6 +964,7 @@
     <!-- Use Key Modal -->
     <UseKeyModal
       :show="showUseKeyModal"
+      :api-key-id="selectedKey?.id || null"
       :api-key="selectedKey?.key || ''"
       :base-url="resolvedGatewayBaseUrl"
       :platform="selectedKey?.group?.platform || null"

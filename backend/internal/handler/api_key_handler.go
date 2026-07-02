@@ -310,6 +310,31 @@ func (h *APIKeyHandler) TestConnection(c *gin.Context) {
 	response.Success(c, result)
 }
 
+// ClaudeCodeConnect returns a Claude Code settings payload for the selected API key.
+// GET /api/v1/keys/:id/claude-code/connect
+func (h *APIKeyHandler) ClaudeCodeConnect(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+
+	keyID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c, "Invalid key ID")
+		return
+	}
+
+	payload, err := h.apiKeyService.BuildClaudeCodeConnect(c.Request.Context(), keyID, subject.UserID, service.ClaudeCodeConnectOptions{
+		BaseURL: resolveAPIKeyConnectionGatewayBaseURL(c),
+	})
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, payload)
+}
+
 func resolveAPIKeyConnectionGatewayBaseURL(c *gin.Context) string {
 	if c == nil || c.Request == nil {
 		return ""

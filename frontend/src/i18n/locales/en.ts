@@ -737,6 +737,13 @@ export default {
         codexCliWs: 'Codex CLI (WebSocket)',
         opencode: 'OpenCode',
       },
+      claudeCode: {
+        needsDispatch: 'Claude Code needs Anthropic Messages dispatch enabled for this OpenAI group.',
+        needsCompatibleGroup: 'Claude Code needs an Anthropic-compatible TokenGate group.',
+        loading: 'Loading Claude Code settings from TokenGate...',
+        settingsHint: 'Add this JSON to your Claude Code settings file, then restart Claude Code.',
+        verifyHint: 'Run this after restarting Claude Code to verify the selected key and model.'
+      },
       antigravity: {
         description: 'Configure API access for Antigravity group. Select the configuration method based on your client.',
         claudeCode: 'Claude Code',

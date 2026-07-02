@@ -735,6 +735,13 @@ export default {
         codexCliWs: 'Codex CLI (WebSocket)',
         opencode: 'OpenCode'
       },
+      claudeCode: {
+        needsDispatch: 'Claude Code 需要该 OpenAI 分组启用 Anthropic Messages 调度。',
+        needsCompatibleGroup: 'Claude Code 需要 Anthropic 兼容的 TokenGate 分组。',
+        loading: '正在从 TokenGate 加载 Claude Code 设置...',
+        settingsHint: '将这段 JSON 添加到 Claude Code settings 文件后，重启 Claude Code。',
+        verifyHint: '重启 Claude Code 后运行此命令，验证当前 key 和模型。'
+      },
       antigravity: {
         description: '为 Antigravity 分组配置 API 访问。请根据您使用的客户端选择对应的配置方式。',
         claudeCode: 'Claude Code',

@@ -87,6 +87,80 @@ func TestAPIKeyHandler_TestConnection_UsesForwardedGatewayBaseURL(t *testing.T) 
 	require.Equal(t, 1, envelope.Data.TestedModelCount)
 }
 
+func TestAPIKeyHandler_ClaudeCodeConnect_UsesForwardedGatewayBaseURL(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	groupID := int64(8)
+	repo := &apiKeyHandlerRepoStub{
+		apiKey: &service.APIKey{
+			ID:      45,
+			UserID:  12,
+			Key:     "sk-claude-live",
+			Name:    "claude",
+			GroupID: &groupID,
+			Group: &service.Group{
+				ID:       groupID,
+				Name:     "anthropic-default",
+				Platform: service.PlatformAnthropic,
+			},
+		},
+	}
+
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, "Bearer sk-claude-live", r.Header.Get("Authorization"))
+		require.Equal(t, "/v1/models", r.URL.Path)
+		require.Equal(t, "1000", r.URL.Query().Get("limit"))
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"data": []map[string]string{
+				{"id": "claude-opus-4-8"},
+				{"id": "claude-fable-5"},
+				{"id": "claude-sonnet-4-6"},
+			},
+		})
+	}))
+	defer upstream.Close()
+
+	svc := service.NewAPIKeyService(repo, nil, nil, nil, nil, nil, nil)
+	router := gin.New()
+	handler := NewAPIKeyHandler(svc)
+	router.GET("/api/v1/keys/:id/claude-code/connect", func(c *gin.Context) {
+		c.Set(string(middleware.ContextKeyUser), middleware.AuthSubject{UserID: 12})
+		handler.ClaudeCodeConnect(c)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/keys/45/claude-code/connect", nil)
+	req.Header.Set("X-Forwarded-Proto", "http")
+	req.Header.Set("X-Forwarded-Host", upstream.Listener.Addr().String())
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	var envelope struct {
+		Code int `json:"code"`
+		Data struct {
+			Supported bool   `json:"supported"`
+			BaseURL   string `json:"base_url"`
+			Settings  struct {
+				Env map[string]string `json:"env"`
+			} `json:"settings"`
+			Models struct {
+				Fable string   `json:"fable"`
+				Items []string `json:"available"`
+			} `json:"models"`
+		} `json:"data"`
+	}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &envelope))
+	require.Equal(t, 0, envelope.Code)
+	require.True(t, envelope.Data.Supported)
+	require.Equal(t, upstream.URL, envelope.Data.BaseURL)
+	require.Equal(t, upstream.URL, envelope.Data.Settings.Env["ANTHROPIC_BASE_URL"])
+	require.Equal(t, "sk-claude-live", envelope.Data.Settings.Env["ANTHROPIC_AUTH_TOKEN"])
+	require.Equal(t, "1", envelope.Data.Settings.Env["CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY"])
+	require.Equal(t, "claude-fable-5", envelope.Data.Models.Fable)
+	require.Contains(t, envelope.Data.Models.Items, "claude-fable-5")
+}
+
 type apiKeyHandlerRepoStub struct {
 	apiKey *service.APIKey
 }
