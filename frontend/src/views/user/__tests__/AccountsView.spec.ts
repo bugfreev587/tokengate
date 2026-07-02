@@ -184,7 +184,7 @@ describe('User AccountsView', () => {
     expect(listConnectedAccounts).toHaveBeenCalledTimes(2)
   })
 
-  it('uses the Codex OAuth default redirect for OpenAI connections', async () => {
+  it('uses the OAuth callback copy page for OpenAI connections', async () => {
     const wrapper = mountView()
     await flushPromises()
 
@@ -192,7 +192,9 @@ describe('User AccountsView', () => {
     await wrapper.get('[data-testid="provider-option-openai"]').trigger('click')
     await flushPromises()
 
-    expect(generateConnectedAccountAuthUrl).toHaveBeenCalledWith('openai', {})
+    expect(generateConnectedAccountAuthUrl).toHaveBeenCalledWith('openai', {
+      redirect_uri: expect.stringMatching(/\/auth\/callback$/),
+    })
 
     await wrapper.get('[data-testid="oauth-code"]').setValue('oauth-code')
     await wrapper.get('[data-testid="oauth-state"]').setValue('state-123')
@@ -201,7 +203,9 @@ describe('User AccountsView', () => {
 
     const exchangePayload = exchangeConnectedAccountCode.mock.calls[0]?.[1]
     expect(exchangeConnectedAccountCode).toHaveBeenCalledWith('openai', expect.any(Object))
-    expect(exchangePayload).not.toHaveProperty('redirect_uri')
+    expect(exchangePayload).toMatchObject({
+      redirect_uri: expect.stringMatching(/\/auth\/callback$/),
+    })
   })
 
   it('extracts OpenAI code and state from a pasted localhost callback URL', async () => {
@@ -232,6 +236,7 @@ describe('User AccountsView', () => {
       session_id: 'session-parse-callback',
       code: 'ac_test-code',
       state: 'state-from-callback',
+      redirect_uri: expect.stringMatching(/\/auth\/callback$/),
       name: undefined,
     })
   })

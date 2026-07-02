@@ -25,6 +25,9 @@ const (
 	// Default redirect URI (can be customized)
 	DefaultRedirectURI = "http://localhost:1455/auth/callback"
 
+	// DefaultOriginator identifies the official Codex client family for OpenAI auth.
+	DefaultOriginator = "codex_cli_rs"
+
 	// Scopes
 	DefaultScopes = "openid profile email offline_access"
 	// RefreshScopes - scope for token refresh (without offline_access, aligned with CRS project)
@@ -201,6 +204,7 @@ func BuildAuthorizationURLForPlatform(state, codeChallenge, redirectURI, platfor
 	params.Set("id_token_add_organizations", "true")
 	if codexFlow {
 		params.Set("codex_cli_simplified_flow", "true")
+		params.Set("originator", DefaultOriginator)
 	}
 
 	return fmt.Sprintf("%s?%s", AuthorizeURL, params.Encode())

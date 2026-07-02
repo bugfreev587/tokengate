@@ -582,7 +582,7 @@ function buildAuthURLPayload(provider: ConnectedAccountOAuthProvider) {
 }
 
 function providerNeedsRedirectURI(provider: ConnectedAccountOAuthProvider): boolean {
-  return provider === 'gemini'
+  return provider === 'openai' || provider === 'gemini'
 }
 
 function isConnectedAccountOAuthProvider(provider: unknown): provider is ConnectedAccountOAuthProvider {
@@ -639,9 +639,9 @@ function parseOAuthCallback(value: string): { code: string; state: string } | nu
 
 function resolveRedirectUri(): string {
   if (typeof window === 'undefined') {
-    return '/accounts'
+    return '/auth/callback'
   }
-  return `${window.location.origin}/accounts`
+  return `${window.location.origin}/auth/callback`
 }
 
 function statusLabel(status: string): string {

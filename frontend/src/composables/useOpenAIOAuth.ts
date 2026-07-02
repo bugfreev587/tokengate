@@ -26,6 +26,11 @@ export interface OpenAITokenInfo {
 
 export type OpenAIOAuthPlatform = 'openai'
 
+function resolveOpenAICallbackRedirectUri(): string {
+  if (typeof window === 'undefined') return '/auth/callback'
+  return `${window.location.origin}/auth/callback`
+}
+
 export function useOpenAIOAuth() {
   const appStore = useAppStore()
   const { t } = useI18n()
@@ -63,9 +68,7 @@ export function useOpenAIOAuth() {
       if (proxyId) {
         payload.proxy_id = proxyId
       }
-      if (redirectUri) {
-        payload.redirect_uri = redirectUri
-      }
+      payload.redirect_uri = redirectUri || resolveOpenAICallbackRedirectUri()
 
       const response = await adminAPI.accounts.generateAuthUrl(
         `${endpointPrefix}/generate-auth-url`,

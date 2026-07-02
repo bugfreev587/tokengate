@@ -67,7 +67,7 @@ describe('user connected accounts api', () => {
     expect(result.items).toEqual([account])
   })
 
-  it('generates an OpenAI OAuth URL without overriding the Codex redirect URI', async () => {
+  it('generates an OpenAI OAuth URL with the callback copy-page redirect URI', async () => {
     post.mockResolvedValue({
       data: {
         auth_url: 'https://auth.example.com/start',
@@ -77,11 +77,12 @@ describe('user connected accounts api', () => {
 
     const result = await generateOpenAIConnectedAccountAuthUrl({
       proxy_id: 7,
-      redirect_uri: 'https://tokengate.example.com/accounts',
+      redirect_uri: 'https://tokengate.example.com/auth/callback',
     })
 
     expect(post).toHaveBeenCalledWith('/user/accounts/openai/auth-url', {
       proxy_id: 7,
+      redirect_uri: 'https://tokengate.example.com/auth/callback',
     })
     expect(result.session_id).toBe('session-123')
   })
@@ -157,7 +158,7 @@ describe('user connected accounts api', () => {
     expect(del).toHaveBeenCalledWith('/user/accounts/12')
   })
 
-  it('exchanges OpenAI OAuth codes without overriding the Codex redirect URI', async () => {
+  it('exchanges OpenAI OAuth codes with the callback copy-page redirect URI', async () => {
     const account: ConnectedAccountSummary = {
       id: 12,
       name: 'OpenAI Main',
@@ -174,7 +175,7 @@ describe('user connected accounts api', () => {
       session_id: 'session-123',
       code: 'oauth-code',
       state: 'state-123',
-      redirect_uri: 'https://tokengate.example.com/accounts',
+      redirect_uri: 'https://tokengate.example.com/auth/callback',
       name: 'OpenAI Main',
     })).resolves.toEqual(account)
 
@@ -182,6 +183,7 @@ describe('user connected accounts api', () => {
       session_id: 'session-123',
       code: 'oauth-code',
       state: 'state-123',
+      redirect_uri: 'https://tokengate.example.com/auth/callback',
       name: 'OpenAI Main',
     })
   })

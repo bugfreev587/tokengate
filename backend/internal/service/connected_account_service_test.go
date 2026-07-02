@@ -61,7 +61,7 @@ func TestConnectedAccountServiceCreateOpenAIAccountCreatesPrivateGroup(t *testin
 	require.Equal(t, group.ID, account.Groups[0].ID)
 }
 
-func TestConnectedAccountServiceOpenAIUsesCodexRedirectURI(t *testing.T) {
+func TestConnectedAccountServiceOpenAIUsesCallbackRedirectURI(t *testing.T) {
 	ctx := context.Background()
 	accountRepo := newConnectedAccountRepoFake()
 	groupRepo := newConnectedGroupRepoFake()
@@ -75,20 +75,20 @@ func TestConnectedAccountServiceOpenAIUsesCodexRedirectURI(t *testing.T) {
 	}
 	svc := NewConnectedAccountService(accountRepo, groupRepo, oauth, nil, nil)
 
-	_, err := svc.GenerateOpenAIAuthURL(ctx, 42, nil, "https://api.tokengate.to/accounts")
+	_, err := svc.GenerateOpenAIAuthURL(ctx, 42, nil, "https://api.tokengate.to/auth/callback")
 	require.NoError(t, err)
-	require.Empty(t, oauth.generateRedirectURI)
+	require.Equal(t, "https://api.tokengate.to/auth/callback", oauth.generateRedirectURI)
 
 	_, err = svc.CreateOpenAIAccountFromOAuth(ctx, CreateConnectedOpenAIAccountInput{
 		UserID:      42,
 		SessionID:   "session",
 		Code:        "code",
 		State:       "state",
-		RedirectURI: "https://api.tokengate.to/accounts",
+		RedirectURI: "https://api.tokengate.to/auth/callback",
 	})
 	require.NoError(t, err)
 	require.NotNil(t, oauth.exchangeInput)
-	require.Empty(t, oauth.exchangeInput.RedirectURI)
+	require.Equal(t, "https://api.tokengate.to/auth/callback", oauth.exchangeInput.RedirectURI)
 }
 
 func TestConnectedAccountServiceCreateAnthropicAccountCreatesPrivateGroup(t *testing.T) {

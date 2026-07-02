@@ -116,7 +116,7 @@ func (s *ConnectedAccountService) GenerateOpenAIAuthURL(ctx context.Context, use
 	if s == nil || s.openaiOAuth == nil {
 		return nil, ErrConnectedAccountUnsupported
 	}
-	return s.openaiOAuth.GenerateAuthURL(ctx, proxyID, "", PlatformOpenAI)
+	return s.openaiOAuth.GenerateAuthURL(ctx, proxyID, redirectURI, PlatformOpenAI)
 }
 
 func (s *ConnectedAccountService) GenerateAnthropicAuthURL(ctx context.Context, userID int64, proxyID *int64) (*GenerateAuthURLResult, error) {
@@ -149,10 +149,11 @@ func (s *ConnectedAccountService) CreateOpenAIAccountFromOAuth(ctx context.Conte
 	}
 
 	tokenInfo, err := s.openaiOAuth.ExchangeCode(ctx, &OpenAIExchangeCodeInput{
-		SessionID: input.SessionID,
-		Code:      input.Code,
-		State:     input.State,
-		ProxyID:   input.ProxyID,
+		SessionID:   input.SessionID,
+		Code:        input.Code,
+		State:       input.State,
+		RedirectURI: input.RedirectURI,
+		ProxyID:     input.ProxyID,
 	})
 	if err != nil {
 		return nil, err

@@ -3546,15 +3546,15 @@ export default {
           openUrlDesc:
             'Open the authorization URL in a new tab, log in to your OpenAI account and authorize.',
           importantNotice:
-            'Important: Seeing "localhost refused to connect" after authorization is expected. Do not wait for that page to load; copy the full URL from the browser address bar and paste it into step 3.',
-          step3EnterCode: 'Enter Authorization URL or Code',
+            'After authorization, the callback page shows the code and state with copy buttons. Copy them back into step 3.',
+          step3EnterCode: 'Enter Authorization Code',
           authCodeDesc:
-            'After authorization, the browser redirects to http://localhost:1455/auth/callback?code=... and may show a connection error. Copy that full address-bar URL, or copy only the code value.',
-          authCode: 'Authorization URL or Code',
+            'After authorization, copy the code from the callback page and paste it below. The full callback URL also works as a fallback.',
+          authCode: 'Authorization Code',
           authCodePlaceholder:
-            'Recommended: paste the full callback URL from the browser address bar\nhttp://localhost:1455/auth/callback?code=...&state=...\nOr paste only the code parameter value',
+            'Paste the copied code from the callback page\nFull callback URLs are also accepted',
           authCodeHint:
-            'The full callback URL is recommended because it includes state. The system will auto-extract code/state.',
+            'Copy code and state from the callback page. If you paste a full callback URL, the system will auto-extract both.',
           failedToGenerateUrl: 'Failed to generate OpenAI auth URL',
           failedToExchangeCode: 'Failed to exchange OpenAI auth code',
           failedToValidateRT: 'Failed to validate refresh token',
@@ -6419,8 +6419,8 @@ export default {
     accountName: 'Account name',
     accountNamePlaceholder: 'My AI account',
     oauthCode: 'OAuth code',
-    oauthCodePlaceholder: 'Paste the full callback URL or only the code',
-    oauthCodeHint: 'If the browser lands on localhost after authorization, paste that full address here.',
+    oauthCodePlaceholder: 'Paste the copied code from the callback page',
+    oauthCodeHint: 'The callback page shows code and state with copy buttons. Full callback URLs still auto-detect as a fallback.',
     oauthState: 'OAuth state',
     finishConnection: 'Finish connection',
     privateGroupPending: 'Private group will appear after the account is linked.',

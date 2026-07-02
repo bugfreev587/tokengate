@@ -265,10 +265,9 @@ export async function generateConnectedAccountAuthUrl(
   provider: ConnectedAccountOAuthProvider,
   payload: ConnectedAccountAuthUrlRequest = {}
 ): Promise<ConnectedAccountAuthUrlResponse> {
-  const requestPayload = sanitizeConnectedAccountOAuthPayload(provider, payload)
   const { data } = await apiClient.post<ConnectedAccountAuthUrlResponse>(
     `/user/accounts/${provider}/auth-url`,
-    requestPayload
+    payload
   )
   return data
 }
@@ -277,24 +276,11 @@ export async function exchangeConnectedAccountCode(
   provider: ConnectedAccountOAuthProvider,
   payload: ConnectedAccountExchangeRequest
 ): Promise<ConnectedAccountSummary> {
-  const requestPayload = sanitizeConnectedAccountOAuthPayload(provider, payload)
   const { data } = await apiClient.post<ConnectedAccountSummary>(
     `/user/accounts/${provider}/exchange-code`,
-    requestPayload
+    payload
   )
   return data
-}
-
-function sanitizeConnectedAccountOAuthPayload<T extends ConnectedAccountAuthUrlRequest | ConnectedAccountExchangeRequest>(
-  provider: ConnectedAccountOAuthProvider,
-  payload: T
-): T {
-  if (provider !== 'openai' || !('redirect_uri' in payload)) {
-    return payload
-  }
-  const requestPayload = { ...payload }
-  delete requestPayload.redirect_uri
-  return requestPayload
 }
 
 export async function refreshOpenAIConnectedAccount(id: number): Promise<ConnectedAccountSummary> {

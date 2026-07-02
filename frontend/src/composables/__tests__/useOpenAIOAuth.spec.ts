@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/stores/app', () => ({
   useAppStore: () => ({
@@ -32,6 +32,10 @@ vi.mock('@/api/admin', () => ({
 import { useOpenAIOAuth } from '@/composables/useOpenAIOAuth'
 import { adminAPI } from '@/api/admin'
 
+beforeEach(() => {
+  vi.clearAllMocks()
+})
+
 describe('useOpenAIOAuth.buildCredentials', () => {
   it('should keep client_id when token response contains it', () => {
     const oauth = useOpenAIOAuth()
@@ -58,6 +62,23 @@ describe('useOpenAIOAuth.buildCredentials', () => {
     expect(Object.prototype.hasOwnProperty.call(creds, 'client_id')).toBe(false)
     expect(creds.access_token).toBe('at')
     expect(creds.refresh_token).toBe('rt')
+  })
+})
+
+describe('useOpenAIOAuth.generateAuthUrl', () => {
+  it('uses the OAuth callback copy page as the default redirect URI', async () => {
+    vi.mocked(adminAPI.accounts.generateAuthUrl).mockResolvedValueOnce({
+      auth_url: 'https://auth.example.com/start?state=state-123',
+      session_id: 'session-123',
+    })
+    const oauth = useOpenAIOAuth()
+
+    await oauth.generateAuthUrl(7)
+
+    expect(adminAPI.accounts.generateAuthUrl).toHaveBeenCalledWith('/admin/openai/generate-auth-url', {
+      proxy_id: 7,
+      redirect_uri: expect.stringMatching(/\/auth\/callback$/),
+    })
   })
 })
 

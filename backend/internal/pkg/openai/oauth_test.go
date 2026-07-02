@@ -56,6 +56,9 @@ func TestBuildAuthorizationURLForPlatform_OpenAI(t *testing.T) {
 	if got := q.Get("codex_cli_simplified_flow"); got != "true" {
 		t.Fatalf("codex flow mismatch: got=%q want=true", got)
 	}
+	if got := q.Get("originator"); got != DefaultOriginator {
+		t.Fatalf("originator mismatch: got=%q want=%q", got, DefaultOriginator)
+	}
 	if got := q.Get("id_token_add_organizations"); got != "true" {
 		t.Fatalf("id_token_add_organizations mismatch: got=%q want=true", got)
 	}
