@@ -149,10 +149,10 @@ func (s *ConnectedAccountService) CreateOpenAIAccountFromOAuth(ctx context.Conte
 	}
 
 	tokenInfo, err := s.openaiOAuth.ExchangeCode(ctx, &OpenAIExchangeCodeInput{
-		SessionID:   input.SessionID,
-		Code:        input.Code,
-		State:       input.State,
-		ProxyID:     input.ProxyID,
+		SessionID: input.SessionID,
+		Code:      input.Code,
+		State:     input.State,
+		ProxyID:   input.ProxyID,
 	})
 	if err != nil {
 		return nil, err
