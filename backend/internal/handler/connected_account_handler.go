@@ -459,15 +459,6 @@ func findGeminiModel(id string) (geminicli.Model, bool) {
 	return geminicli.Model{}, false
 }
 
-func findClaudeModel(id string) (claude.Model, bool) {
-	for _, model := range claude.DefaultModels {
-		if model.ID == id {
-			return model, true
-		}
-	}
-	return claude.Model{}, false
-}
-
 func connectedAccountSummaryFromService(account *service.Account) ConnectedAccountSummary {
 	if account == nil {
 		return ConnectedAccountSummary{}

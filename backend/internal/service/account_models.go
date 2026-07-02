@@ -205,7 +205,9 @@ func fetchAnthropicModelsPage(ctx context.Context, client *http.Client, baseURL 
 	if err != nil {
 		return nil, false, "", err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
