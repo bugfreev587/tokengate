@@ -38,7 +38,11 @@ func RegisterUserRoutes(
 				accounts.GET("", h.ConnectedAccount.List)
 				accounts.POST("/openai/auth-url", h.ConnectedAccount.GenerateOpenAIAuthURL)
 				accounts.POST("/openai/exchange-code", h.ConnectedAccount.ExchangeOpenAICode)
-				accounts.POST("/:id/refresh", h.ConnectedAccount.RefreshOpenAI)
+				accounts.POST("/anthropic/auth-url", h.ConnectedAccount.GenerateAnthropicAuthURL)
+				accounts.POST("/anthropic/exchange-code", h.ConnectedAccount.ExchangeAnthropicCode)
+				accounts.POST("/gemini/auth-url", h.ConnectedAccount.GenerateGeminiAuthURL)
+				accounts.POST("/gemini/exchange-code", h.ConnectedAccount.ExchangeGeminiCode)
+				accounts.POST("/:id/refresh", h.ConnectedAccount.Refresh)
 				accounts.DELETE("/:id", h.ConnectedAccount.Delete)
 			}
 

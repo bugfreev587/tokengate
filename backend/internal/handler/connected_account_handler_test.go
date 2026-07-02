@@ -47,7 +47,7 @@ func TestConnectedAccountHandlerListRedactsCredentials(t *testing.T) {
 		CreatedAt: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 	}
-	svc := service.NewConnectedAccountService(accountRepo, groupRepo, &handlerConnectedOpenAIOAuthFake{})
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, &handlerConnectedOpenAIOAuthFake{}, nil, nil)
 	h := NewConnectedAccountHandler(svc)
 	router := gin.New()
 	router.GET("/api/v1/user/accounts", func(c *gin.Context) {
@@ -90,7 +90,7 @@ func TestConnectedAccountHandlerExchangeOpenAICodeCreatesAccount(t *testing.T) {
 			Email:        "owner@example.com",
 		},
 	}
-	svc := service.NewConnectedAccountService(accountRepo, groupRepo, oauth)
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, oauth, nil, nil)
 	h := NewConnectedAccountHandler(svc)
 	router := gin.New()
 	router.POST("/api/v1/user/accounts/openai/exchange-code", func(c *gin.Context) {
@@ -114,6 +114,92 @@ func TestConnectedAccountHandlerExchangeOpenAICodeCreatesAccount(t *testing.T) {
 	require.Equal(t, service.CapacitySourceConnectedAccount, item["capacity_source"])
 	require.Equal(t, float64(1), item["group_id"])
 	require.NotContains(t, w.Body.String(), "access-secret")
+	require.Len(t, accountRepo.accounts, 1)
+	require.Len(t, groupRepo.groups, 1)
+}
+
+func TestConnectedAccountHandlerExchangeAnthropicCodeCreatesAccount(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ownerID := int64(42)
+	accountRepo := newHandlerConnectedAccountRepoFake()
+	groupRepo := newHandlerConnectedGroupRepoFake()
+	oauth := &handlerConnectedAnthropicOAuthFake{
+		tokenInfo: &service.TokenInfo{
+			AccessToken:  "anthropic-access",
+			RefreshToken: "anthropic-refresh",
+			ExpiresAt:    time.Now().Add(time.Hour).Unix(),
+			EmailAddress: "claude-owner@example.com",
+		},
+	}
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, nil, oauth, nil)
+	h := NewConnectedAccountHandler(svc)
+	router := gin.New()
+	router.POST("/api/v1/user/accounts/anthropic/exchange-code", func(c *gin.Context) {
+		c.Set(string(middleware2.ContextKeyUser), middleware2.AuthSubject{UserID: ownerID})
+		h.ExchangeAnthropicCode(c)
+	})
+
+	body := []byte(`{"session_id":"session","code":"code","name":"Claude Main"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/user/accounts/anthropic/exchange-code", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var envelope response.Response
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &envelope))
+	item, ok := envelope.Data.(map[string]any)
+	require.True(t, ok)
+	require.Equal(t, "Claude Main", item["name"])
+	require.Equal(t, service.PlatformAnthropic, item["platform"])
+	require.Equal(t, "claude-owner@example.com", item["email"])
+	require.Equal(t, float64(1), item["group_id"])
+	require.NotContains(t, w.Body.String(), "anthropic-access")
+	require.NotContains(t, w.Body.String(), "anthropic-refresh")
+	require.Len(t, accountRepo.accounts, 1)
+	require.Len(t, groupRepo.groups, 1)
+}
+
+func TestConnectedAccountHandlerExchangeGeminiCodeCreatesAccount(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ownerID := int64(42)
+	accountRepo := newHandlerConnectedAccountRepoFake()
+	groupRepo := newHandlerConnectedGroupRepoFake()
+	oauth := &handlerConnectedGeminiOAuthFake{
+		tokenInfo: &service.GeminiTokenInfo{
+			AccessToken:  "gemini-access",
+			RefreshToken: "gemini-refresh",
+			TokenType:    "Bearer",
+			ExpiresAt:    time.Now().Add(time.Hour).Unix(),
+			ProjectID:    "project-123",
+			OAuthType:    "google_one",
+			TierID:       service.GeminiTierGoogleAIPro,
+		},
+	}
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, nil, nil, oauth)
+	h := NewConnectedAccountHandler(svc)
+	router := gin.New()
+	router.POST("/api/v1/user/accounts/gemini/exchange-code", func(c *gin.Context) {
+		c.Set(string(middleware2.ContextKeyUser), middleware2.AuthSubject{UserID: ownerID})
+		h.ExchangeGeminiCode(c)
+	})
+
+	body := []byte(`{"session_id":"session","code":"code","state":"state","oauth_type":"google_one","name":"Gemini Main"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/user/accounts/gemini/exchange-code", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var envelope response.Response
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &envelope))
+	item, ok := envelope.Data.(map[string]any)
+	require.True(t, ok)
+	require.Equal(t, "Gemini Main", item["name"])
+	require.Equal(t, service.PlatformGemini, item["platform"])
+	require.Equal(t, float64(1), item["group_id"])
+	require.NotContains(t, w.Body.String(), "gemini-access")
+	require.NotContains(t, w.Body.String(), "gemini-refresh")
 	require.Len(t, accountRepo.accounts, 1)
 	require.Len(t, groupRepo.groups, 1)
 }
@@ -229,4 +315,40 @@ func (f *handlerConnectedOpenAIOAuthFake) RefreshAccountToken(context.Context, *
 
 func (f *handlerConnectedOpenAIOAuthFake) BuildAccountCredentials(tokenInfo *service.OpenAITokenInfo) map[string]any {
 	return (&service.OpenAIOAuthService{}).BuildAccountCredentials(tokenInfo)
+}
+
+type handlerConnectedAnthropicOAuthFake struct {
+	tokenInfo *service.TokenInfo
+}
+
+func (f *handlerConnectedAnthropicOAuthFake) GenerateAuthURL(context.Context, *int64) (*service.GenerateAuthURLResult, error) {
+	return &service.GenerateAuthURLResult{AuthURL: "https://claude.example/auth", SessionID: "session"}, nil
+}
+
+func (f *handlerConnectedAnthropicOAuthFake) ExchangeCode(context.Context, *service.ExchangeCodeInput) (*service.TokenInfo, error) {
+	return f.tokenInfo, nil
+}
+
+func (f *handlerConnectedAnthropicOAuthFake) RefreshAccountToken(context.Context, *service.Account) (*service.TokenInfo, error) {
+	return f.tokenInfo, nil
+}
+
+type handlerConnectedGeminiOAuthFake struct {
+	tokenInfo *service.GeminiTokenInfo
+}
+
+func (f *handlerConnectedGeminiOAuthFake) GenerateAuthURL(context.Context, *int64, string, string, string, string) (*service.GeminiAuthURLResult, error) {
+	return &service.GeminiAuthURLResult{AuthURL: "https://gemini.example/auth", SessionID: "session", State: "state"}, nil
+}
+
+func (f *handlerConnectedGeminiOAuthFake) ExchangeCode(context.Context, *service.GeminiExchangeCodeInput) (*service.GeminiTokenInfo, error) {
+	return f.tokenInfo, nil
+}
+
+func (f *handlerConnectedGeminiOAuthFake) RefreshAccountToken(context.Context, *service.Account) (*service.GeminiTokenInfo, error) {
+	return f.tokenInfo, nil
+}
+
+func (f *handlerConnectedGeminiOAuthFake) BuildAccountCredentials(tokenInfo *service.GeminiTokenInfo) map[string]any {
+	return (&service.GeminiOAuthService{}).BuildAccountCredentials(tokenInfo)
 }

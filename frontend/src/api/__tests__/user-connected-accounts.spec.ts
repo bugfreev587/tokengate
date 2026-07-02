@@ -15,11 +15,12 @@ vi.mock('@/api/client', () => ({
 }))
 
 import {
+  exchangeConnectedAccountCode,
   deleteConnectedAccount,
-  exchangeOpenAIConnectedAccountCode,
+  generateConnectedAccountAuthUrl,
   generateOpenAIConnectedAccountAuthUrl,
   listConnectedAccounts,
-  refreshOpenAIConnectedAccount,
+  refreshConnectedAccount,
   type ConnectedAccountSummary,
 } from '@/api/user'
 
@@ -84,11 +85,46 @@ describe('user connected accounts api', () => {
     expect(result.session_id).toBe('session-123')
   })
 
-  it('exchanges OpenAI OAuth code and refreshes/deletes owned accounts', async () => {
+  it('generates provider OAuth URLs for Anthropic and Gemini', async () => {
+    post.mockResolvedValueOnce({
+      data: {
+        auth_url: 'https://claude.example.com/start',
+        session_id: 'claude-session',
+      },
+    })
+    post.mockResolvedValueOnce({
+      data: {
+        auth_url: 'https://google.example.com/start',
+        session_id: 'gemini-session',
+        state: 'gemini-state',
+      },
+    })
+
+    await expect(generateConnectedAccountAuthUrl('anthropic', {})).resolves.toEqual({
+      auth_url: 'https://claude.example.com/start',
+      session_id: 'claude-session',
+    })
+    await expect(generateConnectedAccountAuthUrl('gemini', {
+      oauth_type: 'google_one',
+      tier_id: 'google_ai_pro',
+    })).resolves.toEqual({
+      auth_url: 'https://google.example.com/start',
+      session_id: 'gemini-session',
+      state: 'gemini-state',
+    })
+
+    expect(post).toHaveBeenNthCalledWith(1, '/user/accounts/anthropic/auth-url', {})
+    expect(post).toHaveBeenNthCalledWith(2, '/user/accounts/gemini/auth-url', {
+      oauth_type: 'google_one',
+      tier_id: 'google_ai_pro',
+    })
+  })
+
+  it('exchanges provider OAuth code and refreshes/deletes owned accounts', async () => {
     const account: ConnectedAccountSummary = {
       id: 12,
-      name: 'OpenAI Main',
-      platform: 'openai',
+      name: 'Gemini Main',
+      platform: 'gemini',
       type: 'oauth',
       status: 'active',
       capacity_source: 'connected_account',
@@ -99,20 +135,22 @@ describe('user connected accounts api', () => {
     post.mockResolvedValueOnce({ data: account })
     del.mockResolvedValueOnce({ data: { deleted: true } })
 
-    await expect(exchangeOpenAIConnectedAccountCode({
+    await expect(exchangeConnectedAccountCode('gemini', {
       session_id: 'session-123',
       code: 'oauth-code',
       state: 'state-123',
-      name: 'OpenAI Main',
+      oauth_type: 'google_one',
+      name: 'Gemini Main',
     })).resolves.toEqual(account)
-    await expect(refreshOpenAIConnectedAccount(12)).resolves.toEqual(account)
+    await expect(refreshConnectedAccount(12)).resolves.toEqual(account)
     await expect(deleteConnectedAccount(12)).resolves.toEqual({ deleted: true })
 
-    expect(post).toHaveBeenNthCalledWith(1, '/user/accounts/openai/exchange-code', {
+    expect(post).toHaveBeenNthCalledWith(1, '/user/accounts/gemini/exchange-code', {
       session_id: 'session-123',
       code: 'oauth-code',
       state: 'state-123',
-      name: 'OpenAI Main',
+      oauth_type: 'google_one',
+      name: 'Gemini Main',
     })
     expect(post).toHaveBeenNthCalledWith(2, '/user/accounts/12/refresh')
     expect(del).toHaveBeenCalledWith('/user/accounts/12')

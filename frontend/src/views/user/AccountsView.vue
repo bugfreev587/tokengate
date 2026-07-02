@@ -23,15 +23,53 @@
           <button
             type="button"
             class="btn btn-primary"
-            data-testid="connect-openai"
+            data-testid="connect-account"
             :disabled="generatingAuthUrl"
-            @click="startOpenAIConnection"
+            @click="openProviderPicker"
           >
             <Icon name="link" size="md" class="mr-2" />
-            {{ generatingAuthUrl ? t('common.loading') : t('userAccounts.connectOpenAI') }}
+            {{ generatingAuthUrl ? t('common.loading') : t('userAccounts.connectAccount') }}
           </button>
         </div>
       </div>
+
+      <section
+        v-if="providerPickerOpen && !authPanelOpen"
+        class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-dark-700 dark:bg-dark-800"
+      >
+        <div class="mb-4">
+          <h2 class="text-base font-semibold text-gray-900 dark:text-white">
+            {{ t('userAccounts.chooseProviderTitle') }}
+          </h2>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {{ t('userAccounts.chooseProviderDescription') }}
+          </p>
+        </div>
+        <div class="grid gap-3 md:grid-cols-3">
+          <button
+            v-for="provider in providerOptions"
+            :key="provider.id"
+            type="button"
+            :data-testid="`provider-option-${provider.id}`"
+            :disabled="generatingAuthUrl"
+            :class="[
+              'flex min-h-[104px] items-start gap-3 rounded-lg border-2 p-4 text-left transition-colors active:scale-[0.99]',
+              selectedProvider === provider.id
+                ? provider.activeClass
+                : 'border-gray-200 hover:border-gray-300 dark:border-dark-600 dark:hover:border-dark-500'
+            ]"
+            @click="startConnection(provider.id)"
+          >
+            <span :class="['flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', provider.iconClass]">
+              <Icon :name="provider.icon" size="sm" />
+            </span>
+            <span class="min-w-0">
+              <span class="block text-sm font-semibold text-gray-900 dark:text-white">{{ provider.label }}</span>
+              <span class="mt-1 block text-xs leading-5 text-gray-500 dark:text-gray-400">{{ provider.description }}</span>
+            </span>
+          </button>
+        </div>
+      </section>
 
       <section
         v-if="authPanelOpen"
@@ -40,15 +78,15 @@
         <div class="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
           <div class="space-y-4">
             <div class="flex items-center gap-3">
-              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                <Icon name="globe" size="md" />
+              <div :class="['flex h-10 w-10 items-center justify-center rounded-lg', selectedProviderOption.iconClass]">
+                <Icon :name="selectedProviderOption.icon" size="md" />
               </div>
               <div>
                 <h2 class="text-base font-semibold text-gray-900 dark:text-white">
-                  {{ t('userAccounts.openAIConnectTitle') }}
+                  {{ t('userAccounts.connectProviderTitle', { provider: selectedProviderOption.label }) }}
                 </h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ t('userAccounts.openAIConnectSubtitle') }}
+                  {{ t('userAccounts.connectProviderSubtitle', { provider: selectedProviderOption.label }) }}
                 </p>
               </div>
             </div>
@@ -81,7 +119,7 @@
             </div>
           </div>
 
-          <form class="grid gap-3" @submit.prevent="finishOpenAIOAuth">
+          <form class="grid gap-3" @submit.prevent="finishOAuth">
             <div>
               <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ t('userAccounts.accountName') }}
@@ -104,7 +142,7 @@
                 autocomplete="off"
               />
             </div>
-            <div>
+            <div v-if="requiresOAuthState">
               <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ t('userAccounts.oauthState') }}
               </label>
@@ -117,10 +155,10 @@
             </div>
             <button
               type="button"
-              data-testid="finish-openai-oauth"
+              data-testid="finish-oauth"
               class="btn btn-primary mt-1"
-              :disabled="exchangingCode || !oauthCode.trim() || !oauthState.trim() || !sessionId"
-              @click="finishOpenAIOAuth"
+              :disabled="exchangingCode || !canFinishOAuth"
+              @click="finishOAuth"
             >
               <Icon name="check" size="md" class="mr-2" />
               {{ exchangingCode ? t('common.submitting') : t('userAccounts.finishConnection') }}
@@ -245,10 +283,11 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   deleteConnectedAccount,
-  exchangeOpenAIConnectedAccountCode,
-  generateOpenAIConnectedAccountAuthUrl,
+  exchangeConnectedAccountCode,
+  generateConnectedAccountAuthUrl,
   listConnectedAccounts,
-  refreshOpenAIConnectedAccount,
+  refreshConnectedAccount,
+  type ConnectedAccountOAuthProvider,
   type ConnectedAccountSummary,
 } from '@/api/user'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
@@ -260,7 +299,19 @@ import Icon from '@/components/icons/Icon.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { useAppStore } from '@/stores/app'
 
-const OPENAI_OAUTH_STORAGE_KEY = 'tokengate:user-openai-connected-account-oauth'
+const OAUTH_STORAGE_KEY = 'tokengate:user-connected-account-oauth'
+const LEGACY_OPENAI_OAUTH_STORAGE_KEY = 'tokengate:user-openai-connected-account-oauth'
+type ProviderIconName = 'link' | 'sparkles' | 'globe'
+
+interface ProviderOption {
+  id: ConnectedAccountOAuthProvider
+  label: string
+  description: string
+  icon: ProviderIconName
+  iconClass: string
+  activeClass: string
+  defaultOAuthType?: string
+}
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -272,9 +323,11 @@ const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 
+const providerPickerOpen = ref(false)
 const authPanelOpen = ref(false)
 const generatingAuthUrl = ref(false)
 const exchangingCode = ref(false)
+const selectedProvider = ref<ConnectedAccountOAuthProvider>('openai')
 const authUrl = ref('')
 const sessionId = ref('')
 const redirectUri = ref('')
@@ -284,6 +337,46 @@ const accountName = ref('')
 
 const actionLoadingId = ref<number | null>(null)
 const deleteTarget = ref<ConnectedAccountSummary | null>(null)
+
+const providerOptions = computed<ProviderOption[]>(() => [
+  {
+    id: 'openai',
+    label: 'OpenAI',
+    description: t('userAccounts.providers.openaiDescription'),
+    icon: 'link',
+    iconClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+    activeClass: 'border-emerald-500 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-900/20',
+  },
+  {
+    id: 'anthropic',
+    label: 'Anthropic',
+    description: t('userAccounts.providers.anthropicDescription'),
+    icon: 'sparkles',
+    iconClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+    activeClass: 'border-amber-500 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20',
+  },
+  {
+    id: 'gemini',
+    label: 'Gemini',
+    description: t('userAccounts.providers.geminiDescription'),
+    icon: 'globe',
+    iconClass: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300',
+    activeClass: 'border-sky-500 bg-sky-50 dark:border-sky-700 dark:bg-sky-900/20',
+    defaultOAuthType: 'google_one',
+  },
+])
+
+const selectedProviderOption = computed(
+  () => providerOptions.value.find((provider) => provider.id === selectedProvider.value) || providerOptions.value[0]
+)
+
+const requiresOAuthState = computed(() => selectedProvider.value !== 'anthropic')
+
+const canFinishOAuth = computed(() => (
+  !!sessionId.value
+  && !!oauthCode.value.trim()
+  && (!requiresOAuthState.value || !!oauthState.value.trim())
+))
 
 const columns = computed<Column[]>(() => [
   { key: 'name', label: t('userAccounts.columns.name') },
@@ -309,19 +402,31 @@ async function loadAccounts() {
   }
 }
 
-async function startOpenAIConnection() {
-  generatingAuthUrl.value = true
-  authPanelOpen.value = true
+function openProviderPicker() {
+  providerPickerOpen.value = true
+  authPanelOpen.value = false
   loadError.value = ''
+}
+
+async function startConnection(provider: ConnectedAccountOAuthProvider) {
+  generatingAuthUrl.value = true
+  selectedProvider.value = provider
+  authPanelOpen.value = true
+  providerPickerOpen.value = false
+  loadError.value = ''
+  authUrl.value = ''
+  sessionId.value = ''
+  redirectUri.value = ''
+  oauthCode.value = ''
+  oauthState.value = ''
+  accountName.value = ''
   try {
-    const resolvedRedirectUri = resolveRedirectUri()
-    const result = await generateOpenAIConnectedAccountAuthUrl({
-      redirect_uri: resolvedRedirectUri,
-    })
+    const payload = buildAuthURLPayload(provider)
+    const result = await generateConnectedAccountAuthUrl(provider, payload)
     authUrl.value = result.auth_url
     sessionId.value = result.session_id
-    redirectUri.value = resolvedRedirectUri
-    oauthState.value = parseOAuthState(result.auth_url) || oauthState.value
+    redirectUri.value = payload.redirect_uri || ''
+    oauthState.value = result.state || parseOAuthState(result.auth_url) || ''
     persistOAuthSession()
   } catch (error) {
     appStore.showError(errorMessage(error, t('userAccounts.authUrlFailed')))
@@ -330,18 +435,19 @@ async function startOpenAIConnection() {
   }
 }
 
-async function finishOpenAIOAuth() {
-  if (!sessionId.value || !oauthCode.value.trim() || !oauthState.value.trim()) {
+async function finishOAuth() {
+  if (!canFinishOAuth.value) {
     appStore.showError(t('userAccounts.oauthFieldsRequired'))
     return
   }
   exchangingCode.value = true
   try {
-    await exchangeOpenAIConnectedAccountCode({
+    await exchangeConnectedAccountCode(selectedProvider.value, {
       session_id: sessionId.value,
       code: oauthCode.value.trim(),
-      state: oauthState.value.trim(),
-      redirect_uri: redirectUri.value || resolveRedirectUri(),
+      ...(oauthState.value.trim() ? { state: oauthState.value.trim() } : {}),
+      ...(providerNeedsRedirectURI(selectedProvider.value) ? { redirect_uri: redirectUri.value || resolveRedirectUri() } : {}),
+      ...(selectedProviderOption.value.defaultOAuthType ? { oauth_type: selectedProviderOption.value.defaultOAuthType } : {}),
       name: accountName.value.trim() || undefined,
     })
     appStore.showSuccess(t('userAccounts.connectedSuccess'))
@@ -357,7 +463,7 @@ async function finishOpenAIOAuth() {
 async function refreshAccount(account: ConnectedAccountSummary) {
   actionLoadingId.value = account.id
   try {
-    await refreshOpenAIConnectedAccount(account.id)
+    await refreshConnectedAccount(account.id)
     appStore.showSuccess(t('userAccounts.refreshSuccess'))
     await loadAccounts()
   } catch (error) {
@@ -388,6 +494,7 @@ async function confirmDelete() {
 }
 
 function resetOAuthState() {
+  providerPickerOpen.value = false
   authPanelOpen.value = false
   authUrl.value = ''
   sessionId.value = ''
@@ -396,20 +503,26 @@ function resetOAuthState() {
   oauthState.value = ''
   accountName.value = ''
   if (typeof window !== 'undefined') {
-    window.sessionStorage.removeItem(OPENAI_OAUTH_STORAGE_KEY)
+    window.sessionStorage.removeItem(OAUTH_STORAGE_KEY)
+    window.sessionStorage.removeItem(LEGACY_OPENAI_OAUTH_STORAGE_KEY)
   }
 }
 
 function restoreOAuthState() {
   if (typeof window === 'undefined') return
-  const raw = window.sessionStorage.getItem(OPENAI_OAUTH_STORAGE_KEY)
+  const raw = window.sessionStorage.getItem(OAUTH_STORAGE_KEY)
+    || window.sessionStorage.getItem(LEGACY_OPENAI_OAUTH_STORAGE_KEY)
   if (raw) {
     try {
       const parsed = JSON.parse(raw) as {
+        provider?: string
         authUrl?: string
         sessionId?: string
         redirectUri?: string
         oauthState?: string
+      }
+      if (isConnectedAccountOAuthProvider(parsed.provider)) {
+        selectedProvider.value = parsed.provider
       }
       authUrl.value = parsed.authUrl || ''
       sessionId.value = parsed.sessionId || ''
@@ -417,7 +530,8 @@ function restoreOAuthState() {
       oauthState.value = parsed.oauthState || parseOAuthState(parsed.authUrl || '') || ''
       authPanelOpen.value = !!sessionId.value
     } catch {
-      window.sessionStorage.removeItem(OPENAI_OAUTH_STORAGE_KEY)
+      window.sessionStorage.removeItem(OAUTH_STORAGE_KEY)
+      window.sessionStorage.removeItem(LEGACY_OPENAI_OAUTH_STORAGE_KEY)
     }
   }
 
@@ -432,14 +546,38 @@ function restoreOAuthState() {
 function persistOAuthSession() {
   if (typeof window === 'undefined') return
   window.sessionStorage.setItem(
-    OPENAI_OAUTH_STORAGE_KEY,
+    OAUTH_STORAGE_KEY,
     JSON.stringify({
+      provider: selectedProvider.value,
       authUrl: authUrl.value,
       sessionId: sessionId.value,
       redirectUri: redirectUri.value,
       oauthState: oauthState.value,
     })
   )
+}
+
+function buildAuthURLPayload(provider: ConnectedAccountOAuthProvider) {
+  const payload: {
+    redirect_uri?: string
+    oauth_type?: string
+  } = {}
+  if (providerNeedsRedirectURI(provider)) {
+    payload.redirect_uri = resolveRedirectUri()
+  }
+  const option = providerOptions.value.find((item) => item.id === provider)
+  if (option?.defaultOAuthType) {
+    payload.oauth_type = option.defaultOAuthType
+  }
+  return payload
+}
+
+function providerNeedsRedirectURI(provider: ConnectedAccountOAuthProvider): boolean {
+  return provider === 'openai' || provider === 'gemini'
+}
+
+function isConnectedAccountOAuthProvider(provider: unknown): provider is ConnectedAccountOAuthProvider {
+  return provider === 'openai' || provider === 'anthropic' || provider === 'gemini'
 }
 
 function parseOAuthState(url: string): string {

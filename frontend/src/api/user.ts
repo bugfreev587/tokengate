@@ -37,26 +37,37 @@ export interface ConnectedAccountSummary {
   updated_at: string
 }
 
-export interface OpenAIConnectedAccountAuthUrlRequest {
+export interface ConnectedAccountAuthUrlRequest {
   proxy_id?: number | null
   redirect_uri?: string
+  project_id?: string
+  oauth_type?: string
+  tier_id?: string
 }
 
-export interface OpenAIConnectedAccountAuthUrlResponse {
+export interface ConnectedAccountAuthUrlResponse {
   auth_url: string
   session_id: string
+  state?: string
 }
 
-export interface OpenAIConnectedAccountExchangeRequest {
+export interface ConnectedAccountExchangeRequest {
   session_id: string
   code: string
-  state: string
+  state?: string
   redirect_uri?: string
   proxy_id?: number | null
   name?: string
   concurrency?: number
   priority?: number
+  oauth_type?: string
+  tier_id?: string
 }
+
+export type OpenAIConnectedAccountAuthUrlRequest = ConnectedAccountAuthUrlRequest
+export type OpenAIConnectedAccountAuthUrlResponse = ConnectedAccountAuthUrlResponse
+export type OpenAIConnectedAccountExchangeRequest = ConnectedAccountExchangeRequest
+export type ConnectedAccountOAuthProvider = Extract<AccountPlatform, 'openai' | 'anthropic' | 'gemini'>
 
 /**
  * Get current user profile
@@ -240,25 +251,43 @@ export async function listConnectedAccounts(
 
 export async function generateOpenAIConnectedAccountAuthUrl(
   payload: OpenAIConnectedAccountAuthUrlRequest = {}
-): Promise<OpenAIConnectedAccountAuthUrlResponse> {
-  const { data } = await apiClient.post<OpenAIConnectedAccountAuthUrlResponse>(
-    '/user/accounts/openai/auth-url',
-    payload
-  )
-  return data
+): Promise<ConnectedAccountAuthUrlResponse> {
+  return generateConnectedAccountAuthUrl('openai', payload)
 }
 
 export async function exchangeOpenAIConnectedAccountCode(
   payload: OpenAIConnectedAccountExchangeRequest
 ): Promise<ConnectedAccountSummary> {
+  return exchangeConnectedAccountCode('openai', payload)
+}
+
+export async function generateConnectedAccountAuthUrl(
+  provider: ConnectedAccountOAuthProvider,
+  payload: ConnectedAccountAuthUrlRequest = {}
+): Promise<ConnectedAccountAuthUrlResponse> {
+  const { data } = await apiClient.post<ConnectedAccountAuthUrlResponse>(
+    `/user/accounts/${provider}/auth-url`,
+    payload
+  )
+  return data
+}
+
+export async function exchangeConnectedAccountCode(
+  provider: ConnectedAccountOAuthProvider,
+  payload: ConnectedAccountExchangeRequest
+): Promise<ConnectedAccountSummary> {
   const { data } = await apiClient.post<ConnectedAccountSummary>(
-    '/user/accounts/openai/exchange-code',
+    `/user/accounts/${provider}/exchange-code`,
     payload
   )
   return data
 }
 
 export async function refreshOpenAIConnectedAccount(id: number): Promise<ConnectedAccountSummary> {
+  return refreshConnectedAccount(id)
+}
+
+export async function refreshConnectedAccount(id: number): Promise<ConnectedAccountSummary> {
   const { data } = await apiClient.post<ConnectedAccountSummary>(`/user/accounts/${id}/refresh`)
   return data
 }
@@ -284,8 +313,11 @@ export const userAPI = {
   getAffiliateDetail,
   transferAffiliateQuota,
   listConnectedAccounts,
+  generateConnectedAccountAuthUrl,
   generateOpenAIConnectedAccountAuthUrl,
+  exchangeConnectedAccountCode,
   exchangeOpenAIConnectedAccountCode,
+  refreshConnectedAccount,
   refreshOpenAIConnectedAccount,
   deleteConnectedAccount,
 }

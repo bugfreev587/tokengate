@@ -24,7 +24,7 @@ func TestConnectedAccountServiceCreateOpenAIAccountCreatesPrivateGroup(t *testin
 			ClientID:     "client-id",
 		},
 	}
-	svc := NewConnectedAccountService(accountRepo, groupRepo, oauth)
+	svc := NewConnectedAccountService(accountRepo, groupRepo, oauth, nil, nil)
 
 	account, err := svc.CreateOpenAIAccountFromOAuth(ctx, CreateConnectedOpenAIAccountInput{
 		UserID:    42,
@@ -61,10 +61,118 @@ func TestConnectedAccountServiceCreateOpenAIAccountCreatesPrivateGroup(t *testin
 	require.Equal(t, group.ID, account.Groups[0].ID)
 }
 
+func TestConnectedAccountServiceCreateAnthropicAccountCreatesPrivateGroup(t *testing.T) {
+	ctx := context.Background()
+	accountRepo := newConnectedAccountRepoFake()
+	groupRepo := newConnectedGroupRepoFake()
+	oauth := &connectedAnthropicOAuthFake{
+		tokenInfo: &TokenInfo{
+			AccessToken:  "anthropic-access",
+			TokenType:    "Bearer",
+			ExpiresIn:    3600,
+			ExpiresAt:    time.Now().Add(time.Hour).Unix(),
+			RefreshToken: "anthropic-refresh",
+			Scope:        "org:create_api_key user:profile",
+			OrgUUID:      "org-uuid",
+			AccountUUID:  "account-uuid",
+			EmailAddress: "claude-owner@example.com",
+		},
+	}
+	svc := NewConnectedAccountService(accountRepo, groupRepo, nil, oauth, nil)
+
+	account, err := svc.CreateAnthropicAccountFromOAuth(ctx, CreateConnectedAnthropicAccountInput{
+		UserID:    42,
+		SessionID: "session",
+		Code:      "code",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, account)
+	require.Equal(t, "claude-owner@example.com", account.Name)
+	require.Equal(t, PlatformAnthropic, account.Platform)
+	require.Equal(t, AccountTypeOAuth, account.Type)
+	require.True(t, account.CredentialsEncrypted)
+	require.Equal(t, "anthropic-access", account.Credentials["access_token"])
+	require.Equal(t, "claude-owner@example.com", account.Extra["email_address"])
+	require.Equal(t, "org-uuid", account.Extra["org_uuid"])
+	require.Equal(t, "account-uuid", account.Extra["account_uuid"])
+
+	require.Len(t, groupRepo.groups, 1)
+	var group *Group
+	for _, stored := range groupRepo.groups {
+		group = stored
+	}
+	require.NotNil(t, group)
+	require.Equal(t, PlatformAnthropic, group.Platform)
+	require.Equal(t, CapacitySourceConnectedAccount, group.CapacitySource)
+	require.NotNil(t, group.OwnerUserID)
+	require.Equal(t, int64(42), *group.OwnerUserID)
+	require.Equal(t, []int64{group.ID}, accountRepo.boundGroups[account.ID])
+}
+
+func TestConnectedAccountServiceCreateGeminiAccountCreatesPrivateGroup(t *testing.T) {
+	ctx := context.Background()
+	accountRepo := newConnectedAccountRepoFake()
+	groupRepo := newConnectedGroupRepoFake()
+	oauth := &connectedGeminiOAuthFake{
+		tokenInfo: &GeminiTokenInfo{
+			AccessToken:  "gemini-access",
+			RefreshToken: "gemini-refresh",
+			TokenType:    "Bearer",
+			ExpiresIn:    3600,
+			ExpiresAt:    time.Now().Add(time.Hour).Unix(),
+			Scope:        "https://www.googleapis.com/auth/cloud-platform",
+			ProjectID:    "project-123",
+			OAuthType:    "google_one",
+			TierID:       GeminiTierGoogleAIPro,
+			Extra: map[string]any{
+				"drive_storage_limit": int64(2 * TB),
+			},
+		},
+	}
+	svc := NewConnectedAccountService(accountRepo, groupRepo, nil, nil, oauth)
+
+	account, err := svc.CreateGeminiAccountFromOAuth(ctx, CreateConnectedGeminiAccountInput{
+		UserID:      42,
+		SessionID:   "session",
+		Code:        "code",
+		State:       "state",
+		OAuthType:   "google_one",
+		TierID:      GeminiTierGoogleAIPro,
+		Name:        "My Gemini",
+		Concurrency: 3,
+		Priority:    11,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, account)
+	require.Equal(t, "My Gemini", account.Name)
+	require.Equal(t, PlatformGemini, account.Platform)
+	require.Equal(t, AccountTypeOAuth, account.Type)
+	require.True(t, account.CredentialsEncrypted)
+	require.Equal(t, 3, account.Concurrency)
+	require.Equal(t, 11, account.Priority)
+	require.Equal(t, "gemini-access", account.Credentials["access_token"])
+	require.Equal(t, "project-123", account.Credentials["project_id"])
+	require.Equal(t, "google_one", account.Credentials["oauth_type"])
+	require.Equal(t, GeminiTierGoogleAIPro, account.Credentials["tier_id"])
+	require.Equal(t, int64(2*TB), account.Extra["drive_storage_limit"])
+
+	require.Len(t, groupRepo.groups, 1)
+	var group *Group
+	for _, stored := range groupRepo.groups {
+		group = stored
+	}
+	require.NotNil(t, group)
+	require.Equal(t, PlatformGemini, group.Platform)
+	require.Equal(t, CapacitySourceConnectedAccount, group.CapacitySource)
+	require.NotNil(t, group.OwnerUserID)
+	require.Equal(t, int64(42), *group.OwnerUserID)
+	require.Equal(t, []int64{group.ID}, accountRepo.boundGroups[account.ID])
+}
+
 func TestConnectedAccountServiceListUsesOwnerScope(t *testing.T) {
 	ctx := context.Background()
 	accountRepo := newConnectedAccountRepoFake()
-	svc := NewConnectedAccountService(accountRepo, newConnectedGroupRepoFake(), &connectedOpenAIOAuthFake{})
+	svc := NewConnectedAccountService(accountRepo, newConnectedGroupRepoFake(), &connectedOpenAIOAuthFake{}, nil, nil)
 	ownerID := int64(42)
 	otherOwnerID := int64(77)
 	require.NoError(t, accountRepo.Create(ctx, &Account{Name: "mine", OwnerUserID: &ownerID, Platform: PlatformOpenAI, Type: AccountTypeOAuth, Status: StatusActive}))
@@ -81,7 +189,7 @@ func TestConnectedAccountServiceDeleteRemovesOnlyOwnedConnectedGroup(t *testing.
 	ctx := context.Background()
 	accountRepo := newConnectedAccountRepoFake()
 	groupRepo := newConnectedGroupRepoFake()
-	svc := NewConnectedAccountService(accountRepo, groupRepo, &connectedOpenAIOAuthFake{})
+	svc := NewConnectedAccountService(accountRepo, groupRepo, &connectedOpenAIOAuthFake{}, nil, nil)
 	ownerID := int64(42)
 	group := &Group{
 		ID:             10,
@@ -118,6 +226,52 @@ type connectedOpenAIOAuthFake struct {
 	tokenInfo     *OpenAITokenInfo
 	refreshedInfo *OpenAITokenInfo
 	authURLResult *OpenAIAuthURLResult
+}
+
+type connectedAnthropicOAuthFake struct {
+	tokenInfo     *TokenInfo
+	refreshedInfo *TokenInfo
+	authURLResult *GenerateAuthURLResult
+}
+
+func (f *connectedAnthropicOAuthFake) GenerateAuthURL(context.Context, *int64) (*GenerateAuthURLResult, error) {
+	if f.authURLResult != nil {
+		return f.authURLResult, nil
+	}
+	return &GenerateAuthURLResult{AuthURL: "https://claude.example/auth", SessionID: "session"}, nil
+}
+
+func (f *connectedAnthropicOAuthFake) ExchangeCode(context.Context, *ExchangeCodeInput) (*TokenInfo, error) {
+	return f.tokenInfo, nil
+}
+
+func (f *connectedAnthropicOAuthFake) RefreshAccountToken(context.Context, *Account) (*TokenInfo, error) {
+	return f.refreshedInfo, nil
+}
+
+type connectedGeminiOAuthFake struct {
+	tokenInfo     *GeminiTokenInfo
+	refreshedInfo *GeminiTokenInfo
+	authURLResult *GeminiAuthURLResult
+}
+
+func (f *connectedGeminiOAuthFake) GenerateAuthURL(context.Context, *int64, string, string, string, string) (*GeminiAuthURLResult, error) {
+	if f.authURLResult != nil {
+		return f.authURLResult, nil
+	}
+	return &GeminiAuthURLResult{AuthURL: "https://gemini.example/auth", SessionID: "session", State: "state"}, nil
+}
+
+func (f *connectedGeminiOAuthFake) ExchangeCode(context.Context, *GeminiExchangeCodeInput) (*GeminiTokenInfo, error) {
+	return f.tokenInfo, nil
+}
+
+func (f *connectedGeminiOAuthFake) RefreshAccountToken(context.Context, *Account) (*GeminiTokenInfo, error) {
+	return f.refreshedInfo, nil
+}
+
+func (f *connectedGeminiOAuthFake) BuildAccountCredentials(tokenInfo *GeminiTokenInfo) map[string]any {
+	return (&GeminiOAuthService{}).BuildAccountCredentials(tokenInfo)
 }
 
 func (f *connectedOpenAIOAuthFake) GenerateAuthURL(context.Context, *int64, string, string) (*OpenAIAuthURLResult, error) {

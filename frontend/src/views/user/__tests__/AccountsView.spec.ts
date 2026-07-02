@@ -4,28 +4,28 @@ import AccountsView from '@/views/user/AccountsView.vue'
 
 const {
   deleteConnectedAccount,
-  exchangeOpenAIConnectedAccountCode,
-  generateOpenAIConnectedAccountAuthUrl,
+  exchangeConnectedAccountCode,
+  generateConnectedAccountAuthUrl,
   listConnectedAccounts,
-  refreshOpenAIConnectedAccount,
+  refreshConnectedAccount,
   showError,
   showSuccess,
 } = vi.hoisted(() => ({
   deleteConnectedAccount: vi.fn(),
-  exchangeOpenAIConnectedAccountCode: vi.fn(),
-  generateOpenAIConnectedAccountAuthUrl: vi.fn(),
+  exchangeConnectedAccountCode: vi.fn(),
+  generateConnectedAccountAuthUrl: vi.fn(),
   listConnectedAccounts: vi.fn(),
-  refreshOpenAIConnectedAccount: vi.fn(),
+  refreshConnectedAccount: vi.fn(),
   showError: vi.fn(),
   showSuccess: vi.fn(),
 }))
 
 vi.mock('@/api/user', () => ({
   deleteConnectedAccount,
-  exchangeOpenAIConnectedAccountCode,
-  generateOpenAIConnectedAccountAuthUrl,
+  exchangeConnectedAccountCode,
+  generateConnectedAccountAuthUrl,
   listConnectedAccounts,
-  refreshOpenAIConnectedAccount,
+  refreshConnectedAccount,
 }))
 
 vi.mock('@/stores/app', () => ({
@@ -119,11 +119,12 @@ describe('User AccountsView', () => {
       page_size: 20,
       pages: 1,
     })
-    generateOpenAIConnectedAccountAuthUrl.mockResolvedValue({
+    generateConnectedAccountAuthUrl.mockResolvedValue({
       auth_url: 'https://auth.example.com/start?state=state-123',
       session_id: 'session-123',
+      state: 'state-123',
     })
-    exchangeOpenAIConnectedAccountCode.mockResolvedValue({
+    exchangeConnectedAccountCode.mockResolvedValue({
       id: 13,
       name: 'OpenAI Added',
       platform: 'openai',
@@ -133,7 +134,7 @@ describe('User AccountsView', () => {
       created_at: '2026-07-01T09:00:00Z',
       updated_at: '2026-07-01T09:00:00Z',
     })
-    refreshOpenAIConnectedAccount.mockResolvedValue({})
+    refreshConnectedAccount.mockResolvedValue({})
     deleteConnectedAccount.mockResolvedValue({ deleted: true })
   })
 
@@ -147,28 +148,37 @@ describe('User AccountsView', () => {
     expect(wrapper.text()).toContain('byo-openai-u7-a12')
   })
 
-  it('generates OpenAI OAuth URL and exchanges code using the saved session', async () => {
+  it('lets users choose a provider before generating an OAuth URL', async () => {
     const wrapper = mountView()
     await flushPromises()
 
-    await wrapper.get('[data-testid="connect-openai"]').trigger('click')
+    await wrapper.get('[data-testid="connect-account"]').trigger('click')
+    expect(wrapper.text()).toContain('OpenAI')
+    expect(wrapper.text()).toContain('Anthropic')
+    expect(wrapper.text()).toContain('Gemini')
+
+    await wrapper.get('[data-testid="provider-option-gemini"]').trigger('click')
     await flushPromises()
 
-    expect(generateOpenAIConnectedAccountAuthUrl).toHaveBeenCalled()
+    expect(generateConnectedAccountAuthUrl).toHaveBeenCalledWith('gemini', {
+      redirect_uri: expect.any(String),
+      oauth_type: 'google_one',
+    })
     expect(wrapper.text()).toContain('https://auth.example.com/start')
 
     await wrapper.get('[data-testid="oauth-code"]').setValue('oauth-code')
     await wrapper.get('[data-testid="oauth-state"]').setValue('state-123')
-    await wrapper.get('[data-testid="account-name"]').setValue('OpenAI Main')
-    await wrapper.get('[data-testid="finish-openai-oauth"]').trigger('click')
+    await wrapper.get('[data-testid="account-name"]').setValue('Gemini Main')
+    await wrapper.get('[data-testid="finish-oauth"]').trigger('click')
     await flushPromises()
 
-    expect(exchangeOpenAIConnectedAccountCode).toHaveBeenCalledWith({
+    expect(exchangeConnectedAccountCode).toHaveBeenCalledWith('gemini', {
       session_id: 'session-123',
       code: 'oauth-code',
       state: 'state-123',
       redirect_uri: expect.any(String),
-      name: 'OpenAI Main',
+      oauth_type: 'google_one',
+      name: 'Gemini Main',
     })
     expect(showSuccess).toHaveBeenCalled()
     expect(listConnectedAccounts).toHaveBeenCalledTimes(2)
@@ -180,7 +190,7 @@ describe('User AccountsView', () => {
 
     await wrapper.get('[data-testid="refresh-account-12"]').trigger('click')
     await flushPromises()
-    expect(refreshOpenAIConnectedAccount).toHaveBeenCalledWith(12)
+    expect(refreshConnectedAccount).toHaveBeenCalledWith(12)
 
     await wrapper.get('[data-testid="delete-account-12"]').trigger('click')
     await wrapper.get('[data-testid="confirm-delete"]').trigger('click')

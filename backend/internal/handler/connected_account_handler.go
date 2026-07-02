@@ -42,6 +42,18 @@ type connectedOpenAIAuthURLRequest struct {
 	RedirectURI string `json:"redirect_uri"`
 }
 
+type connectedAnthropicAuthURLRequest struct {
+	ProxyID *int64 `json:"proxy_id"`
+}
+
+type connectedGeminiAuthURLRequest struct {
+	ProxyID     *int64 `json:"proxy_id"`
+	RedirectURI string `json:"redirect_uri"`
+	ProjectID   string `json:"project_id"`
+	OAuthType   string `json:"oauth_type"`
+	TierID      string `json:"tier_id"`
+}
+
 type connectedOpenAIExchangeCodeRequest struct {
 	SessionID   string `json:"session_id" binding:"required"`
 	Code        string `json:"code" binding:"required"`
@@ -51,6 +63,27 @@ type connectedOpenAIExchangeCodeRequest struct {
 	Name        string `json:"name"`
 	Concurrency int    `json:"concurrency"`
 	Priority    int    `json:"priority"`
+}
+
+type connectedAnthropicExchangeCodeRequest struct {
+	SessionID   string `json:"session_id" binding:"required"`
+	Code        string `json:"code" binding:"required"`
+	ProxyID     *int64 `json:"proxy_id"`
+	Name        string `json:"name"`
+	Concurrency int    `json:"concurrency"`
+	Priority    int    `json:"priority"`
+}
+
+type connectedGeminiExchangeCodeRequest struct {
+	SessionID   string `json:"session_id" binding:"required"`
+	Code        string `json:"code" binding:"required"`
+	State       string `json:"state" binding:"required"`
+	ProxyID     *int64 `json:"proxy_id"`
+	Name        string `json:"name"`
+	Concurrency int    `json:"concurrency"`
+	Priority    int    `json:"priority"`
+	OAuthType   string `json:"oauth_type"`
+	TierID      string `json:"tier_id"`
 }
 
 func (h *ConnectedAccountHandler) List(c *gin.Context) {
@@ -96,6 +129,42 @@ func (h *ConnectedAccountHandler) GenerateOpenAIAuthURL(c *gin.Context) {
 	response.Success(c, result)
 }
 
+func (h *ConnectedAccountHandler) GenerateAnthropicAuthURL(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+	var req connectedAnthropicAuthURLRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		req = connectedAnthropicAuthURLRequest{}
+	}
+	result, err := h.connectedAccountService.GenerateAnthropicAuthURL(c.Request.Context(), subject.UserID, req.ProxyID)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, result)
+}
+
+func (h *ConnectedAccountHandler) GenerateGeminiAuthURL(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+	var req connectedGeminiAuthURLRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		req = connectedGeminiAuthURLRequest{}
+	}
+	result, err := h.connectedAccountService.GenerateGeminiAuthURL(c.Request.Context(), subject.UserID, req.ProxyID, req.RedirectURI, req.ProjectID, req.OAuthType, req.TierID)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, result)
+}
+
 func (h *ConnectedAccountHandler) ExchangeOpenAICode(c *gin.Context) {
 	subject, ok := middleware2.GetAuthSubjectFromContext(c)
 	if !ok {
@@ -125,7 +194,64 @@ func (h *ConnectedAccountHandler) ExchangeOpenAICode(c *gin.Context) {
 	response.Success(c, connectedAccountSummaryFromService(account))
 }
 
-func (h *ConnectedAccountHandler) RefreshOpenAI(c *gin.Context) {
+func (h *ConnectedAccountHandler) ExchangeAnthropicCode(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+	var req connectedAnthropicExchangeCodeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	account, err := h.connectedAccountService.CreateAnthropicAccountFromOAuth(c.Request.Context(), service.CreateConnectedAnthropicAccountInput{
+		UserID:      subject.UserID,
+		SessionID:   req.SessionID,
+		Code:        req.Code,
+		ProxyID:     req.ProxyID,
+		Name:        req.Name,
+		Concurrency: req.Concurrency,
+		Priority:    req.Priority,
+	})
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, connectedAccountSummaryFromService(account))
+}
+
+func (h *ConnectedAccountHandler) ExchangeGeminiCode(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+	var req connectedGeminiExchangeCodeRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	account, err := h.connectedAccountService.CreateGeminiAccountFromOAuth(c.Request.Context(), service.CreateConnectedGeminiAccountInput{
+		UserID:      subject.UserID,
+		SessionID:   req.SessionID,
+		Code:        req.Code,
+		State:       req.State,
+		ProxyID:     req.ProxyID,
+		Name:        req.Name,
+		Concurrency: req.Concurrency,
+		Priority:    req.Priority,
+		OAuthType:   req.OAuthType,
+		TierID:      req.TierID,
+	})
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, connectedAccountSummaryFromService(account))
+}
+
+func (h *ConnectedAccountHandler) Refresh(c *gin.Context) {
 	subject, ok := middleware2.GetAuthSubjectFromContext(c)
 	if !ok {
 		response.Unauthorized(c, "User not authenticated")
@@ -136,7 +262,7 @@ func (h *ConnectedAccountHandler) RefreshOpenAI(c *gin.Context) {
 		response.BadRequest(c, "Invalid account ID")
 		return
 	}
-	account, err := h.connectedAccountService.RefreshOpenAIAccount(c.Request.Context(), subject.UserID, accountID)
+	account, err := h.connectedAccountService.RefreshAccount(c.Request.Context(), subject.UserID, accountID)
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
@@ -172,7 +298,7 @@ func connectedAccountSummaryFromService(account *service.Account) ConnectedAccou
 		Platform:       account.Platform,
 		Type:           account.Type,
 		Status:         account.Status,
-		Email:          credentialString(account.Credentials, "email"),
+		Email:          connectedAccountEmail(account),
 		PlanType:       credentialString(account.Credentials, "plan_type"),
 		CapacitySource: service.CapacitySourceConnectedAccount,
 		LastUsedAt:     account.LastUsedAt,
@@ -190,6 +316,16 @@ func connectedAccountSummaryFromService(account *service.Account) ConnectedAccou
 		break
 	}
 	return out
+}
+
+func connectedAccountEmail(account *service.Account) string {
+	if account == nil {
+		return ""
+	}
+	if email := credentialString(account.Credentials, "email"); email != "" {
+		return email
+	}
+	return credentialString(account.Extra, "email_address")
 }
 
 func credentialString(credentials map[string]any, key string) string {
