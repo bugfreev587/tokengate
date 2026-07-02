@@ -242,6 +242,7 @@ import { getPublicSettings, isTotp2FARequired, isWeChatWebOAuthEnabled } from '@
 import type { LoginAgreementDocument, TotpLoginResponse } from '@/types'
 import { extractI18nErrorMessage } from '@/utils/apiError'
 import { clearAllAffiliateReferralCodes } from '@/utils/oauthAffiliate'
+import { buildSessionBridgeUrl, hasSessionBridgeAttempt } from '@/utils/sessionBridge'
 
 const { t } = useI18n()
 const LOGIN_AGREEMENT_STORAGE_KEY = 'tokengate_login_agreement_consent'
@@ -330,6 +331,14 @@ watch(validationToastMessage, (value, previousValue) => {
 // ==================== Lifecycle ====================
 
 onMounted(async () => {
+  if (!authStore.isAuthenticated && !hasSessionBridgeAttempt()) {
+    const bridgeUrl = buildSessionBridgeUrl()
+    if (bridgeUrl) {
+      window.location.replace(bridgeUrl)
+      return
+    }
+  }
+
   const expiredFlag = sessionStorage.getItem('auth_expired')
   if (expiredFlag) {
     sessionStorage.removeItem('auth_expired')

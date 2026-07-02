@@ -22,4 +22,12 @@ describe('auth session api', () => {
 
     expect(post).toHaveBeenCalledWith('/auth/logout', {})
   })
+
+  it('posts prepareSessionCookies to the session-cookie endpoint', async () => {
+    const { prepareSessionCookies } = await import('@/api/auth')
+
+    await prepareSessionCookies()
+
+    expect(post).toHaveBeenCalledWith('/auth/session-cookie')
+  })
 })

@@ -179,6 +179,21 @@ export async function logout(): Promise<void> {
   clearAuthToken()
 }
 
+export async function prepareSessionCookies(): Promise<AuthResponse> {
+  const { data } = await apiClient.post<AuthResponse>('/auth/session-cookie')
+
+  setAuthToken(data.access_token)
+  if (data.refresh_token) {
+    setRefreshToken(data.refresh_token)
+  }
+  if (data.expires_in) {
+    setTokenExpiresAt(data.expires_in)
+  }
+  localStorage.setItem('auth_user', JSON.stringify(data.user))
+
+  return data
+}
+
 /**
  * Refresh token response
  */
@@ -657,6 +672,7 @@ export const authAPI = {
   register,
   getCurrentUser,
   logout,
+  prepareSessionCookies,
   isAuthenticated,
   setAuthToken,
   setRefreshToken,

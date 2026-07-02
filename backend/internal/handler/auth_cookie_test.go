@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
+	servermiddleware "github.com/Wei-Shaw/sub2api/internal/server/middleware"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
@@ -190,6 +191,25 @@ func TestAuthHandlerRefreshTokenUsesHttpOnlyRefreshCookie(t *testing.T) {
 	})
 
 	handler.RefreshToken(c)
+
+	require.Equal(t, http.StatusOK, recorder.Code)
+	cookies := recorder.Result().Cookies()
+	require.NotNil(t, findCookie(cookies, "tokengate_access_token"))
+	require.NotNil(t, findCookie(cookies, "tokengate_refresh_token"))
+}
+
+func TestAuthHandlerPrepareSessionCookiesSetsHttpOnlyAuthCookiesForCurrentUser(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	handler, _, _, user := newAuthCookieTestHandler(t)
+	handler.userService = service.NewUserService(&userHandlerRepoStub{user: user}, nil, nil, nil)
+
+	recorder := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(recorder)
+	c.Request = httptest.NewRequest(http.MethodPost, "/api/v1/auth/session-cookie", nil)
+	c.Request.Header.Set("X-Forwarded-Proto", "https")
+	c.Set(string(servermiddleware.ContextKeyUser), servermiddleware.AuthSubject{UserID: user.ID})
+
+	handler.PrepareSessionCookies(c)
 
 	require.Equal(t, http.StatusOK, recorder.Code)
 	cookies := recorder.Result().Cookies()

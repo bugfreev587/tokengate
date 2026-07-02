@@ -77,6 +77,15 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/auth/session-bridge',
+    name: 'SessionBridge',
+    component: () => import('@/views/auth/SessionBridgeView.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Session Bridge'
+    }
+  },
+  {
     path: '/auth/linuxdo/callback',
     name: 'LinuxDoOAuthCallback',
     component: () => import('@/views/auth/LinuxDoCallbackView.vue'),

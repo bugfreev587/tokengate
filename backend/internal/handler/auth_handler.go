@@ -493,6 +493,25 @@ func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 	})
 }
 
+// PrepareSessionCookies refreshes the browser's HttpOnly auth cookies for an
+// already-authenticated localStorage session.
+// POST /api/v1/auth/session-cookie
+func (h *AuthHandler) PrepareSessionCookies(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+
+	user, err := h.userService.GetByID(c.Request.Context(), subject.UserID)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+
+	h.respondWithTokenPair(c, user)
+}
+
 // ValidatePromoCodeRequest 验证优惠码请求
 type ValidatePromoCodeRequest struct {
 	Code string `json:"code" binding:"required"`
