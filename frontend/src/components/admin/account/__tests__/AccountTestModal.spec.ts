@@ -119,13 +119,13 @@ describe('AccountTestModal', () => {
       },
       configurable: true
     })
-    global.fetch = vi.fn().mockResolvedValue(
+    global.fetch = vi.fn().mockImplementation(() => Promise.resolve(
       createStreamResponse([
         'data: {"type":"test_start","model":"gemini-2.5-flash-image"}\n',
         'data: {"type":"image","image_url":"data:image/png;base64,QUJD","mime_type":"image/png"}\n',
         'data: {"type":"test_complete","success":true}\n'
       ])
-    ) as any
+    )) as any
   })
 
   afterEach(() => {
@@ -136,6 +136,8 @@ describe('AccountTestModal', () => {
   it('gemini 图片模型测试会携带提示词并渲染图片预览', async () => {
     const wrapper = mountModal()
     await wrapper.setProps({ show: true })
+    await flushPromises()
+    ;(wrapper.vm as any).selectedModelId = 'gemini-3.1-flash-image'
     await flushPromises()
 
     const promptInput = wrapper.find('textarea.textarea-stub')
@@ -163,6 +165,42 @@ describe('AccountTestModal', () => {
     expect(preview.attributes('src')).toBe('data:image/png;base64,QUJD')
   })
 
+  it('defaults to testing all models and probes each available model', async () => {
+    getAvailableModels.mockResolvedValueOnce([
+      { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' },
+      { id: 'claude-opus-5', display_name: 'Claude Opus 5' }
+    ])
+    global.fetch = vi.fn().mockImplementation(() => Promise.resolve(
+      createStreamResponse([
+        'data: {"type":"test_complete","success":true}\n'
+      ])
+    )) as any
+
+    const wrapper = mountModal({
+      id: 42,
+      name: 'Claude Main',
+      platform: 'anthropic',
+      type: 'oauth',
+      status: 'active'
+    } as any)
+
+    await wrapper.setProps({ show: true })
+    await flushPromises()
+
+    expect((wrapper.vm as any).selectedModelId).toBe('__all_models__')
+    expect((wrapper.vm as any).availableModels[0]).toMatchObject({
+      id: '__all_models__',
+      display_name: 'admin.accounts.testAllModelsConnection'
+    })
+
+    await (wrapper.vm as any).startTest()
+    await flushPromises()
+
+    expect(global.fetch).toHaveBeenCalledTimes(2)
+    const bodies = (global.fetch as any).mock.calls.map(([, request]: any[]) => JSON.parse(request.body))
+    expect(bodies.map((body: any) => body.model_id)).toEqual(['claude-sonnet-5', 'claude-opus-5'])
+  })
+
   it('refreshes Claude models from the model selector', async () => {
     getAvailableModels.mockResolvedValueOnce([
       { id: 'claude-opus-4-8', display_name: 'Claude Opus 4.8' }
@@ -185,8 +223,12 @@ describe('AccountTestModal', () => {
 
     expect(refreshModels).toHaveBeenCalledWith(42)
     expect((wrapper.vm as any).availableModels).toEqual([
+      expect.objectContaining({
+        id: '__all_models__',
+        display_name: 'admin.accounts.testAllModelsConnection'
+      }),
       { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' }
     ])
-    expect((wrapper.vm as any).selectedModelId).toBe('claude-sonnet-5')
+    expect((wrapper.vm as any).selectedModelId).toBe('__all_models__')
   })
 })

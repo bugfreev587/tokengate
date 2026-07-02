@@ -323,20 +323,39 @@ const openAITestModeOptions = computed(() => [
 ])
 const previewImageUrl = ref('')
 const prioritizedGeminiModels = ['gemini-3.1-flash-image', 'gemini-2.5-flash-image', 'gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-3-flash-preview', 'gemini-3-pro-preview', 'gemini-2.0-flash']
-const supportsGeminiImageTest = computed(() => {
-  const modelID = selectedModelId.value.toLowerCase()
-  if (!modelID.startsWith('gemini-') || !modelID.includes('-image')) return false
+const TEST_ALL_MODELS_ID = '__all_models__'
+const activeTestModelId = ref('')
+
+const isTestAllModelsOption = (modelID: string) => modelID === TEST_ALL_MODELS_ID
+
+const createTestAllModelsOption = (): ClaudeModel => ({
+  id: TEST_ALL_MODELS_ID,
+  type: 'test-option',
+  display_name: t('admin.accounts.testAllModelsConnection'),
+  created_at: ''
+})
+
+const concreteAvailableModels = computed(() => availableModels.value.filter((model) => !isTestAllModelsOption(model.id)))
+
+const supportsGeminiImageModel = (modelID: string) => {
+  const normalizedModelID = modelID.toLowerCase()
+  if (!normalizedModelID.startsWith('gemini-') || !normalizedModelID.includes('-image')) return false
 
   return props.account?.platform === 'gemini' || (props.account?.platform === 'antigravity' && props.account?.type === 'apikey')
-})
+}
 
-const supportsOpenAIImageTest = computed(() => {
-  const modelID = selectedModelId.value.toLowerCase()
-  if (!modelID.startsWith('gpt-image-')) return false
+const supportsOpenAIImageModel = (modelID: string) => {
+  const normalizedModelID = modelID.toLowerCase()
+  if (!normalizedModelID.startsWith('gpt-image-')) return false
   return props.account?.platform === 'openai'
-})
+}
 
-const supportsImageTest = computed(() => supportsGeminiImageTest.value || supportsOpenAIImageTest.value)
+const supportsImageModel = (modelID: string) => supportsGeminiImageModel(modelID) || supportsOpenAIImageModel(modelID)
+const supportsImageTest = computed(() => !isTestAllModelsOption(selectedModelId.value) && supportsImageModel(selectedModelId.value))
+const activeRequestSupportsImageTest = computed(() => {
+  const modelID = activeTestModelId.value || selectedModelId.value
+  return !isTestAllModelsOption(modelID) && supportsImageModel(modelID)
+})
 const supportsModelRefresh = computed(() => {
   return props.account?.platform === 'anthropic' && ['oauth', 'setup-token', 'apikey'].includes(props.account?.type || '')
 })
@@ -418,9 +437,13 @@ watch(selectedModelId, () => {
 const applyAvailableModels = (models: ClaudeModel[], preferredModelId = '') => {
   if (!props.account) return
 
-  availableModels.value = props.account.platform === 'gemini' || props.account.platform === 'antigravity'
+  const sortedModels = props.account.platform === 'gemini' || props.account.platform === 'antigravity'
     ? sortTestModels(models)
     : models
+
+  availableModels.value = sortedModels.length > 0
+    ? [createTestAllModelsOption(), ...sortedModels]
+    : []
 
   if (availableModels.value.length === 0) {
     selectedModelId.value = ''
@@ -428,20 +451,14 @@ const applyAvailableModels = (models: ClaudeModel[], preferredModelId = '') => {
   }
 
   const preferred = preferredModelId
-    ? availableModels.value.find((model) => model.id === preferredModelId)
+    ? concreteAvailableModels.value.find((model) => model.id === preferredModelId)
     : undefined
   if (preferred) {
     selectedModelId.value = preferred.id
     return
   }
 
-  if (props.account.platform === 'gemini') {
-    selectedModelId.value = availableModels.value[0].id
-    return
-  }
-
-  const sonnetModel = availableModels.value.find((m) => m.id.includes('sonnet'))
-  selectedModelId.value = sonnetModel?.id || availableModels.value[0].id
+  selectedModelId.value = TEST_ALL_MODELS_ID
 }
 
 const loadAvailableModels = async () => {
@@ -489,6 +506,7 @@ const resetState = () => {
   errorMessage.value = ''
   generatedImages.value = []
   previewImageUrl.value = ''
+  activeTestModelId.value = ''
 }
 
 const handleClose = () => {
@@ -515,6 +533,161 @@ const scrollToBottom = async () => {
   }
 }
 
+interface AccountTestEvent {
+  type: string
+  text?: string
+  model?: string
+  success?: boolean
+  error?: string
+  image_url?: string
+  mime_type?: string
+}
+
+const isAbortError = (error: unknown) => error instanceof DOMException && error.name === 'AbortError'
+
+const getModelLabel = (model: ClaudeModel) => model.display_name || model.id
+
+const flushStreamingContent = () => {
+  if (streamingContent.value) {
+    addLine(streamingContent.value, 'text-green-300')
+    streamingContent.value = ''
+  }
+}
+
+const currentTestFailed = () => status.value === 'error'
+
+const getPromptForModel = (modelID: string) => {
+  if (!supportsImageModel(modelID)) return ''
+  return testPrompt.value.trim() || t('admin.accounts.imagePromptDefault')
+}
+
+const streamAccountTest = async (modelID: string) => {
+  if (!props.account) return
+
+  activeTestModelId.value = modelID
+  streamingContent.value = ''
+
+  const url = `${resolvedApiBase.value}/${accountEndpointPrefix.value}/${props.account.id}/test`
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model_id: modelID,
+      prompt: getPromptForModel(modelID),
+      mode: isOpenAIAccount.value ? testMode.value : 'default'
+    }),
+    signal: abortController?.signal
+  })
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+
+  const reader = response.body?.getReader()
+  if (!reader) {
+    throw new Error('No response body')
+  }
+
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() || ''
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue
+
+      const jsonStr = line.slice(6).trim()
+      if (!jsonStr) continue
+
+      try {
+        const event = JSON.parse(jsonStr) as AccountTestEvent
+        handleEvent(event)
+      } catch (e) {
+        console.error('Failed to parse SSE event:', e)
+      }
+    }
+  }
+}
+
+const startAllModelsTest = async () => {
+  const models = concreteAvailableModels.value
+  if (models.length === 0) {
+    throw new Error(t('admin.accounts.noModelsAvailableForTest'))
+  }
+
+  addLine(t('admin.accounts.testingAllModels', { count: models.length }), 'text-cyan-400')
+
+  let passed = 0
+  let failed = 0
+
+  for (const [index, model] of models.entries()) {
+    const modelLabel = getModelLabel(model)
+    if (index > 0) {
+      addLine('', 'text-gray-300')
+    }
+    status.value = 'connecting'
+    addLine(t('admin.accounts.testingModel', { model: modelLabel }), 'text-cyan-400')
+
+    try {
+      await streamAccountTest(model.id)
+      flushStreamingContent()
+
+      if (currentTestFailed()) {
+        failed += 1
+        addLine(
+          t('admin.accounts.testAllModelsModelFailed', {
+            model: modelLabel,
+            error: errorMessage.value || t('admin.accounts.testFailed')
+          }),
+          'text-red-400'
+        )
+        errorMessage.value = ''
+        continue
+      }
+
+      passed += 1
+      addLine(t('admin.accounts.testAllModelsModelPassed', { model: modelLabel }), 'text-green-400')
+    } catch (error: unknown) {
+      if (isAbortError(error)) throw error
+
+      failed += 1
+      const msg = error instanceof Error ? error.message : 'Unknown error'
+      addLine(
+        t('admin.accounts.testAllModelsModelFailed', {
+          model: modelLabel,
+          error: msg
+        }),
+        'text-red-400'
+      )
+      errorMessage.value = ''
+    }
+  }
+
+  addLine('', 'text-gray-300')
+  if (failed > 0) {
+    status.value = 'error'
+    errorMessage.value = t('admin.accounts.testAllModelsFailedSummary', {
+      passed,
+      total: models.length,
+      failed
+    })
+    addLine(errorMessage.value, 'text-red-400')
+    return
+  }
+
+  status.value = 'success'
+  addLine(t('admin.accounts.testAllModelsSummary', { passed, total: models.length }), 'text-green-400')
+}
+
 const startTest = async () => {
   if (!props.account || !selectedModelId.value) return
 
@@ -529,60 +702,13 @@ const startTest = async () => {
   abortController = new AbortController()
 
   try {
-    // Create EventSource for SSE
-    const url = `${resolvedApiBase.value}/${accountEndpointPrefix.value}/${props.account.id}/test`
-
-    // Use fetch with streaming for SSE since EventSource doesn't support POST
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model_id: selectedModelId.value,
-        prompt: supportsImageTest.value ? testPrompt.value.trim() : '',
-        mode: isOpenAIAccount.value ? testMode.value : 'default'
-      }),
-      signal: abortController.signal
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const reader = response.body?.getReader()
-    if (!reader) {
-      throw new Error('No response body')
-    }
-
-    const decoder = new TextDecoder()
-    let buffer = ''
-
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-
-      buffer += decoder.decode(value, { stream: true })
-      const lines = buffer.split('\n')
-      buffer = lines.pop() || ''
-
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const jsonStr = line.slice(6).trim()
-          if (jsonStr) {
-            try {
-              const event = JSON.parse(jsonStr)
-              handleEvent(event)
-            } catch (e) {
-              console.error('Failed to parse SSE event:', e)
-            }
-          }
-        }
-      }
+    if (isTestAllModelsOption(selectedModelId.value)) {
+      await startAllModelsTest()
+    } else {
+      await streamAccountTest(selectedModelId.value)
     }
   } catch (error: unknown) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
+    if (isAbortError(error)) {
       status.value = 'idle'
       return
     }
@@ -590,18 +716,12 @@ const startTest = async () => {
     const msg = error instanceof Error ? error.message : 'Unknown error'
     errorMessage.value = msg
     addLine(`Error: ${msg}`, 'text-red-400')
+  } finally {
+    activeTestModelId.value = ''
   }
 }
 
-const handleEvent = (event: {
-  type: string
-  text?: string
-  model?: string
-  success?: boolean
-  error?: string
-  image_url?: string
-  mime_type?: string
-}) => {
+const handleEvent = (event: AccountTestEvent) => {
   switch (event.type) {
     case 'test_start':
       addLine(t('admin.accounts.connectedToApi'), 'text-green-400')
@@ -609,7 +729,7 @@ const handleEvent = (event: {
         addLine(t('admin.accounts.usingModel', { model: event.model }), 'text-cyan-400')
       }
       addLine(
-        supportsImageTest.value
+        activeRequestSupportsImageTest.value
             ? t('admin.accounts.sendingImageRequest')
             : t('admin.accounts.sendingTestMessage'),
         'text-gray-400'

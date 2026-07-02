@@ -95,6 +95,26 @@ const TextAreaStub = defineComponent({
   `
 })
 
+function createStreamResponse(lines: string[] = []) {
+  const encoder = new TextEncoder()
+  const chunks = lines.map((line) => encoder.encode(line))
+  let index = 0
+
+  return {
+    ok: true,
+    body: {
+      getReader: () => ({
+        read: vi.fn().mockImplementation(async () => {
+          if (index < chunks.length) {
+            return { done: false, value: chunks[index++] }
+          }
+          return { done: true, value: undefined }
+        })
+      })
+    }
+  } as Response
+}
+
 function buildAccount() {
   return {
     id: 1,
@@ -131,14 +151,7 @@ describe('AccountTestModal', () => {
     refreshConnectedAccountModelsMock.mockResolvedValue([
       { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' }
     ])
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      body: {
-        getReader: () => ({
-          read: vi.fn().mockResolvedValue({ done: true, value: undefined })
-        })
-      }
-    } as any)
+    global.fetch = vi.fn().mockImplementation(() => Promise.resolve(createStreamResponse()))
     localStorage.setItem('auth_token', 'test-token')
   })
 
@@ -150,7 +163,7 @@ describe('AccountTestModal', () => {
   it('posts compact mode for OpenAI compact probe', async () => {
     const wrapper = mount(AccountTestModal, {
       props: {
-        show: true,
+        show: false,
         account: buildAccount()
       },
       global: {
@@ -163,6 +176,7 @@ describe('AccountTestModal', () => {
       }
     })
 
+    await wrapper.setProps({ show: true })
     await flushPromises()
     ;(wrapper.vm as any).selectedModelId = 'gpt-5.4'
     ;(wrapper.vm as any).testMode = 'compact'
@@ -206,6 +220,47 @@ describe('AccountTestModal', () => {
     expect(url).toContain('/user/accounts/1/test')
   })
 
+  it('defaults to testing all models and probes each available model', async () => {
+    getAvailableModelsMock.mockResolvedValueOnce([
+      { id: 'gpt-5.4', display_name: 'GPT-5.4' },
+      { id: 'gpt-5.4-mini', display_name: 'GPT-5.4 Mini' }
+    ])
+    ;(global.fetch as any).mockImplementation(() => Promise.resolve(createStreamResponse([
+      'data: {"type":"test_complete","success":true}\n'
+    ])))
+
+    const wrapper = mount(AccountTestModal, {
+      props: {
+        show: false,
+        account: buildAccount()
+      },
+      global: {
+        stubs: {
+          BaseDialog: BaseDialogStub,
+          Select: SelectStub,
+          TextArea: TextAreaStub,
+          Icon: true
+        }
+      }
+    })
+
+    await wrapper.setProps({ show: true })
+    await flushPromises()
+
+    expect((wrapper.vm as any).selectedModelId).toBe('__all_models__')
+    expect((wrapper.vm as any).availableModels[0]).toMatchObject({
+      id: '__all_models__',
+      display_name: 'admin.accounts.testAllModelsConnection'
+    })
+
+    await (wrapper.vm as any).startTest()
+    await flushPromises()
+
+    expect(global.fetch).toHaveBeenCalledTimes(2)
+    const bodies = (global.fetch as any).mock.calls.map(([, options]: any[]) => JSON.parse(options.body))
+    expect(bodies.map((body: any) => body.model_id)).toEqual(['gpt-5.4', 'gpt-5.4-mini'])
+  })
+
   it('refreshes models through the user endpoint in user scope', async () => {
     const account = {
       ...buildAccount(),
@@ -242,7 +297,12 @@ describe('AccountTestModal', () => {
     expect(refreshConnectedAccountModelsMock).toHaveBeenCalledWith(1)
     expect(refreshModelsMock).not.toHaveBeenCalled()
     expect((wrapper.vm as any).availableModels).toEqual([
+      expect.objectContaining({
+        id: '__all_models__',
+        display_name: 'admin.accounts.testAllModelsConnection'
+      }),
       { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' }
     ])
+    expect((wrapper.vm as any).selectedModelId).toBe('__all_models__')
   })
 })
