@@ -146,4 +146,46 @@ describe('UseKeyModal', () => {
     expect(combined).not.toContain('CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC')
     expect(combined).not.toContain('ANTHROPIC_CUSTOM_MODEL_OPTION')
   })
+
+  it('keeps Codex CLI setup available for Anthropic keys', async () => {
+    const wrapper = mount(UseKeyModal, {
+      props: {
+        show: true,
+        apiKeyId: 7,
+        apiKey: 'sk-live',
+        baseUrl: 'https://api.tokengate.to',
+        platform: 'anthropic'
+      },
+      global: {
+        stubs: {
+          BaseDialog: {
+            template: '<div><slot /><slot name="footer" /></div>'
+          },
+          Icon: {
+            template: '<span />'
+          }
+        }
+      }
+    })
+
+    const codexTab = wrapper.findAll('button').find((button) =>
+      button.text().includes('keys.useKeyModal.cliTabs.codexCli')
+    )
+    const codexWsTab = wrapper.findAll('button').find((button) =>
+      button.text().includes('keys.useKeyModal.cliTabs.codexCliWs')
+    )
+
+    expect(codexTab).toBeDefined()
+    expect(codexWsTab).toBeDefined()
+
+    await codexTab!.trigger('click')
+    await nextTick()
+
+    const codeBlocks = wrapper.findAll('pre code').map((node) => node.text())
+    const combined = codeBlocks.join('\n')
+    expect(combined).toContain('model_provider = "OpenAI"')
+    expect(combined).toContain('wire_api = "responses"')
+    expect(combined).toContain('"OPENAI_API_KEY": "sk-live"')
+    expect(combined).not.toContain('CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY')
+  })
 })

@@ -325,6 +325,13 @@ const clientTabs = computed((): TabConfig[] => {
         { id: 'gemini', label: t('keys.useKeyModal.cliTabs.geminiCli'), icon: SparkleIcon },
         { id: 'opencode', label: t('keys.useKeyModal.cliTabs.opencode'), icon: TerminalIcon }
       ]
+    case 'anthropic':
+      return [
+        { id: 'codex', label: t('keys.useKeyModal.cliTabs.codexCli'), icon: TerminalIcon },
+        { id: 'codex-ws', label: t('keys.useKeyModal.cliTabs.codexCliWs'), icon: TerminalIcon },
+        { id: 'claude', label: t('keys.useKeyModal.cliTabs.claudeCode'), icon: TerminalIcon },
+        { id: 'opencode', label: t('keys.useKeyModal.cliTabs.opencode'), icon: TerminalIcon }
+      ]
     case 'antigravity':
       return [
         { id: 'claude', label: t('keys.useKeyModal.cliTabs.claudeCode'), icon: TerminalIcon },
@@ -371,6 +378,11 @@ const platformDescription = computed(() => {
       return t('keys.useKeyModal.openai.description')
     case 'gemini':
       return t('keys.useKeyModal.gemini.description')
+    case 'anthropic':
+      if (activeClientTab.value === 'codex' || activeClientTab.value === 'codex-ws') {
+        return t('keys.useKeyModal.openai.description')
+      }
+      return t('keys.useKeyModal.description')
     case 'antigravity':
       return t('keys.useKeyModal.antigravity.description')
     default:
@@ -389,6 +401,13 @@ const platformNote = computed(() => {
         : t('keys.useKeyModal.openai.note')
     case 'gemini':
       return t('keys.useKeyModal.gemini.note')
+    case 'anthropic':
+      if (activeClientTab.value === 'codex' || activeClientTab.value === 'codex-ws') {
+        return activeTab.value === 'windows'
+          ? t('keys.useKeyModal.openai.noteWindows')
+          : t('keys.useKeyModal.openai.note')
+      }
+      return t('keys.useKeyModal.note')
     case 'antigravity':
       return activeClientTab.value === 'claude'
         ? t('keys.useKeyModal.antigravity.claudeNote')
@@ -516,6 +535,14 @@ const currentFiles = computed((): FileConfig[] => {
       return generateOpenAIFiles(baseUrl, apiKey)
     case 'gemini':
       return [generateGeminiCliContent(baseUrl, apiKey)]
+    case 'anthropic':
+      if (activeClientTab.value === 'codex') {
+        return generateOpenAIFiles(baseUrl, apiKey)
+      }
+      if (activeClientTab.value === 'codex-ws') {
+        return generateOpenAIWsFiles(baseUrl, apiKey)
+      }
+      return generateAnthropicFiles(baseUrl, apiKey)
     case 'antigravity':
       if (activeClientTab.value === 'gemini') {
         return [generateGeminiCliContent(`${baseUrl}/antigravity`, apiKey)]
