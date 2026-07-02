@@ -3,21 +3,25 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { defineComponent } from 'vue'
 import AccountTestModal from '../AccountTestModal.vue'
 
-const { getAvailableModelsMock, getConnectedAccountModelsMock } = vi.hoisted(() => ({
+const { getAvailableModelsMock, refreshModelsMock, getConnectedAccountModelsMock, refreshConnectedAccountModelsMock } = vi.hoisted(() => ({
   getAvailableModelsMock: vi.fn(),
-  getConnectedAccountModelsMock: vi.fn()
+  refreshModelsMock: vi.fn(),
+  getConnectedAccountModelsMock: vi.fn(),
+  refreshConnectedAccountModelsMock: vi.fn()
 }))
 
 vi.mock('@/api/admin', () => ({
   adminAPI: {
     accounts: {
-      getAvailableModels: getAvailableModelsMock
+      getAvailableModels: getAvailableModelsMock,
+      refreshModels: refreshModelsMock
     }
   }
 }))
 
 vi.mock('@/api/user', () => ({
-  getConnectedAccountModels: getConnectedAccountModelsMock
+  getConnectedAccountModels: getConnectedAccountModelsMock,
+  refreshConnectedAccountModels: refreshConnectedAccountModelsMock
 }))
 
 vi.mock('@/composables/useClipboard', () => ({
@@ -112,12 +116,20 @@ describe('AccountTestModal', () => {
 
   beforeEach(() => {
     getAvailableModelsMock.mockReset()
+    refreshModelsMock.mockReset()
     getConnectedAccountModelsMock.mockReset()
+    refreshConnectedAccountModelsMock.mockReset()
     getAvailableModelsMock.mockResolvedValue([
       { id: 'gpt-5.4', display_name: 'GPT-5.4' }
     ])
+    refreshModelsMock.mockResolvedValue([
+      { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' }
+    ])
     getConnectedAccountModelsMock.mockResolvedValue([
       { id: 'gpt-5.4', display_name: 'GPT-5.4' }
+    ])
+    refreshConnectedAccountModelsMock.mockResolvedValue([
+      { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' }
     ])
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -192,5 +204,45 @@ describe('AccountTestModal', () => {
     expect(getAvailableModelsMock).not.toHaveBeenCalled()
     const [url] = (global.fetch as any).mock.calls[0]
     expect(url).toContain('/user/accounts/1/test')
+  })
+
+  it('refreshes models through the user endpoint in user scope', async () => {
+    const account = {
+      ...buildAccount(),
+      name: 'Claude Main',
+      platform: 'anthropic',
+      type: 'oauth'
+    }
+    getConnectedAccountModelsMock.mockResolvedValueOnce([
+      { id: 'claude-opus-4-8', display_name: 'Claude Opus 4.8' }
+    ])
+    refreshConnectedAccountModelsMock.mockResolvedValueOnce([
+      { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' }
+    ])
+    const wrapper = mount(AccountTestModal, {
+      props: {
+        show: true,
+        account,
+        scope: 'user'
+      },
+      global: {
+        stubs: {
+          BaseDialog: BaseDialogStub,
+          Select: SelectStub,
+          TextArea: TextAreaStub,
+          Icon: true
+        }
+      }
+    })
+
+    await flushPromises()
+    await wrapper.get('button[aria-label="admin.accounts.refreshModels"]').trigger('click')
+    await flushPromises()
+
+    expect(refreshConnectedAccountModelsMock).toHaveBeenCalledWith(1)
+    expect(refreshModelsMock).not.toHaveBeenCalled()
+    expect((wrapper.vm as any).availableModels).toEqual([
+      { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' }
+    ])
   })
 })

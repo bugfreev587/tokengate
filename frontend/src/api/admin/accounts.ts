@@ -446,6 +446,11 @@ export async function getAvailableModels(id: number): Promise<ClaudeModel[]> {
   return data
 }
 
+export async function refreshModels(id: number): Promise<ClaudeModel[]> {
+  const { data } = await apiClient.post<ClaudeModel[]>(`/admin/accounts/${id}/models/refresh`)
+  return data
+}
+
 export interface CRSPreviewAccount {
   crs_account_id: string
   kind: string
@@ -660,6 +665,7 @@ export const accountsAPI = {
   resetTempUnschedulable,
   setSchedulable,
   getAvailableModels,
+  refreshModels,
   generateAuthUrl,
   exchangeCode,
   refreshOpenAIToken,

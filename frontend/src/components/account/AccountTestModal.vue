@@ -42,9 +42,22 @@
       </div>
 
       <div class="space-y-1.5">
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {{ t('admin.accounts.selectTestModel') }}
-        </label>
+        <div class="flex items-center justify-between gap-3">
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ t('admin.accounts.selectTestModel') }}
+          </label>
+          <button
+            v-if="supportsModelRefresh"
+            type="button"
+            class="rounded-lg p-1.5 text-cyan-600 transition-colors hover:bg-cyan-50 disabled:opacity-50 dark:hover:bg-cyan-900/20"
+            :title="t('admin.accounts.refreshModels')"
+            :aria-label="t('admin.accounts.refreshModels')"
+            :disabled="loadingModels || refreshingModels || status === 'connecting'"
+            @click="refreshAvailableModels"
+          >
+            <Icon name="refresh" size="sm" :class="{ 'animate-spin': refreshingModels }" />
+          </button>
+        </div>
         <Select
           v-model="selectedModelId"
           :options="availableModels"
@@ -250,7 +263,7 @@ import TextArea from '@/components/common/TextArea.vue'
 import { Icon } from '@/components/icons'
 import { useClipboard } from '@/composables/useClipboard'
 import { adminAPI } from '@/api/admin'
-import { getConnectedAccountModels } from '@/api/user'
+import { getConnectedAccountModels, refreshConnectedAccountModels } from '@/api/user'
 import { useAppStore } from '@/stores/app'
 import type { ClaudeModel } from '@/types'
 
@@ -299,6 +312,7 @@ const availableModels = ref<ClaudeModel[]>([])
 const selectedModelId = ref('')
 const testPrompt = ref('')
 const loadingModels = ref(false)
+const refreshingModels = ref(false)
 let abortController: AbortController | null = null
 const generatedImages = ref<PreviewImage[]>([])
 const testMode = ref<'default' | 'compact'>('default')
@@ -323,6 +337,9 @@ const supportsOpenAIImageTest = computed(() => {
 })
 
 const supportsImageTest = computed(() => supportsGeminiImageTest.value || supportsOpenAIImageTest.value)
+const supportsModelRefresh = computed(() => {
+  return props.account?.platform === 'anthropic' && ['oauth', 'setup-token', 'apikey'].includes(props.account?.type || '')
+})
 const isStandaloneBuild = import.meta.env.VITE_BUILD_TARGET === 'standalone'
 
 const normalizeApiBase = (value?: string | null) => {
@@ -398,6 +415,35 @@ watch(selectedModelId, () => {
   }
 })
 
+const applyAvailableModels = (models: ClaudeModel[], preferredModelId = '') => {
+  if (!props.account) return
+
+  availableModels.value = props.account.platform === 'gemini' || props.account.platform === 'antigravity'
+    ? sortTestModels(models)
+    : models
+
+  if (availableModels.value.length === 0) {
+    selectedModelId.value = ''
+    return
+  }
+
+  const preferred = preferredModelId
+    ? availableModels.value.find((model) => model.id === preferredModelId)
+    : undefined
+  if (preferred) {
+    selectedModelId.value = preferred.id
+    return
+  }
+
+  if (props.account.platform === 'gemini') {
+    selectedModelId.value = availableModels.value[0].id
+    return
+  }
+
+  const sonnetModel = availableModels.value.find((m) => m.id.includes('sonnet'))
+  selectedModelId.value = sonnetModel?.id || availableModels.value[0].id
+}
+
 const loadAvailableModels = async () => {
   if (!props.account) return
 
@@ -407,19 +453,7 @@ const loadAvailableModels = async () => {
     const models = props.scope === 'user'
       ? await getConnectedAccountModels(props.account.id)
       : await adminAPI.accounts.getAvailableModels(props.account.id)
-    availableModels.value = props.account.platform === 'gemini' || props.account.platform === 'antigravity'
-      ? sortTestModels(models)
-      : models
-    // Default selection by platform
-    if (availableModels.value.length > 0) {
-      if (props.account.platform === 'gemini') {
-        selectedModelId.value = availableModels.value[0].id
-      } else {
-        // Try to select Sonnet as default, otherwise use first model
-        const sonnetModel = availableModels.value.find((m) => m.id.includes('sonnet'))
-        selectedModelId.value = sonnetModel?.id || availableModels.value[0].id
-      }
-    }
+    applyAvailableModels(models)
   } catch (error) {
     console.error('Failed to load available models:', error)
     // Fallback to empty list
@@ -427,6 +461,24 @@ const loadAvailableModels = async () => {
     selectedModelId.value = ''
   } finally {
     loadingModels.value = false
+  }
+}
+
+const refreshAvailableModels = async () => {
+  if (!props.account) return
+
+  refreshingModels.value = true
+  try {
+    const models = props.scope === 'user'
+      ? await refreshConnectedAccountModels(props.account.id)
+      : await adminAPI.accounts.refreshModels(props.account.id)
+    applyAvailableModels(models, selectedModelId.value)
+    appStore.showSuccess(t('admin.accounts.modelsRefreshed'))
+  } catch (error: any) {
+    console.error('Failed to refresh available models:', error)
+    appStore.showError(error?.message || t('admin.accounts.refreshModelsFailed'))
+  } finally {
+    refreshingModels.value = false
   }
 }
 

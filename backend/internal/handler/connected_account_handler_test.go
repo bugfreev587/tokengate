@@ -233,6 +233,60 @@ func TestConnectedAccountHandlerGetAvailableModelsRequiresOwnership(t *testing.T
 	require.Equal(t, http.StatusNotFound, w.Code)
 }
 
+func TestConnectedAccountHandlerRefreshAvailableModelsStoresOwnedCatalog(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ownerID := int64(42)
+	accountRepo := newHandlerConnectedAccountRepoFake()
+	groupRepo := newHandlerConnectedGroupRepoFake()
+	accountRepo.accounts[12] = &service.Account{
+		ID:          12,
+		Name:        "Claude Main",
+		Platform:    service.PlatformAnthropic,
+		Type:        service.AccountTypeOAuth,
+		Status:      service.StatusActive,
+		OwnerUserID: &ownerID,
+		Credentials: map[string]any{
+			"access_token": "anthropic-access",
+		},
+	}
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, "Bearer anthropic-access", r.Header.Get("Authorization"))
+		require.Equal(t, "2023-06-01", r.Header.Get("anthropic-version"))
+		_, _ = w.Write([]byte(`{
+			"data": [
+				{"id": "claude-sonnet-5", "type": "model", "display_name": "Claude Sonnet 5", "created_at": "2026-07-01T00:00:00Z"}
+			],
+			"has_more": false
+		}`))
+	}))
+	defer upstream.Close()
+	restore := service.SetAnthropicModelsHTTPClientForTest(upstream.Client(), upstream.URL)
+	defer restore()
+
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, nil, nil, nil)
+	h := NewConnectedAccountHandler(svc, nil, nil)
+	router := gin.New()
+	router.POST("/api/v1/user/accounts/:id/models/refresh", func(c *gin.Context) {
+		c.Set(string(middleware2.ContextKeyUser), middleware2.AuthSubject{UserID: ownerID})
+		h.RefreshAvailableModels(c)
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/user/accounts/12/models/refresh", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var envelope response.Response
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &envelope))
+	models, ok := envelope.Data.([]any)
+	require.True(t, ok)
+	require.Len(t, models, 1)
+	first, ok := models[0].(map[string]any)
+	require.True(t, ok)
+	require.Equal(t, "claude-sonnet-5", first["id"])
+	require.Contains(t, accountRepo.accounts[12].Extra, service.AccountExtraAvailableModels)
+}
+
 func TestConnectedAccountHandlerTestRequiresOwnership(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	ownerID := int64(42)
@@ -299,6 +353,20 @@ func (r *handlerConnectedAccountRepoFake) UpdateCredentials(_ context.Context, i
 		return service.ErrAccountNotFound
 	}
 	account.Credentials = credentials
+	return nil
+}
+
+func (r *handlerConnectedAccountRepoFake) UpdateExtra(_ context.Context, id int64, updates map[string]any) error {
+	account, ok := r.accounts[id]
+	if !ok {
+		return service.ErrAccountNotFound
+	}
+	if account.Extra == nil {
+		account.Extra = map[string]any{}
+	}
+	for key, value := range updates {
+		account.Extra[key] = value
+	}
 	return nil
 }
 

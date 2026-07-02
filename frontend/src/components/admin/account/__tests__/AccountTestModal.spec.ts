@@ -2,15 +2,17 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AccountTestModal from '../AccountTestModal.vue'
 
-const { getAvailableModels, copyToClipboard } = vi.hoisted(() => ({
+const { getAvailableModels, refreshModels, copyToClipboard } = vi.hoisted(() => ({
   getAvailableModels: vi.fn(),
+  refreshModels: vi.fn(),
   copyToClipboard: vi.fn()
 }))
 
 vi.mock('@/api/admin', () => ({
   adminAPI: {
     accounts: {
-      getAvailableModels
+      getAvailableModels,
+      refreshModels
     }
   }
 }))
@@ -23,7 +25,9 @@ vi.mock('@/composables/useClipboard', () => ({
 
 vi.mock('@/stores/app', () => ({
   useAppStore: () => ({
-    apiBaseUrl: 'https://public.example.com/api/v1'
+    apiBaseUrl: 'https://public.example.com/api/v1',
+    showError: vi.fn(),
+    showSuccess: vi.fn()
   })
 }))
 
@@ -65,17 +69,17 @@ function createStreamResponse(lines: string[]) {
   } as Response
 }
 
-function mountModal() {
+function mountModal(account = {
+  id: 42,
+  name: 'Gemini Image Test',
+  platform: 'gemini',
+  type: 'apikey',
+  status: 'active'
+} as any) {
   return mount(AccountTestModal, {
     props: {
       show: false,
-      account: {
-        id: 42,
-        name: 'Gemini Image Test',
-        platform: 'gemini',
-        type: 'apikey',
-        status: 'active'
-      }
+      account
     } as any,
     global: {
       stubs: {
@@ -100,6 +104,10 @@ describe('AccountTestModal', () => {
       { id: 'gemini-2.0-flash', display_name: 'Gemini 2.0 Flash' },
       { id: 'gemini-2.5-flash-image', display_name: 'Gemini 2.5 Flash Image' },
       { id: 'gemini-3.1-flash-image', display_name: 'Gemini 3.1 Flash Image' }
+    ])
+    refreshModels.mockReset()
+    refreshModels.mockResolvedValue([
+      { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' }
     ])
     copyToClipboard.mockReset()
     Object.defineProperty(globalThis, 'localStorage', {
@@ -153,5 +161,32 @@ describe('AccountTestModal', () => {
     const preview = wrapper.find('img[alt="test-image-1"]')
     expect(preview.exists()).toBe(true)
     expect(preview.attributes('src')).toBe('data:image/png;base64,QUJD')
+  })
+
+  it('refreshes Claude models from the model selector', async () => {
+    getAvailableModels.mockResolvedValueOnce([
+      { id: 'claude-opus-4-8', display_name: 'Claude Opus 4.8' }
+    ])
+    refreshModels.mockResolvedValueOnce([
+      { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' }
+    ])
+    const wrapper = mountModal({
+      id: 42,
+      name: 'Claude Main',
+      platform: 'anthropic',
+      type: 'oauth',
+      status: 'active'
+    } as any)
+
+    await wrapper.setProps({ show: true })
+    await flushPromises()
+    await wrapper.get('button[aria-label="admin.accounts.refreshModels"]').trigger('click')
+    await flushPromises()
+
+    expect(refreshModels).toHaveBeenCalledWith(42)
+    expect((wrapper.vm as any).availableModels).toEqual([
+      { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' }
+    ])
+    expect((wrapper.vm as any).selectedModelId).toBe('claude-sonnet-5')
   })
 })

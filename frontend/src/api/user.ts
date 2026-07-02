@@ -298,6 +298,11 @@ export async function getConnectedAccountModels(id: number): Promise<ClaudeModel
   return data
 }
 
+export async function refreshConnectedAccountModels(id: number): Promise<ClaudeModel[]> {
+  const { data } = await apiClient.post<ClaudeModel[]>(`/user/accounts/${id}/models/refresh`)
+  return data
+}
+
 export async function deleteConnectedAccount(id: number): Promise<{ deleted: boolean }> {
   const { data } = await apiClient.delete<{ deleted: boolean }>(`/user/accounts/${id}`)
   return data
@@ -326,6 +331,7 @@ export const userAPI = {
   refreshConnectedAccount,
   refreshOpenAIConnectedAccount,
   getConnectedAccountModels,
+  refreshConnectedAccountModels,
   deleteConnectedAccount,
 }
 

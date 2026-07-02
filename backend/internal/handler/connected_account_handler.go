@@ -287,7 +287,32 @@ func (h *ConnectedAccountHandler) GetAvailableModels(c *gin.Context) {
 		response.ErrorFrom(c, err)
 		return
 	}
+	if service.ShouldAutoRefreshClaudeModels(account, service.DefaultAccountModelRefreshInterval) {
+		if models, err := h.connectedAccountService.RefreshAccountModels(c.Request.Context(), subject.UserID, accountID); err == nil {
+			response.Success(c, models)
+			return
+		}
+	}
 	response.Success(c, connectedAccountAvailableModels(account))
+}
+
+func (h *ConnectedAccountHandler) RefreshAvailableModels(c *gin.Context) {
+	subject, ok := middleware2.GetAuthSubjectFromContext(c)
+	if !ok {
+		response.Unauthorized(c, "User not authenticated")
+		return
+	}
+	accountID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || accountID <= 0 {
+		response.BadRequest(c, "Invalid account ID")
+		return
+	}
+	models, err := h.connectedAccountService.RefreshAccountModels(c.Request.Context(), subject.UserID, accountID)
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, models)
 }
 
 func (h *ConnectedAccountHandler) Test(c *gin.Context) {
@@ -413,27 +438,7 @@ func connectedAccountAvailableModels(account *service.Account) any {
 	if account.Platform == service.PlatformAntigravity {
 		return antigravity.DefaultModels()
 	}
-	if account.IsOAuth() {
-		return claude.DefaultModels
-	}
-	mapping := account.GetModelMapping()
-	if len(mapping) == 0 {
-		return claude.DefaultModels
-	}
-	models := make([]claude.Model, 0, len(mapping))
-	for requestedModel := range mapping {
-		if model, ok := findClaudeModel(requestedModel); ok {
-			models = append(models, model)
-			continue
-		}
-		models = append(models, claude.Model{
-			ID:          requestedModel,
-			Type:        "model",
-			DisplayName: requestedModel,
-			CreatedAt:   "",
-		})
-	}
-	return models
+	return service.ClaudeAvailableModelsForAccount(account)
 }
 
 func findOpenAIModel(id string) (openai.Model, bool) {

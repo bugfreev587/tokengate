@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
@@ -14,7 +15,9 @@ import (
 
 type availableModelsAdminService struct {
 	*stubAdminService
-	account service.Account
+	account          service.Account
+	refreshModels    []claude.Model
+	refreshAccountID int64
 }
 
 func (s *availableModelsAdminService) GetAccount(_ context.Context, id int64) (*service.Account, error) {
@@ -25,11 +28,17 @@ func (s *availableModelsAdminService) GetAccount(_ context.Context, id int64) (*
 	return s.stubAdminService.GetAccount(context.Background(), id)
 }
 
+func (s *availableModelsAdminService) RefreshAccountModels(_ context.Context, id int64) ([]claude.Model, error) {
+	s.refreshAccountID = id
+	return s.refreshModels, nil
+}
+
 func setupAvailableModelsRouter(adminSvc service.AdminService) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 	handler := NewAccountHandler(adminSvc, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	router.GET("/api/v1/admin/accounts/:id/models", handler.GetAvailableModels)
+	router.POST("/api/v1/admin/accounts/:id/models/refresh", handler.RefreshAvailableModels)
 	return router
 }
 
@@ -102,4 +111,67 @@ func TestAccountHandlerGetAvailableModels_OpenAIOAuthPassthroughFallsBackToDefau
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	require.NotEmpty(t, resp.Data)
 	require.NotEqual(t, "gpt-5", resp.Data[0].ID)
+}
+
+func TestAccountHandlerGetAvailableModels_AnthropicUsesCachedModelCatalog(t *testing.T) {
+	svc := &availableModelsAdminService{
+		stubAdminService: newStubAdminService(),
+		account: service.Account{
+			ID:       44,
+			Name:     "anthropic-oauth",
+			Platform: service.PlatformAnthropic,
+			Type:     service.AccountTypeOAuth,
+			Status:   service.StatusActive,
+			Extra: map[string]any{
+				"available_models": []any{
+					map[string]any{
+						"id":           "claude-mythos-5",
+						"type":         "model",
+						"display_name": "Claude Mythos 5",
+						"created_at":   "2026-07-02T00:00:00Z",
+					},
+				},
+			},
+		},
+	}
+	router := setupAvailableModelsRouter(svc)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/accounts/44/models", nil)
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+
+	var resp struct {
+		Data []struct {
+			ID string `json:"id"`
+		} `json:"data"`
+	}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	require.Equal(t, []string{"claude-mythos-5"}, []string{resp.Data[0].ID})
+}
+
+func TestAccountHandlerRefreshAvailableModelsReturnsRefreshedCatalog(t *testing.T) {
+	svc := &availableModelsAdminService{
+		stubAdminService: newStubAdminService(),
+		refreshModels: []claude.Model{
+			{ID: "claude-sonnet-5", Type: "model", DisplayName: "Claude Sonnet 5", CreatedAt: "2026-07-01T00:00:00Z"},
+		},
+	}
+	router := setupAvailableModelsRouter(svc)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/accounts/45/models/refresh", nil)
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	require.Equal(t, int64(45), svc.refreshAccountID)
+
+	var resp struct {
+		Data []struct {
+			ID string `json:"id"`
+		} `json:"data"`
+	}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	require.Equal(t, []string{"claude-sonnet-5"}, []string{resp.Data[0].ID})
 }

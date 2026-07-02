@@ -255,6 +255,16 @@
               </button>
               <button
                 type="button"
+                class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-cyan-50 hover:text-cyan-700 disabled:opacity-50 dark:hover:bg-cyan-900/20 dark:hover:text-cyan-300"
+                :data-testid="`models-account-${row.id}`"
+                :title="t('userAccounts.viewModels')"
+                :disabled="actionLoadingId === row.id"
+                @click="openModelsModal(row)"
+              >
+                <Icon name="database" size="sm" />
+              </button>
+              <button
+                type="button"
                 class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 dark:hover:bg-dark-700 dark:hover:text-gray-200"
                 :data-testid="`refresh-account-${row.id}`"
                 :title="t('userAccounts.refresh')"
@@ -307,6 +317,64 @@
       scope="user"
       @close="testingAccount = null"
     />
+    <BaseDialog
+      :show="!!modelsAccount"
+      :title="t('userAccounts.availableModels')"
+      width="normal"
+      @close="closeModelsModal"
+    >
+      <div class="space-y-4" data-testid="connected-account-models-modal">
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <div class="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
+              {{ modelsAccount?.name }}
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">
+              {{ accountModels.length }} {{ t('userAccounts.models') }}
+            </div>
+          </div>
+          <button
+            v-if="supportsSelectedModelRefresh"
+            type="button"
+            class="rounded-lg p-2 text-cyan-600 transition-colors hover:bg-cyan-50 disabled:opacity-50 dark:hover:bg-cyan-900/20"
+            data-testid="refresh-connected-models"
+            :title="t('userAccounts.refreshModels')"
+            :aria-label="t('userAccounts.refreshModels')"
+            :disabled="modelsLoading || modelsRefreshing"
+            @click="refreshSelectedModels"
+          >
+            <Icon name="refresh" size="sm" :class="{ 'animate-spin': modelsRefreshing }" />
+          </button>
+        </div>
+
+        <div v-if="modelsLoading" class="flex items-center gap-2 py-6 text-sm text-gray-500 dark:text-gray-400">
+          <Icon name="refresh" size="sm" class="animate-spin" />
+          <span>{{ t('common.loading') }}...</span>
+        </div>
+        <div v-else-if="accountModels.length === 0" class="py-6 text-sm text-gray-500 dark:text-gray-400">
+          {{ t('userAccounts.noModels') }}
+        </div>
+        <div v-else class="max-h-[360px] overflow-y-auto rounded-lg border border-gray-200 dark:border-dark-600">
+          <div
+            v-for="model in accountModels"
+            :key="model.id"
+            class="flex items-center justify-between gap-3 border-b border-gray-100 px-3 py-2 last:border-b-0 dark:border-dark-700"
+          >
+            <div class="min-w-0">
+              <div class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                {{ model.display_name || model.id }}
+              </div>
+              <div class="truncate font-mono text-xs text-gray-500 dark:text-gray-400">
+                {{ model.id }}
+              </div>
+            </div>
+            <span class="shrink-0 rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-dark-700 dark:text-gray-300">
+              {{ model.type || 'model' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </BaseDialog>
   </AppLayout>
 </template>
 
@@ -317,12 +385,15 @@ import {
   deleteConnectedAccount,
   exchangeConnectedAccountCode,
   generateConnectedAccountAuthUrl,
+  getConnectedAccountModels,
   listConnectedAccounts,
   refreshConnectedAccount,
+  refreshConnectedAccountModels,
   type ConnectedAccountOAuthProvider,
   type ConnectedAccountSummary,
 } from '@/api/user'
 import AccountTestModal from '@/components/account/AccountTestModal.vue'
+import BaseDialog from '@/components/common/BaseDialog.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import PlatformTypeBadge from '@/components/common/PlatformTypeBadge.vue'
@@ -331,6 +402,7 @@ import type { Column } from '@/components/common/types'
 import Icon from '@/components/icons/Icon.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import { useAppStore } from '@/stores/app'
+import type { ClaudeModel } from '@/types'
 
 const OAUTH_STORAGE_KEY = 'tokengate:user-connected-account-oauth'
 const LEGACY_OPENAI_OAUTH_STORAGE_KEY = 'tokengate:user-openai-connected-account-oauth'
@@ -371,6 +443,10 @@ const accountName = ref('')
 const actionLoadingId = ref<number | null>(null)
 const deleteTarget = ref<ConnectedAccountSummary | null>(null)
 const testingAccount = ref<ConnectedAccountSummary | null>(null)
+const modelsAccount = ref<ConnectedAccountSummary | null>(null)
+const accountModels = ref<ClaudeModel[]>([])
+const modelsLoading = ref(false)
+const modelsRefreshing = ref(false)
 
 const providerOptions = computed<ProviderOption[]>(() => [
   {
@@ -405,6 +481,7 @@ const selectedProviderOption = computed(
 )
 
 const requiresOAuthState = computed(() => selectedProvider.value !== 'anthropic')
+const supportsSelectedModelRefresh = computed(() => modelsAccount.value?.platform === 'anthropic')
 
 const canFinishOAuth = computed(() => (
   !!sessionId.value
@@ -514,6 +591,43 @@ async function refreshAccount(account: ConnectedAccountSummary) {
 
 function openTestModal(account: ConnectedAccountSummary) {
   testingAccount.value = account
+}
+
+async function openModelsModal(account: ConnectedAccountSummary) {
+  modelsAccount.value = account
+  accountModels.value = []
+  await loadModelsForAccount(account)
+}
+
+function closeModelsModal() {
+  modelsAccount.value = null
+  accountModels.value = []
+}
+
+async function loadModelsForAccount(account: ConnectedAccountSummary) {
+  modelsLoading.value = true
+  try {
+    accountModels.value = await getConnectedAccountModels(account.id)
+  } catch (error) {
+    accountModels.value = []
+    appStore.showError(errorMessage(error, t('userAccounts.modelsLoadFailed')))
+  } finally {
+    modelsLoading.value = false
+  }
+}
+
+async function refreshSelectedModels() {
+  if (!modelsAccount.value) return
+
+  modelsRefreshing.value = true
+  try {
+    accountModels.value = await refreshConnectedAccountModels(modelsAccount.value.id)
+    appStore.showSuccess(t('userAccounts.modelsRefreshed'))
+  } catch (error) {
+    appStore.showError(errorMessage(error, t('userAccounts.modelsRefreshFailed')))
+  } finally {
+    modelsRefreshing.value = false
+  }
 }
 
 function openDeleteDialog(account: ConnectedAccountSummary) {

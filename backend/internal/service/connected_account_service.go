@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
 )
@@ -19,6 +20,7 @@ type ConnectedAccountRepository interface {
 	Create(ctx context.Context, account *Account) error
 	Delete(ctx context.Context, id int64) error
 	UpdateCredentials(ctx context.Context, id int64, credentials map[string]any) error
+	UpdateExtra(ctx context.Context, id int64, updates map[string]any) error
 	GetByIDAndOwnerUserID(ctx context.Context, id int64, ownerUserID int64) (*Account, error)
 	ListByOwnerUserID(ctx context.Context, ownerUserID int64, params pagination.PaginationParams) ([]Account, *pagination.PaginationResult, error)
 	BindGroups(ctx context.Context, accountID int64, groupIDs []int64) error
@@ -292,6 +294,20 @@ func (s *ConnectedAccountService) GetOwnedAccount(ctx context.Context, userID in
 		return nil, ErrConnectedAccountUnsupported
 	}
 	return s.accountRepo.GetByIDAndOwnerUserID(ctx, accountID, userID)
+}
+
+func (s *ConnectedAccountService) RefreshAccountModels(ctx context.Context, userID int64, accountID int64) ([]claude.Model, error) {
+	if err := validateConnectedAccountUser(userID); err != nil {
+		return nil, err
+	}
+	if s == nil || s.accountRepo == nil {
+		return nil, ErrConnectedAccountUnsupported
+	}
+	account, err := s.accountRepo.GetByIDAndOwnerUserID(ctx, accountID, userID)
+	if err != nil {
+		return nil, err
+	}
+	return RefreshClaudeAvailableModelsForAccount(ctx, account, s.accountRepo)
 }
 
 func (s *ConnectedAccountService) RefreshAccount(ctx context.Context, userID int64, accountID int64) (*Account, error) {

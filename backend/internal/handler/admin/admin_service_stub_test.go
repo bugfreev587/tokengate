@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 )
 
@@ -352,6 +353,15 @@ func (s *stubAdminService) DeleteAccount(ctx context.Context, id int64) error {
 func (s *stubAdminService) RefreshAccountCredentials(ctx context.Context, id int64) (*service.Account, error) {
 	account := service.Account{ID: id, Name: "account", Status: service.StatusActive}
 	return &account, nil
+}
+
+func (s *stubAdminService) RefreshAccountModels(ctx context.Context, id int64) ([]claude.Model, error) {
+	return service.ClaudeAvailableModelsForAccount(&service.Account{
+		ID:       id,
+		Platform: service.PlatformAnthropic,
+		Type:     service.AccountTypeOAuth,
+		Status:   service.StatusActive,
+	}), nil
 }
 
 func (s *stubAdminService) ClearAccountError(ctx context.Context, id int64) (*service.Account, error) {

@@ -43,6 +43,7 @@ func RegisterUserRoutes(
 				accounts.POST("/gemini/auth-url", h.ConnectedAccount.GenerateGeminiAuthURL)
 				accounts.POST("/gemini/exchange-code", h.ConnectedAccount.ExchangeGeminiCode)
 				accounts.GET("/:id/models", h.ConnectedAccount.GetAvailableModels)
+				accounts.POST("/:id/models/refresh", h.ConnectedAccount.RefreshAvailableModels)
 				accounts.POST("/:id/test", h.ConnectedAccount.Test)
 				accounts.POST("/:id/refresh", h.ConnectedAccount.Refresh)
 				accounts.DELETE("/:id", h.ConnectedAccount.Delete)

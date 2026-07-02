@@ -6,16 +6,20 @@ const {
   deleteConnectedAccount,
   exchangeConnectedAccountCode,
   generateConnectedAccountAuthUrl,
+  getConnectedAccountModels,
   listConnectedAccounts,
   refreshConnectedAccount,
+  refreshConnectedAccountModels,
   showError,
   showSuccess,
 } = vi.hoisted(() => ({
   deleteConnectedAccount: vi.fn(),
   exchangeConnectedAccountCode: vi.fn(),
   generateConnectedAccountAuthUrl: vi.fn(),
+  getConnectedAccountModels: vi.fn(),
   listConnectedAccounts: vi.fn(),
   refreshConnectedAccount: vi.fn(),
+  refreshConnectedAccountModels: vi.fn(),
   showError: vi.fn(),
   showSuccess: vi.fn(),
 }))
@@ -24,8 +28,10 @@ vi.mock('@/api/user', () => ({
   deleteConnectedAccount,
   exchangeConnectedAccountCode,
   generateConnectedAccountAuthUrl,
+  getConnectedAccountModels,
   listConnectedAccounts,
   refreshConnectedAccount,
+  refreshConnectedAccountModels,
 }))
 
 vi.mock('@/stores/app', () => ({
@@ -88,6 +94,18 @@ const AccountTestModalStub = {
     </section>
   `,
 }
+const BaseDialogStub = {
+  props: ['show', 'title'],
+  emits: ['close'],
+  template: `
+    <section v-if="show" data-testid="base-dialog">
+      <h2>{{ title }}</h2>
+      <slot />
+      <slot name="footer" />
+      <button data-testid="close-base-dialog" @click="$emit('close')">close</button>
+    </section>
+  `,
+}
 
 function mountView() {
   return mount(AccountsView, {
@@ -95,6 +113,7 @@ function mountView() {
       stubs: {
         AccountTestModal: AccountTestModalStub,
         AppLayout: AppLayoutStub,
+        BaseDialog: BaseDialogStub,
         ConfirmDialog: ConfirmDialogStub,
         DataTable: DataTableStub,
         Icon: true,
@@ -149,6 +168,12 @@ describe('User AccountsView', () => {
       updated_at: '2026-07-01T09:00:00Z',
     })
     refreshConnectedAccount.mockResolvedValue({})
+    getConnectedAccountModels.mockResolvedValue([
+      { id: 'claude-opus-4-8', type: 'model', display_name: 'Claude Opus 4.8', created_at: '2026-07-01T00:00:00Z' },
+    ])
+    refreshConnectedAccountModels.mockResolvedValue([
+      { id: 'claude-sonnet-5', type: 'model', display_name: 'Claude Sonnet 5', created_at: '2026-07-01T00:00:00Z' },
+    ])
     deleteConnectedAccount.mockResolvedValue({ deleted: true })
   })
 
@@ -318,5 +343,45 @@ describe('User AccountsView', () => {
 
     expect(wrapper.get('[data-testid="account-test-modal-name"]').text()).toBe('OpenAI Main')
     expect(wrapper.get('[data-testid="account-test-modal-scope"]').text()).toBe('user')
+  })
+
+  it('shows and refreshes models for an Anthropic connected account', async () => {
+    listConnectedAccounts.mockResolvedValueOnce({
+      items: [
+        {
+          id: 12,
+          name: 'Claude Main',
+          platform: 'anthropic',
+          type: 'oauth',
+          status: 'active',
+          email: 'owner@example.com',
+          group_id: 44,
+          group_name: 'byo-anthropic-u7-a12',
+          capacity_source: 'connected_account',
+          created_at: '2026-07-01T09:00:00Z',
+          updated_at: '2026-07-01T09:00:00Z',
+          last_used_at: null,
+        },
+      ],
+      total: 1,
+      page: 1,
+      page_size: 20,
+      pages: 1,
+    })
+    const wrapper = mountView()
+    await flushPromises()
+
+    await wrapper.get('[data-testid="models-account-12"]').trigger('click')
+    await flushPromises()
+
+    expect(getConnectedAccountModels).toHaveBeenCalledWith(12)
+    expect(wrapper.get('[data-testid="connected-account-models-modal"]').text()).toContain('Claude Opus 4.8')
+
+    await wrapper.get('[data-testid="refresh-connected-models"]').trigger('click')
+    await flushPromises()
+
+    expect(refreshConnectedAccountModels).toHaveBeenCalledWith(12)
+    expect(wrapper.get('[data-testid="connected-account-models-modal"]').text()).toContain('Claude Sonnet 5')
+    expect(showSuccess).toHaveBeenCalledWith('userAccounts.modelsRefreshed')
   })
 })

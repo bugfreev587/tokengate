@@ -22,6 +22,7 @@ import {
   getConnectedAccountModels,
   listConnectedAccounts,
   refreshConnectedAccount,
+  refreshConnectedAccountModels,
   type ConnectedAccountSummary,
 } from '@/api/user'
 
@@ -201,5 +202,19 @@ describe('user connected accounts api', () => {
     ])
 
     expect(get).toHaveBeenCalledWith('/user/accounts/12/models')
+  })
+
+  it('refreshes available models for an owned connected account', async () => {
+    post.mockResolvedValueOnce({
+      data: [
+        { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' },
+      ],
+    })
+
+    await expect(refreshConnectedAccountModels(12)).resolves.toEqual([
+      { id: 'claude-sonnet-5', display_name: 'Claude Sonnet 5' },
+    ])
+
+    expect(post).toHaveBeenCalledWith('/user/accounts/12/models/refresh')
   })
 })

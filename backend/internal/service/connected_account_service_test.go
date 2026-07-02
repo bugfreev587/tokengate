@@ -371,6 +371,20 @@ func (r *connectedAccountRepoFake) UpdateCredentials(_ context.Context, id int64
 	return nil
 }
 
+func (r *connectedAccountRepoFake) UpdateExtra(_ context.Context, id int64, updates map[string]any) error {
+	account, ok := r.accounts[id]
+	if !ok {
+		return ErrAccountNotFound
+	}
+	if account.Extra == nil {
+		account.Extra = map[string]any{}
+	}
+	for key, value := range updates {
+		account.Extra[key] = value
+	}
+	return nil
+}
+
 func (r *connectedAccountRepoFake) GetByIDAndOwnerUserID(_ context.Context, id int64, ownerUserID int64) (*Account, error) {
 	account, ok := r.accounts[id]
 	if !ok || account.OwnerUserID == nil || *account.OwnerUserID != ownerUserID {
