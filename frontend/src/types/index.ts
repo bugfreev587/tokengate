@@ -487,6 +487,8 @@ export type GroupPlatform = 'anthropic' | 'openai' | 'gemini' | 'antigravity'
 
 export type SubscriptionType = 'standard' | 'subscription'
 
+export type GroupCapacitySource = 'tokengate' | 'connected_account'
+
 export interface OpenAIMessagesDispatchModelConfig {
   opus_mapped_model?: string
   sonnet_mapped_model?: string
@@ -500,11 +502,11 @@ export interface Group {
   description: string | null
   platform: GroupPlatform
   rate_multiplier: number
-  capacity_source?: 'tokengate' | 'connected_account'
   rpm_limit?: number // Group-level RPM cap (0 = unlimited); overrides user-level rpm_limit when set
   is_exclusive: boolean
   status: 'active' | 'inactive'
   subscription_type: SubscriptionType
+  capacity_source?: GroupCapacitySource
   daily_limit_usd: number | null
   weekly_limit_usd: number | null
   monthly_limit_usd: number | null

@@ -678,6 +678,18 @@ export default {
     namePlaceholder: 'My API Key',
     groupLabel: 'Group',
     selectGroup: 'Select a group',
+    groupSections: {
+      tokengate: {
+        title: 'TokenGate Capacity',
+        description: 'System groups billed by TokenGate model usage',
+      },
+      connected: {
+        title: 'My Connected Accounts',
+        description: 'BYO groups that use your connected provider account',
+        badge: 'BYO account',
+        itemDescription: 'Uses your connected AI account. TokenGate model usage is not charged.',
+      },
+    },
     statusLabel: 'Status',
     selectStatus: 'Select status',
     saving: 'Saving...',

@@ -438,7 +438,7 @@
           <label class="input-label">{{ t('keys.groupLabel') }}</label>
           <Select
             v-model="formData.group_id"
-            :options="groupOptions"
+            :options="groupSelectOptions"
             :placeholder="t('keys.selectGroup')"
             :searchable="true"
             :search-placeholder="t('keys.searchGroup')"
@@ -457,7 +457,16 @@
               <span v-else class="text-gray-400">{{ t('keys.selectGroup') }}</span>
             </template>
             <template #option="{ option, selected }">
+              <div v-if="isGroupHeaderOption(option)" class="flex w-full flex-col items-start gap-0.5 py-0.5 text-left">
+                <span class="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                  {{ (option as unknown as GroupHeaderOption).label }}
+                </span>
+                <span class="text-[11px] font-normal leading-snug text-gray-500 dark:text-gray-400">
+                  {{ (option as unknown as GroupHeaderOption).description }}
+                </span>
+              </div>
               <GroupOptionItem
+                v-else
                 :name="(option as unknown as GroupOption).label"
                 :platform="(option as unknown as GroupOption).platform"
                 :subscription-type="(option as unknown as GroupOption).subscriptionType"
@@ -1178,34 +1187,47 @@
         </div>
         <!-- Group list -->
         <div class="max-h-80 overflow-y-auto p-1.5">
-          <button
-            v-for="option in filteredGroupOptions"
-            :key="option.value ?? 'null'"
-            @click="changeGroup(selectedKeyForGroup!, option.value)"
-            :class="[
-              'flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors',
-              'border-b border-gray-100 last:border-0 dark:border-dark-700',
-              selectedKeyForGroup?.group_id === option.value ||
-              (!selectedKeyForGroup?.group_id && option.value === null)
-                ? 'bg-primary-50 dark:bg-primary-900/20'
-                : 'hover:bg-gray-100 dark:hover:bg-dark-700'
-            ]"
-            :title="option.description || undefined"
+          <template
+            v-for="section in filteredGroupSections"
+            :key="section.key"
           >
-            <GroupOptionItem
-              :name="option.label"
-              :platform="option.platform"
-              :subscription-type="option.subscriptionType"
-              :rate-multiplier="option.rate"
-              :user-rate-multiplier="option.userRate"
-              :capacity-source="option.capacitySource"
-              :description="option.description"
-              :selected="
+            <div class="px-3 pb-1.5 pt-2 first:pt-1">
+              <div class="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                {{ section.title }}
+              </div>
+              <div class="mt-0.5 text-[11px] leading-snug text-gray-500 dark:text-gray-400">
+                {{ section.description }}
+              </div>
+            </div>
+            <button
+              v-for="option in section.options"
+              :key="option.value"
+              @click="changeGroup(selectedKeyForGroup!, option.value)"
+              :class="[
+                'flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors',
+                'border-b border-gray-100 last:border-0 dark:border-dark-700',
                 selectedKeyForGroup?.group_id === option.value ||
                 (!selectedKeyForGroup?.group_id && option.value === null)
-              "
-            />
-          </button>
+                  ? 'bg-primary-50 dark:bg-primary-900/20'
+                  : 'hover:bg-gray-100 dark:hover:bg-dark-700'
+              ]"
+              :title="option.description || undefined"
+            >
+              <GroupOptionItem
+                :name="option.label"
+                :platform="option.platform"
+                :subscription-type="option.subscriptionType"
+                :rate-multiplier="option.rate"
+                :user-rate-multiplier="option.userRate"
+                :description="option.description"
+                :capacity-source="option.capacitySource"
+                :selected="
+                  selectedKeyForGroup?.group_id === option.value ||
+                  (!selectedKeyForGroup?.group_id && option.value === null)
+                "
+              />
+            </button>
+          </template>
           <!-- Empty state when search has no results -->
           <div v-if="filteredGroupOptions.length === 0" class="py-4 text-center text-sm text-gray-400 dark:text-gray-500">
             {{ t('keys.noGroupFound') }}
@@ -1244,7 +1266,7 @@ import TablePageLayout from '@/components/layout/TablePageLayout.vue'
 	import EndpointPopover from '@/components/keys/EndpointPopover.vue'
 	import GroupBadge from '@/components/common/GroupBadge.vue'
 	import GroupOptionItem from '@/components/common/GroupOptionItem.vue'
-	import type { ApiKey, Group, PublicSettings, SubscriptionType, GroupPlatform } from '@/types'
+	import type { ApiKey, Group, PublicSettings, SubscriptionType, GroupPlatform, GroupCapacitySource } from '@/types'
 import type { Column } from '@/components/common/types'
 import type { BatchApiKeyUsageStats } from '@/api/usage'
 import { formatDateTime } from '@/utils/format'
@@ -1261,7 +1283,7 @@ const formatDateTimeLocal = (isoDate: string): string => {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
-interface GroupOption {
+interface GroupOption extends Record<string, unknown> {
   value: number
   label: string
   description: string | null
@@ -1269,7 +1291,26 @@ interface GroupOption {
   userRate: number | null
   subscriptionType: SubscriptionType
   platform: GroupPlatform
-  capacitySource?: 'tokengate' | 'connected_account'
+  capacitySource: GroupCapacitySource
+}
+
+interface GroupHeaderOption extends Record<string, unknown> {
+  value: string
+  label: string
+  description: string
+  disabled: true
+  kind: 'group'
+  section: GroupSectionKey
+}
+
+type GroupSelectOption = GroupOption | GroupHeaderOption
+type GroupSectionKey = 'tokengate' | 'connected'
+
+interface GroupOptionSection {
+  key: GroupSectionKey
+  title: string
+  description: string
+  options: GroupOption[]
 }
 
 const appStore = useAppStore()
@@ -1426,25 +1467,111 @@ const groupOptions = computed(() =>
   groups.value.map((group) => ({
     value: group.id,
     label: group.name,
-    description: group.description,
+    description: getGroupOptionDescription(group),
     rate: group.rate_multiplier,
     userRate: userGroupRates.value[group.id] ?? null,
     subscriptionType: group.subscription_type,
     platform: group.platform,
-    capacitySource: group.capacity_source
+    capacitySource: getGroupCapacitySource(group)
   }))
 )
 
+const getGroupCapacitySource = (group: Group): GroupCapacitySource => {
+  const rawSource = String((group as Group & { source?: string; capacitySource?: string }).capacity_source ||
+    (group as Group & { source?: string; capacitySource?: string }).capacitySource ||
+    (group as Group & { source?: string }).source ||
+    '').toLowerCase()
+
+  if (rawSource === 'connected_account' || rawSource === 'byo' || rawSource === 'user_owned') {
+    return 'connected_account'
+  }
+  if (rawSource === 'tokengate' || rawSource === 'system') {
+    return 'tokengate'
+  }
+
+  const name = group.name.trim().toLowerCase()
+  const description = (group.description || '').toLowerCase()
+  if (
+    name.startsWith('byo-') ||
+    description.includes('connected account') ||
+    description.includes('user-owned')
+  ) {
+    return 'connected_account'
+  }
+
+  return 'tokengate'
+}
+
+const getGroupOptionDescription = (group: Group): string | null => {
+  if (group.description) return group.description
+  if (getGroupCapacitySource(group) === 'connected_account') {
+    return t('keys.groupSections.connected.itemDescription')
+  }
+  return group.description
+}
+
+const groupSectionDefinitions = computed<Record<GroupSectionKey, Omit<GroupOptionSection, 'options'>>>(() => ({
+  tokengate: {
+    key: 'tokengate',
+    title: t('keys.groupSections.tokengate.title'),
+    description: t('keys.groupSections.tokengate.description')
+  },
+  connected: {
+    key: 'connected',
+    title: t('keys.groupSections.connected.title'),
+    description: t('keys.groupSections.connected.description')
+  }
+}))
+
+const groupSections = computed<GroupOptionSection[]>(() => {
+  const tokengateOptions = groupOptions.value.filter((option) => option.capacitySource !== 'connected_account')
+  const connectedOptions = groupOptions.value.filter((option) => option.capacitySource === 'connected_account')
+  const definitions = groupSectionDefinitions.value
+
+  return [
+    { ...definitions.tokengate, options: tokengateOptions },
+    { ...definitions.connected, options: connectedOptions }
+  ].filter((section) => section.options.length > 0)
+})
+
+const groupSelectOptions = computed<GroupSelectOption[]>(() =>
+  groupSections.value.flatMap((section) => [
+    {
+      value: `__group_${section.key}`,
+      label: section.title,
+      description: section.description,
+      disabled: true,
+      kind: 'group' as const,
+      section: section.key
+    },
+    ...section.options
+  ])
+)
+
+const isGroupHeaderOption = (option: unknown): option is GroupHeaderOption => {
+  return !!option && typeof option === 'object' && (option as { kind?: unknown }).kind === 'group'
+}
+
 // Group dropdown search
 const groupSearchQuery = ref('')
-const filteredGroupOptions = computed(() => {
+const groupOptionMatchesSearch = (opt: GroupOption, query: string): boolean => {
+  return opt.label.toLowerCase().includes(query) ||
+    (opt.description && opt.description.toLowerCase().includes(query)) ||
+    opt.platform.toLowerCase().includes(query)
+}
+
+const filteredGroupSections = computed<GroupOptionSection[]>(() => {
   const query = groupSearchQuery.value.trim().toLowerCase()
-  if (!query) return groupOptions.value
-  return groupOptions.value.filter((opt) => {
-    return opt.label.toLowerCase().includes(query) ||
-      (opt.description && opt.description.toLowerCase().includes(query))
-  })
+  if (!query) return groupSections.value
+  return groupSections.value
+    .map((section) => ({
+      ...section,
+      options: section.options.filter((opt) => groupOptionMatchesSearch(opt, query))
+    }))
+    .filter((section) => section.options.length > 0)
 })
+
+const filteredGroupOptions = computed(() => filteredGroupSections.value.flatMap((section) => section.options))
 
 const copyToClipboard = async (text: string, keyId: number) => {
   const success = await clipboardCopy(text, t('keys.copied'))

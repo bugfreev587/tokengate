@@ -675,6 +675,18 @@ export default {
     namePlaceholder: '我的 API 密钥',
     groupLabel: '分组',
     selectGroup: '选择分组',
+    groupSections: {
+      tokengate: {
+        title: 'TokenGate 容量',
+        description: '系统分组，按 TokenGate 模型用量计费',
+      },
+      connected: {
+        title: '我的连接账号',
+        description: 'BYO 分组，使用你自己连接的上游账号',
+        badge: 'BYO 账号',
+        itemDescription: '使用你连接的 AI 账号，不扣除 TokenGate 模型用量余额。',
+      },
+    },
     statusLabel: '状态',
     selectStatus: '选择状态',
     saving: '保存中...',

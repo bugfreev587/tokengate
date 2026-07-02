@@ -212,7 +212,7 @@ const getOptionLabel = (option: any): string => {
 
 const isOptionDisabled = (option: any): boolean => {
   if (typeof option === 'object' && option !== null) {
-    return !!option.disabled
+    return !!option.disabled || isGroupHeaderOption(option)
   }
   return false
 }
@@ -243,13 +243,46 @@ const filteredOptions = computed(() => {
   let opts = props.options as any[]
   if (isSearchable.value && searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    opts = opts.filter((opt) => {
+    const matchesQuery = (opt: any) => {
       // Match label
       if (getOptionLabel(opt).toLowerCase().includes(query)) return true
       // Also match description if present
       if (opt.description && String(opt.description).toLowerCase().includes(query)) return true
       return false
-    })
+    }
+
+    if (opts.some(isGroupHeaderOption)) {
+      const grouped: any[] = []
+      let currentHeader: any | null = null
+      let currentHeaderMatches = false
+      let currentItems: any[] = []
+
+      const flushGroup = () => {
+        if (currentItems.length === 0) return
+        if (currentHeader) grouped.push(currentHeader)
+        grouped.push(...currentItems)
+      }
+
+      for (const opt of opts) {
+        if (isGroupHeaderOption(opt)) {
+          flushGroup()
+          currentHeader = opt
+          currentHeaderMatches = matchesQuery(opt)
+          currentItems = []
+          continue
+        }
+
+        if (currentHeaderMatches || matchesQuery(opt)) {
+          currentItems.push(opt)
+        }
+      }
+
+      flushGroup()
+      opts = grouped
+    } else {
+      opts = opts.filter(matchesQuery)
+    }
+
     // In creatable mode, always prepend a fuzzy search option
     if (props.creatable && searchQuery.value.trim()) {
       const trimmed = searchQuery.value.trim()
@@ -515,7 +548,7 @@ onUnmounted(() => {
 .select-dropdown-portal .select-option-group {
   @apply cursor-default select-none;
   @apply bg-gray-50 dark:bg-dark-900;
-  @apply text-[11px] font-bold uppercase tracking-wider;
+  @apply text-[11px] font-bold tracking-wide;
   @apply text-gray-500 dark:text-gray-400;
 }
 

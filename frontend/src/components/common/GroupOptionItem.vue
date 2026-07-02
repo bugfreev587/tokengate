@@ -66,7 +66,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GroupBadge from './GroupBadge.vue'
-import type { SubscriptionType, GroupPlatform } from '@/types'
+import type { SubscriptionType, GroupPlatform, GroupCapacitySource } from '@/types'
 
 interface Props {
   name: string
@@ -74,17 +74,18 @@ interface Props {
   subscriptionType?: SubscriptionType
   rateMultiplier?: number
   userRateMultiplier?: number | null
-  capacitySource?: string
   description?: string | null
   selected?: boolean
   showCheckmark?: boolean
+  capacitySource?: GroupCapacitySource
 }
 
 const props = withDefaults(defineProps<Props>(), {
   subscriptionType: 'standard',
   selected: false,
   showCheckmark: true,
-  userRateMultiplier: null
+  userRateMultiplier: null,
+  capacitySource: 'tokengate'
 })
 
 const { t } = useI18n()
