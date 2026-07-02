@@ -12,13 +12,15 @@ import (
 )
 
 type openaiOAuthClientStateStub struct {
-	exchangeCalled int32
-	lastClientID   string
+	exchangeCalled  int32
+	lastClientID    string
+	lastRedirectURI string
 }
 
 func (s *openaiOAuthClientStateStub) ExchangeCode(ctx context.Context, code, codeVerifier, redirectURI, proxyURL, clientID string) (*openai.TokenResponse, error) {
 	atomic.AddInt32(&s.exchangeCalled, 1)
 	s.lastClientID = clientID
+	s.lastRedirectURI = redirectURI
 	return &openai.TokenResponse{
 		AccessToken:  "at",
 		RefreshToken: "rt",
@@ -99,8 +101,33 @@ func TestOpenAIOAuthService_ExchangeCode_StateMatch(t *testing.T) {
 	require.Equal(t, "at", info.AccessToken)
 	require.Equal(t, openai.ClientID, info.ClientID)
 	require.Equal(t, openai.ClientID, client.lastClientID)
+	require.Equal(t, openai.DefaultRedirectURI, client.lastRedirectURI)
 	require.Equal(t, int32(1), atomic.LoadInt32(&client.exchangeCalled))
 
 	_, ok := svc.sessionStore.Get("sid")
 	require.False(t, ok)
+}
+
+func TestOpenAIOAuthService_ExchangeCode_IgnoresRequestRedirectOverride(t *testing.T) {
+	client := &openaiOAuthClientStateStub{}
+	svc := NewOpenAIOAuthService(nil, client)
+	defer svc.Stop()
+
+	svc.sessionStore.Set("sid", &openai.OAuthSession{
+		State:        "expected-state",
+		CodeVerifier: "verifier",
+		RedirectURI:  openai.DefaultRedirectURI,
+		CreatedAt:    time.Now(),
+	})
+
+	info, err := svc.ExchangeCode(context.Background(), &OpenAIExchangeCodeInput{
+		SessionID:   "sid",
+		Code:        "auth-code",
+		State:       "expected-state",
+		RedirectURI: "https://api.tokengate.to/auth/callback",
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, info)
+	require.Equal(t, openai.DefaultRedirectURI, client.lastRedirectURI)
 }

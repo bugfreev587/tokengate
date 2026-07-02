@@ -74,11 +74,8 @@ func (s *OpenAIOAuthService) GenerateAuthURL(ctx context.Context, proxyID *int64
 		}
 	}
 
-	// Use default redirect URI if not specified
-	if redirectURI == "" {
-		redirectURI = openai.DefaultRedirectURI
-	}
 	normalizedPlatform := normalizeOpenAIOAuthPlatform(platform)
+	redirectURI = openAIAuthRedirectURI(normalizedPlatform, redirectURI)
 	clientID, _ := openai.OAuthClientConfigByPlatform(normalizedPlatform)
 
 	// Store session
@@ -153,11 +150,9 @@ func (s *OpenAIOAuthService) ExchangeCode(ctx context.Context, input *OpenAIExch
 		}
 	}
 
-	// Use redirect URI from session or input
+	// Use the redirect URI stored with the authorization session so the token
+	// exchange exactly matches the authorize request.
 	redirectURI := session.RedirectURI
-	if input.RedirectURI != "" {
-		redirectURI = input.RedirectURI
-	}
 	clientID := strings.TrimSpace(session.ClientID)
 	if clientID == "" {
 		clientID = openai.ClientID
@@ -376,4 +371,14 @@ func (s *OpenAIOAuthService) Stop() {
 
 func normalizeOpenAIOAuthPlatform(platform string) string {
 	return openai.OAuthPlatformOpenAI
+}
+
+func openAIAuthRedirectURI(platform, redirectURI string) string {
+	if platform == openai.OAuthPlatformOpenAI {
+		return openai.DefaultRedirectURI
+	}
+	if strings.TrimSpace(redirectURI) == "" {
+		return openai.DefaultRedirectURI
+	}
+	return redirectURI
 }

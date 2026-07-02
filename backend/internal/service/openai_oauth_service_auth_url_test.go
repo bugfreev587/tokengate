@@ -44,3 +44,25 @@ func TestOpenAIOAuthService_GenerateAuthURL_OpenAIKeepsCodexFlow(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, openai.ClientID, session.ClientID)
 }
+
+func TestOpenAIOAuthService_GenerateAuthURL_OpenAIUsesCodexRedirectURI(t *testing.T) {
+	svc := NewOpenAIOAuthService(nil, &openaiOAuthClientAuthURLStub{})
+	defer svc.Stop()
+
+	result, err := svc.GenerateAuthURL(
+		context.Background(),
+		nil,
+		"https://api.tokengate.to/auth/callback",
+		PlatformOpenAI,
+	)
+	require.NoError(t, err)
+	require.NotEmpty(t, result.AuthURL)
+
+	parsed, err := url.Parse(result.AuthURL)
+	require.NoError(t, err)
+	require.Equal(t, openai.DefaultRedirectURI, parsed.Query().Get("redirect_uri"))
+
+	session, ok := svc.sessionStore.Get(result.SessionID)
+	require.True(t, ok)
+	require.Equal(t, openai.DefaultRedirectURI, session.RedirectURI)
+}
