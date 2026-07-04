@@ -6,12 +6,14 @@ import UsersView from '../UsersView.vue'
 
 const {
   listUsers,
+  updateUser,
   getAllGroups,
   getBatchUsersUsage,
   listEnabledDefinitions,
   getBatchUserAttributes
 } = vi.hoisted(() => ({
   listUsers: vi.fn(),
+  updateUser: vi.fn(),
   getAllGroups: vi.fn(),
   getBatchUsersUsage: vi.fn(),
   listEnabledDefinitions: vi.fn(),
@@ -22,6 +24,7 @@ vi.mock('@/api/admin', () => ({
   adminAPI: {
     users: {
       list: listUsers,
+      update: updateUser,
       toggleStatus: vi.fn(),
       delete: vi.fn()
     },
@@ -82,9 +85,23 @@ const DataTableStub = {
     <div>
       <div data-test="columns">{{ columns.map(col => col.key).join(',') }}</div>
       <button data-test="sort-last-used" @click="$emit('sort', 'last_used_at', 'desc')">sort</button>
-      <div v-for="row in data" :key="row.id">
+      <div v-for="row in data" :key="row.id" data-test="user-row">
         <slot name="cell-last_used_at" :value="row.last_used_at" :row="row" />
+        <slot name="cell-actions" :row="row" />
       </div>
+    </div>
+  `
+}
+
+const ConfirmDialogStub = {
+  props: ['show', 'title', 'message'],
+  emits: ['confirm', 'cancel'],
+  template: `
+    <div v-if="show" data-test="confirm-dialog">
+      <p data-test="confirm-title">{{ title }}</p>
+      <p data-test="confirm-message">{{ message }}</p>
+      <button data-test="confirm-dialog-confirm" @click="$emit('confirm')">confirm</button>
+      <button data-test="confirm-dialog-cancel" @click="$emit('cancel')">cancel</button>
     </div>
   `
 }
@@ -94,6 +111,7 @@ describe('admin UsersView', () => {
     localStorage.clear()
 
     listUsers.mockReset()
+    updateUser.mockReset()
     getAllGroups.mockReset()
     getBatchUsersUsage.mockReset()
     listEnabledDefinitions.mockReset()
@@ -107,6 +125,7 @@ describe('admin UsersView', () => {
       pages: 1
     })
     getAllGroups.mockResolvedValue([])
+    updateUser.mockResolvedValue({ ...createAdminUser(), role: 'admin' })
     getBatchUsersUsage.mockResolvedValue({ stats: {} })
     listEnabledDefinitions.mockResolvedValue([])
     getBatchUserAttributes.mockResolvedValue({ values: {} })
@@ -122,7 +141,7 @@ describe('admin UsersView', () => {
           },
           DataTable: DataTableStub,
           Pagination: true,
-          ConfirmDialog: true,
+          ConfirmDialog: ConfirmDialogStub,
           EmptyState: true,
           GroupBadge: true,
           Select: true,
@@ -160,5 +179,53 @@ describe('admin UsersView', () => {
       }),
       expect.any(Object)
     )
+  })
+
+  it('promotes a regular user from the More menu after confirmation', async () => {
+    const wrapper = mount(UsersView, {
+      global: {
+        stubs: {
+          AppLayout: { template: '<div><slot /></div>' },
+          TablePageLayout: {
+            template: '<div><slot name="filters" /><slot name="table" /><slot name="pagination" /></div>'
+          },
+          DataTable: DataTableStub,
+          Pagination: true,
+          ConfirmDialog: ConfirmDialogStub,
+          EmptyState: true,
+          GroupBadge: true,
+          Select: true,
+          UserAttributesConfigModal: true,
+          UserConcurrencyCell: true,
+          UserCreateModal: true,
+          UserEditModal: true,
+          UserApiKeysModal: true,
+          UserAllowedGroupsModal: true,
+          UserBalanceModal: true,
+          UserBalanceHistoryModal: true,
+          GroupReplaceModal: true,
+          Icon: true,
+          Teleport: true
+        }
+      }
+    })
+
+    await flushPromises()
+
+    const moreButton = wrapper.findAll('button').find((button) => button.text().includes('common.more'))
+    expect(moreButton).toBeTruthy()
+    await moreButton!.trigger('click', { clientX: 320, clientY: 120 })
+    await flushPromises()
+
+    const promoteButton = wrapper.findAll('button').find((button) => button.text().includes('admin.users.makeAdmin'))
+    expect(promoteButton).toBeTruthy()
+    await promoteButton!.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.get('[data-test="confirm-title"]').text()).toBe('admin.users.makeAdmin')
+    await wrapper.get('[data-test="confirm-dialog-confirm"]').trigger('click')
+    await flushPromises()
+
+    expect(updateUser).toHaveBeenCalledWith(42, { role: 'admin' })
   })
 })

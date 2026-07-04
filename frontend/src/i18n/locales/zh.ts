@@ -1837,6 +1837,10 @@ export default {
       failedToDelete: '删除用户失败',
       failedToToggle: '更新用户状态失败',
       failedToLoadApiKeys: '加载用户 API 密钥失败',
+      makeAdmin: '设为管理员',
+      makeAdminConfirm: "确定要将用户 '{email}' 升级为管理员吗？该用户将可以访问所有管理页面和系统设置。",
+      makeAdminSuccess: '用户已升级为管理员',
+      failedToMakeAdmin: '升级管理员失败',
       deleteConfirm: "确定要删除用户 '{email}' 吗？此操作无法撤销。",
       roles: {
         admin: '管理员',

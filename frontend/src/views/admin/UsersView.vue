@@ -591,6 +591,16 @@
 
               <div class="my-1 border-t border-gray-100 dark:border-dark-700"></div>
 
+              <!-- Promote to Admin (not for admin) -->
+              <button
+                v-if="user.role !== 'admin'"
+                @click="handleMakeAdmin(user); closeActionMenu()"
+                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700 dark:text-gray-300 dark:hover:bg-primary-900/20 dark:hover:text-primary-300"
+              >
+                <Icon name="shield" size="sm" class="text-primary-500" :stroke-width="2" />
+                {{ t('admin.users.makeAdmin') }}
+              </button>
+
               <!-- Delete (not for admin) -->
               <button
                 v-if="user.role !== 'admin'"
@@ -607,6 +617,14 @@
     </Teleport>
 
     <ConfirmDialog :show="showDeleteDialog" :title="t('admin.users.deleteUser')" :message="t('admin.users.deleteConfirm', { email: deletingUser?.email })" :danger="true" @confirm="confirmDelete" @cancel="showDeleteDialog = false" />
+    <ConfirmDialog
+      :show="showMakeAdminDialog"
+      :title="t('admin.users.makeAdmin')"
+      :message="t('admin.users.makeAdminConfirm', { email: makeAdminUser?.email })"
+      :confirm-text="t('admin.users.makeAdmin')"
+      @confirm="confirmMakeAdmin"
+      @cancel="closeMakeAdminDialog"
+    />
     <UserCreateModal :show="showCreateModal" @close="showCreateModal = false" @success="loadUsers" />
     <UserEditModal :show="showEditModal" :user="editingUser" @close="closeEditModal" @success="loadUsers" />
     <UserApiKeysModal :show="showApiKeysModal" :user="viewingUser" @close="closeApiKeysModal" />
@@ -958,10 +976,12 @@ const pagination = reactive({
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteDialog = ref(false)
+const showMakeAdminDialog = ref(false)
 const showApiKeysModal = ref(false)
 const showAttributesModal = ref(false)
 const editingUser = ref<AdminUser | null>(null)
 const deletingUser = ref<AdminUser | null>(null)
+const makeAdminUser = ref<AdminUser | null>(null)
 const viewingUser = ref<AdminUser | null>(null)
 let abortController: AbortController | null = null
 let secondaryDataSeq = 0
@@ -1035,7 +1055,7 @@ const openActionMenu = (user: AdminUser, e: MouseEvent) => {
 
     const rect = target.getBoundingClientRect()
     const menuWidth = 200
-    const menuHeight = 240
+    const menuHeight = 280
     const padding = 8
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
@@ -1347,6 +1367,29 @@ const closeGroupReplaceModal = () => {
 const handleDelete = (user: AdminUser) => {
   deletingUser.value = user
   showDeleteDialog.value = true
+}
+
+const handleMakeAdmin = (user: AdminUser) => {
+  makeAdminUser.value = user
+  showMakeAdminDialog.value = true
+}
+
+const closeMakeAdminDialog = () => {
+  showMakeAdminDialog.value = false
+  makeAdminUser.value = null
+}
+
+const confirmMakeAdmin = async () => {
+  if (!makeAdminUser.value) return
+  try {
+    await adminAPI.users.update(makeAdminUser.value.id, { role: 'admin' })
+    appStore.showSuccess(t('admin.users.makeAdminSuccess'))
+    closeMakeAdminDialog()
+    loadUsers()
+  } catch (error: any) {
+    appStore.showError(error.response?.data?.detail || t('admin.users.failedToMakeAdmin'))
+    console.error('Error promoting user to admin:', error)
+  }
 }
 
 const confirmDelete = async () => {
