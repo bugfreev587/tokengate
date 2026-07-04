@@ -41,6 +41,7 @@ type CreateUserRequest struct {
 	Balance       float64 `json:"balance"`
 	Concurrency   int     `json:"concurrency"`
 	RPMLimit      int     `json:"rpm_limit"`
+	IsTestUser    bool    `json:"is_test_user"`
 	AllowedGroups []int64 `json:"allowed_groups"`
 }
 
@@ -56,6 +57,7 @@ type UpdateUserRequest struct {
 	RPMLimit      *int     `json:"rpm_limit"`
 	Role          string   `json:"role" binding:"omitempty,oneof=admin user"`
 	Status        string   `json:"status" binding:"omitempty,oneof=active disabled"`
+	IsTestUser    *bool    `json:"is_test_user"`
 	AllowedGroups *[]int64 `json:"allowed_groups"`
 	// GroupRates 用户专属分组倍率配置
 	// map[groupID]*rate，nil 表示删除该分组的专属倍率
@@ -247,6 +249,7 @@ func (h *UserHandler) Create(c *gin.Context) {
 		Balance:       req.Balance,
 		Concurrency:   req.Concurrency,
 		RPMLimit:      req.RPMLimit,
+		IsTestUser:    req.IsTestUser,
 		AllowedGroups: req.AllowedGroups,
 	})
 	if err != nil {
@@ -283,6 +286,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 		RPMLimit:      req.RPMLimit,
 		Role:          req.Role,
 		Status:        req.Status,
+		IsTestUser:    req.IsTestUser,
 		AllowedGroups: req.AllowedGroups,
 		GroupRates:    req.GroupRates,
 	})

@@ -21,6 +21,7 @@ export type OrderStatus =
 export type PaymentType = 'alipay' | 'wxpay' | 'alipay_direct' | 'wxpay_direct' | 'stripe' | 'easypay' | 'airwallex'
 
 export type OrderType = 'balance' | 'subscription'
+export type ProviderEnvironment = 'live' | 'sandbox'
 
 // ==================== Configuration ====================
 
@@ -117,6 +118,11 @@ export interface SubscriptionPlan {
   validity_unit: string
   /** Stored as JSON string in backend; API layer should parse before use */
   features: string[]
+  stripe_price_id?: string | null
+  stripe_sandbox_price_id?: string | null
+  billing_provider?: string
+  billing_mode?: string
+  stripe_trial_days?: number
   for_sale: boolean
   sort_order: number
 }
@@ -138,6 +144,7 @@ export interface PaymentChannel {
 export interface ProviderInstance {
   id: number
   provider_key: string
+  environment?: ProviderEnvironment
   name: string
   config: Record<string, string>
   supported_types: string[]
@@ -161,6 +168,27 @@ export interface CreateOrderRequest {
   openid?: string
   wechat_resume_token?: string
   is_mobile?: boolean
+}
+
+export interface CreateSubscriptionCheckoutRequest {
+  plan_id: number
+  success_url: string
+  cancel_url: string
+}
+
+export interface CreateSubscriptionCheckoutResponse {
+  session_id: string
+  url: string
+  customer_id?: string
+}
+
+export interface CreateBillingPortalRequest {
+  return_url: string
+}
+
+export interface CreateBillingPortalResponse {
+  session_id: string
+  url: string
 }
 
 export type CreateOrderResultType = 'order_created' | 'oauth_required' | 'jsapi_ready'

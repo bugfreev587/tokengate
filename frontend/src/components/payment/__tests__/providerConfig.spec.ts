@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PAYMENT_CURRENCY_OPTIONS, PROVIDER_CONFIG_FIELDS } from '@/components/payment/providerConfig'
+import { PAYMENT_CURRENCY_OPTIONS, PROVIDER_CONFIG_FIELDS, resolveWebhookBaseUrl } from '@/components/payment/providerConfig'
 
 function findField(providerKey: string, key: string) {
   const fields = PROVIDER_CONFIG_FIELDS[providerKey] || []
@@ -48,5 +48,11 @@ describe('PROVIDER_CONFIG_FIELDS.stripe', () => {
     expect(currency?.defaultValue).toBe('CNY')
     expect(currency?.hintKey).toBe('admin.settings.payment.field_paymentCurrencyHint')
     expect(currency?.options).toBe(PAYMENT_CURRENCY_OPTIONS)
+  })
+})
+
+describe('resolveWebhookBaseUrl', () => {
+  it('uses the backend API origin when the frontend is served from a different origin', () => {
+    expect(resolveWebhookBaseUrl('https://api.tokengate.to/api/v1', 'https://app.tokengate.to')).toBe('https://api.tokengate.to')
   })
 })

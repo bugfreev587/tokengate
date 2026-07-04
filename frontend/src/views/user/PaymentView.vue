@@ -185,14 +185,14 @@
                   </div>
                 </div>
               </div>
-              <div v-if="enabledMethods.length >= 1" class="card p-6">
+              <div v-if="!isSelectedStripeBillingPlan && enabledMethods.length >= 1" class="card p-6">
                 <PaymentMethodSelector
                   :methods="subMethodOptions"
                   :selected="selectedMethod"
                   @select="selectedMethod = $event"
                 />
               </div>
-              <div v-if="feeRate > 0 && selectedPlan.price > 0" class="card p-6">
+              <div v-if="!isSelectedStripeBillingPlan && feeRate > 0 && selectedPlan.price > 0" class="card p-6">
                 <div class="space-y-2 text-sm">
                   <div class="flex justify-between">
                     <span class="text-gray-500 dark:text-gray-400">{{ t('payment.amountLabel') }}</span>
@@ -208,12 +208,14 @@
                   </div>
                 </div>
               </div>
-              <button :class="['btn w-full py-3 text-base font-medium', paymentButtonClass]" :disabled="!canSubmitSubscription || submitting" @click="confirmSubscribe">
+              <button data-testid="subscription-confirm-button" :class="['btn w-full py-3 text-base font-medium', paymentButtonClass]" :disabled="!canSubmitSubscription || submitting" @click="confirmSubscribe">
                 <span v-if="submitting" class="flex items-center justify-center gap-2">
                   <span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
                   {{ t('common.processing') }}
                 </span>
-                <span v-else>{{ t('payment.createOrder') }} {{ formatSelectedPaymentAmount(feeRate > 0 ? subTotalAmount : selectedPlan.price) }}</span>
+                <span v-else>
+                  {{ isSelectedStripeBillingPlan ? t('payment.subscribeWithStripe') : `${t('payment.createOrder')} ${formatSelectedPaymentAmount(feeRate > 0 ? subTotalAmount : selectedPlan.price)}` }}
+                </span>
               </button>
               <button class="btn btn-secondary w-full" @click="selectedPlan = null">{{ t('common.cancel') }}</button>
             </template>
@@ -689,6 +691,12 @@ const canSubmit = computed(() =>
     && selectedLimit.value?.available !== false
 )
 
+function isStripeBillingPlan(plan: SubscriptionPlan | null): boolean {
+  return plan?.billing_provider === 'stripe' && plan?.billing_mode === 'subscription'
+}
+
+const isSelectedStripeBillingPlan = computed(() => isStripeBillingPlan(selectedPlan.value))
+
 // Subscription-specific: method options based on plan price
 const subMethodOptions = computed<PaymentMethodOption[]>(() => {
   const planPrice = selectedPlan.value?.price ?? 0
@@ -716,8 +724,9 @@ const subTotalAmount = computed(() => {
 
 const canSubmitSubscription = computed(() =>
   selectedPlan.value !== null
-    && amountFitsMethod(selectedPlan.value.price, selectedMethod.value)
-    && selectedLimit.value?.available !== false
+    && (isStripeBillingPlan(selectedPlan.value)
+      || (amountFitsMethod(selectedPlan.value.price, selectedMethod.value)
+        && selectedLimit.value?.available !== false))
 )
 
 // Auto-switch to first available method when current selection can't handle the amount
@@ -729,6 +738,7 @@ watch(() => [validAmount.value, selectedMethod.value] as const, ([amt, method]) 
 
 // Payment button class: follows selected payment method color
 const paymentButtonClass = computed(() => {
+  if (isSelectedStripeBillingPlan.value) return 'btn-stripe'
   const m = selectedMethod.value
   if (!m) return 'btn-primary'
   if (m.includes('alipay')) return 'btn-alipay'
@@ -782,7 +792,42 @@ async function handleSubmitRecharge() {
 
 async function confirmSubscribe() {
   if (!selectedPlan.value || submitting.value) return
+  if (isSelectedStripeBillingPlan.value) {
+    await createStripeBillingCheckout(selectedPlan.value)
+    return
+  }
   await createOrder(selectedPlan.value.price, 'subscription', selectedPlan.value.id)
+}
+
+function buildStripeBillingReturnURL(path: string, query: Record<string, string>): string {
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  const url = new URL(path, origin || 'http://localhost')
+  for (const [key, value] of Object.entries(query)) {
+    url.searchParams.set(key, value)
+  }
+  return origin ? url.toString() : `${url.pathname}${url.search}`
+}
+
+async function createStripeBillingCheckout(plan: SubscriptionPlan) {
+  submitting.value = true
+  errorMessage.value = ''
+  errorHintMessage.value = ''
+  try {
+    const res = await paymentAPI.createSubscriptionCheckout({
+      plan_id: plan.id,
+      success_url: buildStripeBillingReturnURL('/subscriptions', { checkout: 'success' }),
+      cancel_url: buildStripeBillingReturnURL('/purchase', { tab: 'subscription' }),
+    })
+    if (res.data.url) {
+      window.location.href = res.data.url
+    }
+  } catch (err: unknown) {
+    errorMessage.value = extractI18nErrorMessage(err, t, 'payment.errors', t('payment.result.failed'))
+    errorHintMessage.value = ''
+    appStore.showError(buildPaymentErrorToastMessage(errorMessage.value, errorHintMessage.value))
+  } finally {
+    submitting.value = false
+  }
 }
 
 async function createOrder(orderAmount: number, orderType: OrderType, planId?: number, options: CreateOrderOptions = {}) {

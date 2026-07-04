@@ -39,6 +39,7 @@ type AdminUser struct {
 	User
 
 	Notes      string     `json:"notes"`
+	IsTestUser bool       `json:"is_test_user"`
 	LastUsedAt *time.Time `json:"last_used_at"`
 	// GroupRates 用户专属分组倍率配置
 	// map[groupID]rateMultiplier
@@ -499,6 +500,20 @@ type UserSubscription struct {
 	StartsAt  time.Time `json:"starts_at"`
 	ExpiresAt time.Time `json:"expires_at"`
 	Status    string    `json:"status"`
+
+	StripeCustomerID         string     `json:"stripe_customer_id,omitempty"`
+	StripeSubscriptionID     string     `json:"stripe_subscription_id,omitempty"`
+	StripePriceID            string     `json:"stripe_price_id,omitempty"`
+	StripeEnvironment        string     `json:"stripe_environment,omitempty"`
+	StripeProviderInstanceID string     `json:"stripe_provider_instance_id,omitempty"`
+	StripeStatus             string     `json:"stripe_status,omitempty"`
+	CurrentPeriodStart       *time.Time `json:"current_period_start,omitempty"`
+	CurrentPeriodEnd         *time.Time `json:"current_period_end,omitempty"`
+	TrialStart               *time.Time `json:"trial_start,omitempty"`
+	TrialEnd                 *time.Time `json:"trial_end,omitempty"`
+	CancelAtPeriodEnd        bool       `json:"cancel_at_period_end,omitempty"`
+	PastDueSince             *time.Time `json:"past_due_since,omitempty"`
+	TrialUsed                bool       `json:"trial_used,omitempty"`
 
 	DailyWindowStart   *time.Time `json:"daily_window_start"`
 	WeeklyWindowStart  *time.Time `json:"weekly_window_start"`

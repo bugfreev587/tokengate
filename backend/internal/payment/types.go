@@ -77,6 +77,28 @@ const DefaultLoadBalanceStrategy = "round-robin"
 // ConfigKeyPublishableKey is the config map key for Stripe's publishable key.
 const ConfigKeyPublishableKey = "publishableKey"
 
+// Provider environment constants distinguish production and sandbox payment accounts.
+const (
+	ProviderEnvironmentLive    = "live"
+	ProviderEnvironmentSandbox = "sandbox"
+)
+
+func NormalizeProviderEnvironment(env string) string {
+	if env == ProviderEnvironmentSandbox {
+		return ProviderEnvironmentSandbox
+	}
+	return ProviderEnvironmentLive
+}
+
+func IsValidProviderEnvironment(env string) bool {
+	switch env {
+	case ProviderEnvironmentLive, ProviderEnvironmentSandbox:
+		return true
+	default:
+		return false
+	}
+}
+
 // GetBasePaymentType extracts the base payment method from a composite key.
 // For example, "alipay_direct" -> "alipay".
 func GetBasePaymentType(t string) string {
@@ -173,6 +195,40 @@ type PaymentNotification struct {
 	Metadata map[string]string
 }
 
+// CreateSubscriptionCheckoutRequest holds the parameters for creating a
+// Stripe Billing subscription Checkout Session.
+type CreateSubscriptionCheckoutRequest struct {
+	PriceID       string
+	CustomerID    string
+	CustomerEmail string
+	SuccessURL    string
+	CancelURL     string
+	TrialDays     int64
+	Metadata      map[string]string
+}
+
+// CreateSubscriptionCheckoutResponse is returned after creating a subscription
+// Checkout Session.
+type CreateSubscriptionCheckoutResponse struct {
+	SessionID  string
+	URL        string
+	CustomerID string
+}
+
+// CreateBillingPortalRequest holds the parameters for creating a customer
+// billing portal session.
+type CreateBillingPortalRequest struct {
+	CustomerID string
+	ReturnURL  string
+}
+
+// CreateBillingPortalResponse is returned after creating a billing portal
+// session.
+type CreateBillingPortalResponse struct {
+	SessionID string
+	URL       string
+}
+
 // RefundRequest contains the parameters for requesting a refund.
 type RefundRequest struct {
 	TradeNo string
@@ -191,6 +247,7 @@ type RefundResponse struct {
 type InstanceSelection struct {
 	InstanceID     string
 	ProviderKey    string // Provider key of the selected instance (e.g. "alipay", "easypay")
+	Environment    string // Provider account environment: "live" or "sandbox"
 	Config         map[string]string
 	SupportedTypes string // Comma-separated list of supported payment types from the instance
 	PaymentMode    string // Payment display mode: "qrcode", "redirect", "popup"
@@ -220,6 +277,14 @@ type CancelableProvider interface {
 	Provider
 	// CancelPayment cancels/expires a pending payment on the upstream platform.
 	CancelPayment(ctx context.Context, tradeNo string) error
+}
+
+// SubscriptionBillingProvider extends Provider with hosted Stripe Billing
+// session creation for auto-renewing subscriptions.
+type SubscriptionBillingProvider interface {
+	Provider
+	CreateSubscriptionCheckout(ctx context.Context, req CreateSubscriptionCheckoutRequest) (*CreateSubscriptionCheckoutResponse, error)
+	CreateBillingPortal(ctx context.Context, req CreateBillingPortalRequest) (*CreateBillingPortalResponse, error)
 }
 
 // MerchantIdentityProvider exposes the current non-sensitive merchant identity

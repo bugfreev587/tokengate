@@ -12,6 +12,7 @@ const routerReplace = vi.hoisted(() => vi.fn())
 const routerPush = vi.hoisted(() => vi.fn())
 const routerResolve = vi.hoisted(() => vi.fn(() => ({ href: '/payment/stripe?mock=1' })))
 const createOrder = vi.hoisted(() => vi.fn())
+const createSubscriptionCheckout = vi.hoisted(() => vi.fn())
 const refreshUser = vi.hoisted(() => vi.fn())
 const fetchActiveSubscriptions = vi.hoisted(() => vi.fn().mockResolvedValue(undefined))
 const showError = vi.hoisted(() => vi.fn())
@@ -77,6 +78,7 @@ vi.mock('@/stores', () => ({
 vi.mock('@/api/payment', () => ({
   paymentAPI: {
     getCheckoutInfo,
+    createSubscriptionCheckout,
   },
 }))
 
@@ -140,6 +142,39 @@ function checkoutInfoWithPlansFixture() {
   }
 }
 
+function checkoutInfoWithStripeBillingPlanFixture() {
+  return {
+    data: {
+      ...checkoutInfoFixture().data,
+      methods: {},
+      plans: [
+        {
+          id: 7,
+          group_id: 3,
+          name: 'BYO Pro',
+          description: '',
+          price: 19,
+          original_price: 0,
+          validity_days: 30,
+          validity_unit: 'month',
+          rate_multiplier: 1,
+          daily_limit_usd: null,
+          weekly_limit_usd: null,
+          monthly_limit_usd: null,
+          features: [],
+          group_platform: 'openai',
+          sort_order: 1,
+          for_sale: true,
+          group_name: 'BYO',
+          billing_provider: 'stripe',
+          billing_mode: 'subscription',
+          stripe_trial_days: 7,
+        },
+      ],
+    },
+  }
+}
+
 function jsapiOrderFixture(resumeToken: string) {
   return {
     order_id: 123,
@@ -191,6 +226,7 @@ describe('PaymentView WeChat JSAPI flow', () => {
     routerPush.mockReset().mockResolvedValue(undefined)
     routerResolve.mockClear()
     createOrder.mockReset()
+    createSubscriptionCheckout.mockReset()
     refreshUser.mockReset()
     fetchActiveSubscriptions.mockReset().mockResolvedValue(undefined)
     showError.mockReset()
@@ -233,6 +269,62 @@ describe('PaymentView WeChat JSAPI flow', () => {
     expect(wrapper.text()).toContain('payment.modeDescriptions.byoSubscription.desc')
     expect(wrapper.find('amount-input-stub').exists()).toBe(false)
     expect(wrapper.find('subscription-plan-card-stub').exists()).toBe(true)
+  })
+
+  it('starts Stripe Billing Checkout for Stripe subscription plans', async () => {
+    routeState.query = {
+      tab: 'subscription',
+      group: '3',
+    }
+    getCheckoutInfo.mockResolvedValue(checkoutInfoWithStripeBillingPlanFixture())
+    createSubscriptionCheckout.mockResolvedValue({
+      data: {
+        session_id: 'cs_test_123',
+        url: 'https://checkout.stripe.test/session',
+        customer_id: 'cus_test_123',
+      },
+    })
+
+    const originalLocation = window.location
+    const locationState = {
+      href: 'http://localhost/purchase',
+      origin: 'http://localhost',
+    }
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: locationState,
+    })
+
+    const wrapper = shallowMount(PaymentView, {
+      global: {
+        stubs: {
+          AppLayout: { template: '<div><slot /></div>' },
+          Teleport: true,
+          Transition: false,
+        },
+      },
+    })
+    await flushPromises()
+    await flushPromises()
+
+    const button = wrapper.find('[data-testid="subscription-confirm-button"]')
+    expect(button.exists()).toBe(true)
+    expect(button.text()).toContain('payment.subscribeWithStripe')
+    await button.trigger('click')
+    await flushPromises()
+
+    expect(createSubscriptionCheckout).toHaveBeenCalledWith(expect.objectContaining({
+      plan_id: 7,
+      success_url: 'http://localhost/subscriptions?checkout=success',
+      cancel_url: 'http://localhost/purchase?tab=subscription',
+    }))
+    expect(createOrder).not.toHaveBeenCalled()
+    expect(locationState.href).toBe('https://checkout.stripe.test/session')
+
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: originalLocation,
+    })
   })
 
   it('resets payment state and redirects to /payment/result after JSAPI reports success', async () => {

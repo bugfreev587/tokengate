@@ -107,6 +107,20 @@ func (_u *UserUpdate) SetNillableRole(v *string) *UserUpdate {
 	return _u
 }
 
+// SetIsTestUser sets the "is_test_user" field.
+func (_u *UserUpdate) SetIsTestUser(v bool) *UserUpdate {
+	_u.mutation.SetIsTestUser(v)
+	return _u
+}
+
+// SetNillableIsTestUser sets the "is_test_user" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableIsTestUser(v *bool) *UserUpdate {
+	if v != nil {
+		_u.SetIsTestUser(*v)
+	}
+	return _u
+}
+
 // SetBalance sets the "balance" field.
 func (_u *UserUpdate) SetBalance(v float64) *UserUpdate {
 	_u.mutation.ResetBalance()
@@ -954,6 +968,9 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.IsTestUser(); ok {
+		_spec.SetField(user.FieldIsTestUser, field.TypeBool, value)
+	}
 	if value, ok := _u.mutation.Balance(); ok {
 		_spec.SetField(user.FieldBalance, field.TypeFloat64, value)
 	}
@@ -1671,6 +1688,20 @@ func (_u *UserUpdateOne) SetRole(v string) *UserUpdateOne {
 func (_u *UserUpdateOne) SetNillableRole(v *string) *UserUpdateOne {
 	if v != nil {
 		_u.SetRole(*v)
+	}
+	return _u
+}
+
+// SetIsTestUser sets the "is_test_user" field.
+func (_u *UserUpdateOne) SetIsTestUser(v bool) *UserUpdateOne {
+	_u.mutation.SetIsTestUser(v)
+	return _u
+}
+
+// SetNillableIsTestUser sets the "is_test_user" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableIsTestUser(v *bool) *UserUpdateOne {
+	if v != nil {
+		_u.SetIsTestUser(*v)
 	}
 	return _u
 }
@@ -2551,6 +2582,9 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.IsTestUser(); ok {
+		_spec.SetField(user.FieldIsTestUser, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.Balance(); ok {
 		_spec.SetField(user.FieldBalance, field.TypeFloat64, value)

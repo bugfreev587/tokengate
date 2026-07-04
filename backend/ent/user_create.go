@@ -101,6 +101,20 @@ func (_c *UserCreate) SetNillableRole(v *string) *UserCreate {
 	return _c
 }
 
+// SetIsTestUser sets the "is_test_user" field.
+func (_c *UserCreate) SetIsTestUser(v bool) *UserCreate {
+	_c.mutation.SetIsTestUser(v)
+	return _c
+}
+
+// SetNillableIsTestUser sets the "is_test_user" field if the given value is not nil.
+func (_c *UserCreate) SetNillableIsTestUser(v *bool) *UserCreate {
+	if v != nil {
+		_c.SetIsTestUser(*v)
+	}
+	return _c
+}
+
 // SetBalance sets the "balance" field.
 func (_c *UserCreate) SetBalance(v float64) *UserCreate {
 	_c.mutation.SetBalance(v)
@@ -574,6 +588,10 @@ func (_c *UserCreate) defaults() error {
 		v := user.DefaultRole
 		_c.mutation.SetRole(v)
 	}
+	if _, ok := _c.mutation.IsTestUser(); !ok {
+		v := user.DefaultIsTestUser
+		_c.mutation.SetIsTestUser(v)
+	}
 	if _, ok := _c.mutation.Balance(); !ok {
 		v := user.DefaultBalance
 		_c.mutation.SetBalance(v)
@@ -656,6 +674,9 @@ func (_c *UserCreate) check() error {
 		if err := user.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.IsTestUser(); !ok {
+		return &ValidationError{Name: "is_test_user", err: errors.New(`ent: missing required field "User.is_test_user"`)}
 	}
 	if _, ok := _c.mutation.Balance(); !ok {
 		return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "User.balance"`)}
@@ -758,6 +779,10 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeString, value)
 		_node.Role = value
+	}
+	if value, ok := _c.mutation.IsTestUser(); ok {
+		_spec.SetField(user.FieldIsTestUser, field.TypeBool, value)
+		_node.IsTestUser = value
 	}
 	if value, ok := _c.mutation.Balance(); ok {
 		_spec.SetField(user.FieldBalance, field.TypeFloat64, value)
@@ -1138,6 +1163,18 @@ func (u *UserUpsert) SetRole(v string) *UserUpsert {
 // UpdateRole sets the "role" field to the value that was provided on create.
 func (u *UserUpsert) UpdateRole() *UserUpsert {
 	u.SetExcluded(user.FieldRole)
+	return u
+}
+
+// SetIsTestUser sets the "is_test_user" field.
+func (u *UserUpsert) SetIsTestUser(v bool) *UserUpsert {
+	u.Set(user.FieldIsTestUser, v)
+	return u
+}
+
+// UpdateIsTestUser sets the "is_test_user" field to the value that was provided on create.
+func (u *UserUpsert) UpdateIsTestUser() *UserUpsert {
+	u.SetExcluded(user.FieldIsTestUser)
 	return u
 }
 
@@ -1524,6 +1561,20 @@ func (u *UserUpsertOne) SetRole(v string) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateRole() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateRole()
+	})
+}
+
+// SetIsTestUser sets the "is_test_user" field.
+func (u *UserUpsertOne) SetIsTestUser(v bool) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetIsTestUser(v)
+	})
+}
+
+// UpdateIsTestUser sets the "is_test_user" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateIsTestUser() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateIsTestUser()
 	})
 }
 
@@ -2120,6 +2171,20 @@ func (u *UserUpsertBulk) SetRole(v string) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateRole() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateRole()
+	})
+}
+
+// SetIsTestUser sets the "is_test_user" field.
+func (u *UserUpsertBulk) SetIsTestUser(v bool) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetIsTestUser(v)
+	})
+}
+
+// UpdateIsTestUser sets the "is_test_user" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateIsTestUser() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateIsTestUser()
 	})
 }
 

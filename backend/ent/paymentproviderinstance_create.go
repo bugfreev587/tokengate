@@ -42,6 +42,20 @@ func (_c *PaymentProviderInstanceCreate) SetNillableName(v *string) *PaymentProv
 	return _c
 }
 
+// SetEnvironment sets the "environment" field.
+func (_c *PaymentProviderInstanceCreate) SetEnvironment(v string) *PaymentProviderInstanceCreate {
+	_c.mutation.SetEnvironment(v)
+	return _c
+}
+
+// SetNillableEnvironment sets the "environment" field if the given value is not nil.
+func (_c *PaymentProviderInstanceCreate) SetNillableEnvironment(v *string) *PaymentProviderInstanceCreate {
+	if v != nil {
+		_c.SetEnvironment(*v)
+	}
+	return _c
+}
+
 // SetConfig sets the "config" field.
 func (_c *PaymentProviderInstanceCreate) SetConfig(v string) *PaymentProviderInstanceCreate {
 	_c.mutation.SetConfig(v)
@@ -213,6 +227,10 @@ func (_c *PaymentProviderInstanceCreate) defaults() {
 		v := paymentproviderinstance.DefaultName
 		_c.mutation.SetName(v)
 	}
+	if _, ok := _c.mutation.Environment(); !ok {
+		v := paymentproviderinstance.DefaultEnvironment
+		_c.mutation.SetEnvironment(v)
+	}
 	if _, ok := _c.mutation.SupportedTypes(); !ok {
 		v := paymentproviderinstance.DefaultSupportedTypes
 		_c.mutation.SetSupportedTypes(v)
@@ -267,6 +285,14 @@ func (_c *PaymentProviderInstanceCreate) check() error {
 	if v, ok := _c.mutation.Name(); ok {
 		if err := paymentproviderinstance.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "PaymentProviderInstance.name": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Environment(); !ok {
+		return &ValidationError{Name: "environment", err: errors.New(`ent: missing required field "PaymentProviderInstance.environment"`)}
+	}
+	if v, ok := _c.mutation.Environment(); ok {
+		if err := paymentproviderinstance.EnvironmentValidator(v); err != nil {
+			return &ValidationError{Name: "environment", err: fmt.Errorf(`ent: validator failed for field "PaymentProviderInstance.environment": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Config(); !ok {
@@ -343,6 +369,10 @@ func (_c *PaymentProviderInstanceCreate) createSpec() (*PaymentProviderInstance,
 	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(paymentproviderinstance.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := _c.mutation.Environment(); ok {
+		_spec.SetField(paymentproviderinstance.FieldEnvironment, field.TypeString, value)
+		_node.Environment = value
 	}
 	if value, ok := _c.mutation.Config(); ok {
 		_spec.SetField(paymentproviderinstance.FieldConfig, field.TypeString, value)
@@ -457,6 +487,18 @@ func (u *PaymentProviderInstanceUpsert) SetName(v string) *PaymentProviderInstan
 // UpdateName sets the "name" field to the value that was provided on create.
 func (u *PaymentProviderInstanceUpsert) UpdateName() *PaymentProviderInstanceUpsert {
 	u.SetExcluded(paymentproviderinstance.FieldName)
+	return u
+}
+
+// SetEnvironment sets the "environment" field.
+func (u *PaymentProviderInstanceUpsert) SetEnvironment(v string) *PaymentProviderInstanceUpsert {
+	u.Set(paymentproviderinstance.FieldEnvironment, v)
+	return u
+}
+
+// UpdateEnvironment sets the "environment" field to the value that was provided on create.
+func (u *PaymentProviderInstanceUpsert) UpdateEnvironment() *PaymentProviderInstanceUpsert {
+	u.SetExcluded(paymentproviderinstance.FieldEnvironment)
 	return u
 }
 
@@ -644,6 +686,20 @@ func (u *PaymentProviderInstanceUpsertOne) SetName(v string) *PaymentProviderIns
 func (u *PaymentProviderInstanceUpsertOne) UpdateName() *PaymentProviderInstanceUpsertOne {
 	return u.Update(func(s *PaymentProviderInstanceUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetEnvironment sets the "environment" field.
+func (u *PaymentProviderInstanceUpsertOne) SetEnvironment(v string) *PaymentProviderInstanceUpsertOne {
+	return u.Update(func(s *PaymentProviderInstanceUpsert) {
+		s.SetEnvironment(v)
+	})
+}
+
+// UpdateEnvironment sets the "environment" field to the value that was provided on create.
+func (u *PaymentProviderInstanceUpsertOne) UpdateEnvironment() *PaymentProviderInstanceUpsertOne {
+	return u.Update(func(s *PaymentProviderInstanceUpsert) {
+		s.UpdateEnvironment()
 	})
 }
 
@@ -1016,6 +1072,20 @@ func (u *PaymentProviderInstanceUpsertBulk) SetName(v string) *PaymentProviderIn
 func (u *PaymentProviderInstanceUpsertBulk) UpdateName() *PaymentProviderInstanceUpsertBulk {
 	return u.Update(func(s *PaymentProviderInstanceUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetEnvironment sets the "environment" field.
+func (u *PaymentProviderInstanceUpsertBulk) SetEnvironment(v string) *PaymentProviderInstanceUpsertBulk {
+	return u.Update(func(s *PaymentProviderInstanceUpsert) {
+		s.SetEnvironment(v)
+	})
+}
+
+// UpdateEnvironment sets the "environment" field to the value that was provided on create.
+func (u *PaymentProviderInstanceUpsertBulk) UpdateEnvironment() *PaymentProviderInstanceUpsertBulk {
+	return u.Update(func(s *PaymentProviderInstanceUpsert) {
+		s.UpdateEnvironment()
 	})
 }
 

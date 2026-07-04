@@ -24,6 +24,17 @@
         </div>
         <span class="text-sm font-medium text-gray-900 dark:text-white">{{ provider.name }}</span>
         <span class="text-xs text-gray-400 dark:text-gray-500">{{ keyLabel }}</span>
+        <span
+          v-if="provider.provider_key === 'stripe'"
+          :class="[
+            'rounded px-1.5 py-0.5 text-[11px] font-medium uppercase',
+            provider.environment === 'sandbox'
+              ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+              : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+          ]"
+        >
+          {{ provider.environment === 'sandbox' ? t('admin.settings.payment.environmentSandbox') : t('admin.settings.payment.environmentLive') }}
+        </span>
         <span v-if="provider.payment_mode" class="text-xs text-gray-400 dark:text-gray-500">· {{ modeLabel }}</span>
         <span v-if="enabled && availableTypes.length" class="text-xs text-gray-300 dark:text-gray-600">|</span>
         <div v-if="enabled" class="flex items-center gap-1">

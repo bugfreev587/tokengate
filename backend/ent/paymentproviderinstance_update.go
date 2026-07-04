@@ -56,6 +56,20 @@ func (_u *PaymentProviderInstanceUpdate) SetNillableName(v *string) *PaymentProv
 	return _u
 }
 
+// SetEnvironment sets the "environment" field.
+func (_u *PaymentProviderInstanceUpdate) SetEnvironment(v string) *PaymentProviderInstanceUpdate {
+	_u.mutation.SetEnvironment(v)
+	return _u
+}
+
+// SetNillableEnvironment sets the "environment" field if the given value is not nil.
+func (_u *PaymentProviderInstanceUpdate) SetNillableEnvironment(v *string) *PaymentProviderInstanceUpdate {
+	if v != nil {
+		_u.SetEnvironment(*v)
+	}
+	return _u
+}
+
 // SetConfig sets the "config" field.
 func (_u *PaymentProviderInstanceUpdate) SetConfig(v string) *PaymentProviderInstanceUpdate {
 	_u.mutation.SetConfig(v)
@@ -234,6 +248,11 @@ func (_u *PaymentProviderInstanceUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "PaymentProviderInstance.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Environment(); ok {
+		if err := paymentproviderinstance.EnvironmentValidator(v); err != nil {
+			return &ValidationError{Name: "environment", err: fmt.Errorf(`ent: validator failed for field "PaymentProviderInstance.environment": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.SupportedTypes(); ok {
 		if err := paymentproviderinstance.SupportedTypesValidator(v); err != nil {
 			return &ValidationError{Name: "supported_types", err: fmt.Errorf(`ent: validator failed for field "PaymentProviderInstance.supported_types": %w`, err)}
@@ -264,6 +283,9 @@ func (_u *PaymentProviderInstanceUpdate) sqlSave(ctx context.Context) (_node int
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(paymentproviderinstance.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Environment(); ok {
+		_spec.SetField(paymentproviderinstance.FieldEnvironment, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Config(); ok {
 		_spec.SetField(paymentproviderinstance.FieldConfig, field.TypeString, value)
@@ -339,6 +361,20 @@ func (_u *PaymentProviderInstanceUpdateOne) SetName(v string) *PaymentProviderIn
 func (_u *PaymentProviderInstanceUpdateOne) SetNillableName(v *string) *PaymentProviderInstanceUpdateOne {
 	if v != nil {
 		_u.SetName(*v)
+	}
+	return _u
+}
+
+// SetEnvironment sets the "environment" field.
+func (_u *PaymentProviderInstanceUpdateOne) SetEnvironment(v string) *PaymentProviderInstanceUpdateOne {
+	_u.mutation.SetEnvironment(v)
+	return _u
+}
+
+// SetNillableEnvironment sets the "environment" field if the given value is not nil.
+func (_u *PaymentProviderInstanceUpdateOne) SetNillableEnvironment(v *string) *PaymentProviderInstanceUpdateOne {
+	if v != nil {
+		_u.SetEnvironment(*v)
 	}
 	return _u
 }
@@ -534,6 +570,11 @@ func (_u *PaymentProviderInstanceUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "PaymentProviderInstance.name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.Environment(); ok {
+		if err := paymentproviderinstance.EnvironmentValidator(v); err != nil {
+			return &ValidationError{Name: "environment", err: fmt.Errorf(`ent: validator failed for field "PaymentProviderInstance.environment": %w`, err)}
+		}
+	}
 	if v, ok := _u.mutation.SupportedTypes(); ok {
 		if err := paymentproviderinstance.SupportedTypesValidator(v); err != nil {
 			return &ValidationError{Name: "supported_types", err: fmt.Errorf(`ent: validator failed for field "PaymentProviderInstance.supported_types": %w`, err)}
@@ -581,6 +622,9 @@ func (_u *PaymentProviderInstanceUpdateOne) sqlSave(ctx context.Context) (_node 
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(paymentproviderinstance.FieldName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.Environment(); ok {
+		_spec.SetField(paymentproviderinstance.FieldEnvironment, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Config(); ok {
 		_spec.SetField(paymentproviderinstance.FieldConfig, field.TypeString, value)

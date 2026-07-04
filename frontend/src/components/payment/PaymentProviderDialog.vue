@@ -34,6 +34,23 @@
         <ToggleSwitch :label="t('common.enabled')" :checked="form.enabled" @toggle="form.enabled = !form.enabled" />
         <ToggleSwitch :label="t('admin.settings.payment.refundEnabled')" :checked="form.refund_enabled" @toggle="form.refund_enabled = !form.refund_enabled; if (!form.refund_enabled) form.allow_user_refund = false" />
         <ToggleSwitch v-if="form.refund_enabled" :label="t('admin.settings.payment.allowUserRefund')" :checked="form.allow_user_refund" @toggle="form.allow_user_refund = !form.allow_user_refund" />
+        <div v-if="form.provider_key === 'stripe'" class="flex items-center gap-2">
+          <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.environment') }}</span>
+          <div class="flex gap-1.5">
+            <button
+              v-for="option in environmentOptions"
+              :key="option.value"
+              type="button"
+              @click="form.environment = option.value"
+              :class="[
+                'rounded-lg border px-2.5 py-1 text-xs font-medium transition-all',
+                form.environment === option.value
+                  ? 'border-primary-500 bg-primary-500 text-white shadow-sm'
+                  : 'border-gray-300 bg-white text-gray-600 hover:border-gray-400 hover:bg-gray-50 dark:border-dark-600 dark:bg-dark-800 dark:text-gray-300 dark:hover:border-dark-500',
+              ]"
+            >{{ option.label }}</button>
+          </div>
+        </div>
         <div v-if="form.provider_key === 'easypay'" class="flex items-center gap-2">
           <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.paymentMode') }}</span>
           <div class="flex gap-1.5">
@@ -269,7 +286,7 @@ import HelpTooltip from '@/components/common/HelpTooltip.vue'
 import Select from '@/components/common/Select.vue'
 import type { SelectOption } from '@/components/common/Select.vue'
 import ToggleSwitch from './ToggleSwitch.vue'
-import type { ProviderInstance } from '@/types/payment'
+import type { ProviderEnvironment, ProviderInstance } from '@/types/payment'
 import type { TypeOption } from './providerConfig'
 import {
   PROVIDER_CONFIG_FIELDS,
@@ -281,6 +298,7 @@ import {
   STRIPE_SDK_API_VERSION,
   getAvailableTypes,
   extractBaseUrl,
+  resolveWebhookBaseUrl,
 } from './providerConfig'
 
 const props = defineProps<{
@@ -299,6 +317,7 @@ const emit = defineEmits<{
     provider_key: string
     name: string
     supported_types: string[]
+    environment: ProviderEnvironment
     enabled: boolean
     payment_mode: string
     refund_enabled: boolean
@@ -328,6 +347,7 @@ const form = reactive({
   name: '',
   provider_key: 'easypay',
   supported_types: [] as string[],
+  environment: 'live' as ProviderEnvironment,
   enabled: true,
   payment_mode: PAYMENT_MODE_QRCODE,
   refund_enabled: false,
@@ -342,6 +362,12 @@ const visibleFields = reactive<Record<string, boolean>>({})
 
 // --- Computed ---
 const defaultBaseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+const configuredApiBaseUrl = computed(() => {
+  const envApiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) || ''
+  if (envApiBaseUrl.trim()) return envApiBaseUrl
+  return typeof window !== 'undefined' ? window.__APP_CONFIG__?.api_base_url || '' : ''
+})
+const webhookBaseUrl = computed(() => resolveWebhookBaseUrl(configuredApiBaseUrl.value, defaultBaseUrl))
 
 const providerWebhookHintMap: Record<string, string> = {
   stripe: 'admin.settings.payment.stripeWebhookHint',
@@ -350,7 +376,7 @@ const providerWebhookHintMap: Record<string, string> = {
 
 const providerWebhookUrl = computed(() => {
   const path = WEBHOOK_PATHS[form.provider_key]
-  return providerWebhookHintMap[form.provider_key] && path ? defaultBaseUrl + path : ''
+  return providerWebhookHintMap[form.provider_key] && path ? webhookBaseUrl.value + path : ''
 })
 
 const providerWebhookHint = computed(() =>
@@ -365,6 +391,11 @@ const paymentModeOptions = computed(() => {
     { value: PAYMENT_MODE_POPUP, label: t('admin.settings.payment.modePopup') },
   ]
 })
+
+const environmentOptions = computed<{ value: ProviderEnvironment; label: string }[]>(() => [
+  { value: 'live', label: t('admin.settings.payment.environmentLive') },
+  { value: 'sandbox', label: t('admin.settings.payment.environmentSandbox') },
+])
 
 const availableTypes = computed(() => {
   const base = getAvailableTypes(form.provider_key, props.allPaymentTypes, props.redirectLabel)
@@ -476,6 +507,7 @@ function toggleType(type: string) {
 
 function onKeyChange() {
   form.supported_types = [...(PROVIDER_SUPPORTED_TYPES[form.provider_key] || [])]
+  if (form.provider_key !== 'stripe') form.environment = 'live'
   clearConfig()
   applyDefaults()
 }
@@ -590,6 +622,7 @@ function handleSave() {
     provider_key: form.provider_key,
     name: form.name,
     supported_types: form.supported_types,
+    environment: form.environment,
     enabled: form.enabled,
     payment_mode: form.provider_key === 'easypay' ? form.payment_mode : '',
     refund_enabled: form.refund_enabled,
@@ -610,6 +643,7 @@ function reset(defaultKey: string) {
   form.name = ''
   form.provider_key = defaultKey
   form.supported_types = [...(PROVIDER_SUPPORTED_TYPES[defaultKey] || [])]
+  form.environment = 'live'
   form.enabled = true
   form.payment_mode = defaultKey === 'easypay' ? PAYMENT_MODE_QRCODE : ''
   form.refund_enabled = false
@@ -622,6 +656,7 @@ function loadProvider(provider: ProviderInstance) {
   form.name = provider.name
   form.provider_key = provider.provider_key
   form.supported_types = provider.supported_types
+  form.environment = provider.environment || 'live'
   form.enabled = provider.enabled
   form.payment_mode = provider.payment_mode || (provider.provider_key === 'easypay' ? PAYMENT_MODE_QRCODE : '')
   form.refund_enabled = provider.refund_enabled

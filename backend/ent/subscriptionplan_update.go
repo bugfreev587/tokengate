@@ -188,6 +188,95 @@ func (_u *SubscriptionPlanUpdate) SetNillableProductName(v *string) *Subscriptio
 	return _u
 }
 
+// SetStripePriceID sets the "stripe_price_id" field.
+func (_u *SubscriptionPlanUpdate) SetStripePriceID(v string) *SubscriptionPlanUpdate {
+	_u.mutation.SetStripePriceID(v)
+	return _u
+}
+
+// SetNillableStripePriceID sets the "stripe_price_id" field if the given value is not nil.
+func (_u *SubscriptionPlanUpdate) SetNillableStripePriceID(v *string) *SubscriptionPlanUpdate {
+	if v != nil {
+		_u.SetStripePriceID(*v)
+	}
+	return _u
+}
+
+// ClearStripePriceID clears the value of the "stripe_price_id" field.
+func (_u *SubscriptionPlanUpdate) ClearStripePriceID() *SubscriptionPlanUpdate {
+	_u.mutation.ClearStripePriceID()
+	return _u
+}
+
+// SetStripeSandboxPriceID sets the "stripe_sandbox_price_id" field.
+func (_u *SubscriptionPlanUpdate) SetStripeSandboxPriceID(v string) *SubscriptionPlanUpdate {
+	_u.mutation.SetStripeSandboxPriceID(v)
+	return _u
+}
+
+// SetNillableStripeSandboxPriceID sets the "stripe_sandbox_price_id" field if the given value is not nil.
+func (_u *SubscriptionPlanUpdate) SetNillableStripeSandboxPriceID(v *string) *SubscriptionPlanUpdate {
+	if v != nil {
+		_u.SetStripeSandboxPriceID(*v)
+	}
+	return _u
+}
+
+// ClearStripeSandboxPriceID clears the value of the "stripe_sandbox_price_id" field.
+func (_u *SubscriptionPlanUpdate) ClearStripeSandboxPriceID() *SubscriptionPlanUpdate {
+	_u.mutation.ClearStripeSandboxPriceID()
+	return _u
+}
+
+// SetStripeTrialDays sets the "stripe_trial_days" field.
+func (_u *SubscriptionPlanUpdate) SetStripeTrialDays(v int) *SubscriptionPlanUpdate {
+	_u.mutation.ResetStripeTrialDays()
+	_u.mutation.SetStripeTrialDays(v)
+	return _u
+}
+
+// SetNillableStripeTrialDays sets the "stripe_trial_days" field if the given value is not nil.
+func (_u *SubscriptionPlanUpdate) SetNillableStripeTrialDays(v *int) *SubscriptionPlanUpdate {
+	if v != nil {
+		_u.SetStripeTrialDays(*v)
+	}
+	return _u
+}
+
+// AddStripeTrialDays adds value to the "stripe_trial_days" field.
+func (_u *SubscriptionPlanUpdate) AddStripeTrialDays(v int) *SubscriptionPlanUpdate {
+	_u.mutation.AddStripeTrialDays(v)
+	return _u
+}
+
+// SetBillingProvider sets the "billing_provider" field.
+func (_u *SubscriptionPlanUpdate) SetBillingProvider(v string) *SubscriptionPlanUpdate {
+	_u.mutation.SetBillingProvider(v)
+	return _u
+}
+
+// SetNillableBillingProvider sets the "billing_provider" field if the given value is not nil.
+func (_u *SubscriptionPlanUpdate) SetNillableBillingProvider(v *string) *SubscriptionPlanUpdate {
+	if v != nil {
+		_u.SetBillingProvider(*v)
+	}
+	return _u
+}
+
+// SetBillingMode sets the "billing_mode" field.
+func (_u *SubscriptionPlanUpdate) SetBillingMode(v string) *SubscriptionPlanUpdate {
+	_u.mutation.SetBillingMode(v)
+	return _u
+}
+
+// SetNillableBillingMode sets the "billing_mode" field if the given value is not nil.
+func (_u *SubscriptionPlanUpdate) SetNillableBillingMode(v *string) *SubscriptionPlanUpdate {
+	if v != nil {
+		_u.SetBillingMode(*v)
+	}
+	return _u
+}
+
 // SetForSale sets the "for_sale" field.
 func (_u *SubscriptionPlanUpdate) SetForSale(v bool) *SubscriptionPlanUpdate {
 	_u.mutation.SetForSale(v)
@@ -287,6 +376,26 @@ func (_u *SubscriptionPlanUpdate) check() error {
 			return &ValidationError{Name: "product_name", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.product_name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.StripePriceID(); ok {
+		if err := subscriptionplan.StripePriceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_price_id", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.stripe_price_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripeSandboxPriceID(); ok {
+		if err := subscriptionplan.StripeSandboxPriceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_sandbox_price_id", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.stripe_sandbox_price_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.BillingProvider(); ok {
+		if err := subscriptionplan.BillingProviderValidator(v); err != nil {
+			return &ValidationError{Name: "billing_provider", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.billing_provider": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.BillingMode(); ok {
+		if err := subscriptionplan.BillingModeValidator(v); err != nil {
+			return &ValidationError{Name: "billing_mode", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.billing_mode": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -343,6 +452,30 @@ func (_u *SubscriptionPlanUpdate) sqlSave(ctx context.Context) (_node int, err e
 	}
 	if value, ok := _u.mutation.ProductName(); ok {
 		_spec.SetField(subscriptionplan.FieldProductName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StripePriceID(); ok {
+		_spec.SetField(subscriptionplan.FieldStripePriceID, field.TypeString, value)
+	}
+	if _u.mutation.StripePriceIDCleared() {
+		_spec.ClearField(subscriptionplan.FieldStripePriceID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripeSandboxPriceID(); ok {
+		_spec.SetField(subscriptionplan.FieldStripeSandboxPriceID, field.TypeString, value)
+	}
+	if _u.mutation.StripeSandboxPriceIDCleared() {
+		_spec.ClearField(subscriptionplan.FieldStripeSandboxPriceID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripeTrialDays(); ok {
+		_spec.SetField(subscriptionplan.FieldStripeTrialDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStripeTrialDays(); ok {
+		_spec.AddField(subscriptionplan.FieldStripeTrialDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.BillingProvider(); ok {
+		_spec.SetField(subscriptionplan.FieldBillingProvider, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.BillingMode(); ok {
+		_spec.SetField(subscriptionplan.FieldBillingMode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ForSale(); ok {
 		_spec.SetField(subscriptionplan.FieldForSale, field.TypeBool, value)
@@ -536,6 +669,95 @@ func (_u *SubscriptionPlanUpdateOne) SetNillableProductName(v *string) *Subscrip
 	return _u
 }
 
+// SetStripePriceID sets the "stripe_price_id" field.
+func (_u *SubscriptionPlanUpdateOne) SetStripePriceID(v string) *SubscriptionPlanUpdateOne {
+	_u.mutation.SetStripePriceID(v)
+	return _u
+}
+
+// SetNillableStripePriceID sets the "stripe_price_id" field if the given value is not nil.
+func (_u *SubscriptionPlanUpdateOne) SetNillableStripePriceID(v *string) *SubscriptionPlanUpdateOne {
+	if v != nil {
+		_u.SetStripePriceID(*v)
+	}
+	return _u
+}
+
+// ClearStripePriceID clears the value of the "stripe_price_id" field.
+func (_u *SubscriptionPlanUpdateOne) ClearStripePriceID() *SubscriptionPlanUpdateOne {
+	_u.mutation.ClearStripePriceID()
+	return _u
+}
+
+// SetStripeSandboxPriceID sets the "stripe_sandbox_price_id" field.
+func (_u *SubscriptionPlanUpdateOne) SetStripeSandboxPriceID(v string) *SubscriptionPlanUpdateOne {
+	_u.mutation.SetStripeSandboxPriceID(v)
+	return _u
+}
+
+// SetNillableStripeSandboxPriceID sets the "stripe_sandbox_price_id" field if the given value is not nil.
+func (_u *SubscriptionPlanUpdateOne) SetNillableStripeSandboxPriceID(v *string) *SubscriptionPlanUpdateOne {
+	if v != nil {
+		_u.SetStripeSandboxPriceID(*v)
+	}
+	return _u
+}
+
+// ClearStripeSandboxPriceID clears the value of the "stripe_sandbox_price_id" field.
+func (_u *SubscriptionPlanUpdateOne) ClearStripeSandboxPriceID() *SubscriptionPlanUpdateOne {
+	_u.mutation.ClearStripeSandboxPriceID()
+	return _u
+}
+
+// SetStripeTrialDays sets the "stripe_trial_days" field.
+func (_u *SubscriptionPlanUpdateOne) SetStripeTrialDays(v int) *SubscriptionPlanUpdateOne {
+	_u.mutation.ResetStripeTrialDays()
+	_u.mutation.SetStripeTrialDays(v)
+	return _u
+}
+
+// SetNillableStripeTrialDays sets the "stripe_trial_days" field if the given value is not nil.
+func (_u *SubscriptionPlanUpdateOne) SetNillableStripeTrialDays(v *int) *SubscriptionPlanUpdateOne {
+	if v != nil {
+		_u.SetStripeTrialDays(*v)
+	}
+	return _u
+}
+
+// AddStripeTrialDays adds value to the "stripe_trial_days" field.
+func (_u *SubscriptionPlanUpdateOne) AddStripeTrialDays(v int) *SubscriptionPlanUpdateOne {
+	_u.mutation.AddStripeTrialDays(v)
+	return _u
+}
+
+// SetBillingProvider sets the "billing_provider" field.
+func (_u *SubscriptionPlanUpdateOne) SetBillingProvider(v string) *SubscriptionPlanUpdateOne {
+	_u.mutation.SetBillingProvider(v)
+	return _u
+}
+
+// SetNillableBillingProvider sets the "billing_provider" field if the given value is not nil.
+func (_u *SubscriptionPlanUpdateOne) SetNillableBillingProvider(v *string) *SubscriptionPlanUpdateOne {
+	if v != nil {
+		_u.SetBillingProvider(*v)
+	}
+	return _u
+}
+
+// SetBillingMode sets the "billing_mode" field.
+func (_u *SubscriptionPlanUpdateOne) SetBillingMode(v string) *SubscriptionPlanUpdateOne {
+	_u.mutation.SetBillingMode(v)
+	return _u
+}
+
+// SetNillableBillingMode sets the "billing_mode" field if the given value is not nil.
+func (_u *SubscriptionPlanUpdateOne) SetNillableBillingMode(v *string) *SubscriptionPlanUpdateOne {
+	if v != nil {
+		_u.SetBillingMode(*v)
+	}
+	return _u
+}
+
 // SetForSale sets the "for_sale" field.
 func (_u *SubscriptionPlanUpdateOne) SetForSale(v bool) *SubscriptionPlanUpdateOne {
 	_u.mutation.SetForSale(v)
@@ -648,6 +870,26 @@ func (_u *SubscriptionPlanUpdateOne) check() error {
 			return &ValidationError{Name: "product_name", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.product_name": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.StripePriceID(); ok {
+		if err := subscriptionplan.StripePriceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_price_id", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.stripe_price_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripeSandboxPriceID(); ok {
+		if err := subscriptionplan.StripeSandboxPriceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_sandbox_price_id", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.stripe_sandbox_price_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.BillingProvider(); ok {
+		if err := subscriptionplan.BillingProviderValidator(v); err != nil {
+			return &ValidationError{Name: "billing_provider", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.billing_provider": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.BillingMode(); ok {
+		if err := subscriptionplan.BillingModeValidator(v); err != nil {
+			return &ValidationError{Name: "billing_mode", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.billing_mode": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -721,6 +963,30 @@ func (_u *SubscriptionPlanUpdateOne) sqlSave(ctx context.Context) (_node *Subscr
 	}
 	if value, ok := _u.mutation.ProductName(); ok {
 		_spec.SetField(subscriptionplan.FieldProductName, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StripePriceID(); ok {
+		_spec.SetField(subscriptionplan.FieldStripePriceID, field.TypeString, value)
+	}
+	if _u.mutation.StripePriceIDCleared() {
+		_spec.ClearField(subscriptionplan.FieldStripePriceID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripeSandboxPriceID(); ok {
+		_spec.SetField(subscriptionplan.FieldStripeSandboxPriceID, field.TypeString, value)
+	}
+	if _u.mutation.StripeSandboxPriceIDCleared() {
+		_spec.ClearField(subscriptionplan.FieldStripeSandboxPriceID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripeTrialDays(); ok {
+		_spec.SetField(subscriptionplan.FieldStripeTrialDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedStripeTrialDays(); ok {
+		_spec.AddField(subscriptionplan.FieldStripeTrialDays, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.BillingProvider(); ok {
+		_spec.SetField(subscriptionplan.FieldBillingProvider, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.BillingMode(); ok {
+		_spec.SetField(subscriptionplan.FieldBillingMode, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.ForSale(); ok {
 		_spec.SetField(subscriptionplan.FieldForSale, field.TypeBool, value)

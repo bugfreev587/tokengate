@@ -921,6 +921,7 @@ var (
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "provider_key", Type: field.TypeString, Size: 30},
 		{Name: "name", Type: field.TypeString, Size: 100, Default: ""},
+		{Name: "environment", Type: field.TypeString, Size: 20, Default: "live"},
 		{Name: "config", Type: field.TypeString, SchemaType: map[string]string{"postgres": "text"}},
 		{Name: "supported_types", Type: field.TypeString, Size: 200, Default: ""},
 		{Name: "enabled", Type: field.TypeBool, Default: true},
@@ -946,7 +947,12 @@ var (
 			{
 				Name:    "paymentproviderinstance_enabled",
 				Unique:  false,
-				Columns: []*schema.Column{PaymentProviderInstancesColumns[5]},
+				Columns: []*schema.Column{PaymentProviderInstancesColumns[6]},
+			},
+			{
+				Name:    "paymentproviderinstance_environment",
+				Unique:  false,
+				Columns: []*schema.Column{PaymentProviderInstancesColumns[3]},
 			},
 		},
 	}
@@ -1214,6 +1220,11 @@ var (
 		{Name: "validity_unit", Type: field.TypeString, Size: 10, Default: "day"},
 		{Name: "features", Type: field.TypeString, Default: "", SchemaType: map[string]string{"postgres": "text"}},
 		{Name: "product_name", Type: field.TypeString, Size: 100, Default: ""},
+		{Name: "stripe_price_id", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "stripe_sandbox_price_id", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "stripe_trial_days", Type: field.TypeInt, Default: 0},
+		{Name: "billing_provider", Type: field.TypeString, Size: 30, Default: "internal"},
+		{Name: "billing_mode", Type: field.TypeString, Size: 30, Default: "fixed_period"},
 		{Name: "for_sale", Type: field.TypeBool, Default: true},
 		{Name: "sort_order", Type: field.TypeInt, Default: 0},
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
@@ -1233,7 +1244,22 @@ var (
 			{
 				Name:    "subscriptionplan_for_sale",
 				Unique:  false,
+				Columns: []*schema.Column{SubscriptionPlansColumns[15]},
+			},
+			{
+				Name:    "subscriptionplan_stripe_price_id",
+				Unique:  false,
 				Columns: []*schema.Column{SubscriptionPlansColumns[10]},
+			},
+			{
+				Name:    "subscriptionplan_stripe_sandbox_price_id",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionPlansColumns[11]},
+			},
+			{
+				Name:    "subscriptionplan_billing_provider",
+				Unique:  false,
+				Columns: []*schema.Column{SubscriptionPlansColumns[13]},
 			},
 		},
 	}
@@ -1455,6 +1481,7 @@ var (
 		{Name: "email", Type: field.TypeString, Size: 255},
 		{Name: "password_hash", Type: field.TypeString, Size: 255},
 		{Name: "role", Type: field.TypeString, Size: 20, Default: "user"},
+		{Name: "is_test_user", Type: field.TypeBool, Default: false},
 		{Name: "balance", Type: field.TypeFloat64, Default: 0, SchemaType: map[string]string{"postgres": "decimal(20,8)"}},
 		{Name: "concurrency", Type: field.TypeInt, Default: 5},
 		{Name: "status", Type: field.TypeString, Size: 20, Default: "active"},
@@ -1482,7 +1509,7 @@ var (
 			{
 				Name:    "user_status",
 				Unique:  false,
-				Columns: []*schema.Column{UsersColumns[9]},
+				Columns: []*schema.Column{UsersColumns[10]},
 			},
 			{
 				Name:    "user_deleted_at",
@@ -1619,6 +1646,19 @@ var (
 		{Name: "starts_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "expires_at", Type: field.TypeTime, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "status", Type: field.TypeString, Size: 20, Default: "active"},
+		{Name: "stripe_customer_id", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "stripe_subscription_id", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "stripe_price_id", Type: field.TypeString, Nullable: true, Size: 128},
+		{Name: "stripe_environment", Type: field.TypeString, Size: 20, Default: "live"},
+		{Name: "stripe_provider_instance_id", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "stripe_status", Type: field.TypeString, Nullable: true, Size: 30},
+		{Name: "current_period_start", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "current_period_end", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "trial_start", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "trial_end", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "cancel_at_period_end", Type: field.TypeBool, Default: false},
+		{Name: "past_due_since", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
+		{Name: "trial_used", Type: field.TypeBool, Default: false},
 		{Name: "daily_window_start", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "weekly_window_start", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
 		{Name: "monthly_window_start", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"postgres": "timestamptz"}},
@@ -1639,19 +1679,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "user_subscriptions_groups_subscriptions",
-				Columns:    []*schema.Column{UserSubscriptionsColumns[15]},
+				Columns:    []*schema.Column{UserSubscriptionsColumns[28]},
 				RefColumns: []*schema.Column{GroupsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "user_subscriptions_users_subscriptions",
-				Columns:    []*schema.Column{UserSubscriptionsColumns[16]},
+				Columns:    []*schema.Column{UserSubscriptionsColumns[29]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "user_subscriptions_users_assigned_subscriptions",
-				Columns:    []*schema.Column{UserSubscriptionsColumns[17]},
+				Columns:    []*schema.Column{UserSubscriptionsColumns[30]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -1660,12 +1700,12 @@ var (
 			{
 				Name:    "usersubscription_user_id",
 				Unique:  false,
-				Columns: []*schema.Column{UserSubscriptionsColumns[16]},
+				Columns: []*schema.Column{UserSubscriptionsColumns[29]},
 			},
 			{
 				Name:    "usersubscription_group_id",
 				Unique:  false,
-				Columns: []*schema.Column{UserSubscriptionsColumns[15]},
+				Columns: []*schema.Column{UserSubscriptionsColumns[28]},
 			},
 			{
 				Name:    "usersubscription_status",
@@ -1680,17 +1720,42 @@ var (
 			{
 				Name:    "usersubscription_user_id_status_expires_at",
 				Unique:  false,
-				Columns: []*schema.Column{UserSubscriptionsColumns[16], UserSubscriptionsColumns[6], UserSubscriptionsColumns[5]},
+				Columns: []*schema.Column{UserSubscriptionsColumns[29], UserSubscriptionsColumns[6], UserSubscriptionsColumns[5]},
 			},
 			{
 				Name:    "usersubscription_assigned_by",
 				Unique:  false,
-				Columns: []*schema.Column{UserSubscriptionsColumns[17]},
+				Columns: []*schema.Column{UserSubscriptionsColumns[30]},
+			},
+			{
+				Name:    "usersubscription_stripe_subscription_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserSubscriptionsColumns[8]},
+			},
+			{
+				Name:    "usersubscription_stripe_customer_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserSubscriptionsColumns[7]},
+			},
+			{
+				Name:    "usersubscription_stripe_environment",
+				Unique:  false,
+				Columns: []*schema.Column{UserSubscriptionsColumns[10]},
+			},
+			{
+				Name:    "usersubscription_stripe_provider_instance_id",
+				Unique:  false,
+				Columns: []*schema.Column{UserSubscriptionsColumns[11]},
+			},
+			{
+				Name:    "usersubscription_stripe_status",
+				Unique:  false,
+				Columns: []*schema.Column{UserSubscriptionsColumns[12]},
 			},
 			{
 				Name:    "usersubscription_user_id_group_id",
 				Unique:  false,
-				Columns: []*schema.Column{UserSubscriptionsColumns[16], UserSubscriptionsColumns[15]},
+				Columns: []*schema.Column{UserSubscriptionsColumns[29], UserSubscriptionsColumns[28]},
 			},
 			{
 				Name:    "usersubscription_deleted_at",

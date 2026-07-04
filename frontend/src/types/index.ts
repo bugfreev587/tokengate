@@ -102,6 +102,7 @@ export interface User {
 export interface AdminUser extends User {
   // 管理员备注（普通用户接口不返回）
   notes: string
+  is_test_user?: boolean
   last_used_at?: string | null
   // 用户专属分组倍率配置 (group_id -> rate_multiplier)
   group_rates?: Record<number, number>
@@ -1462,6 +1463,7 @@ export interface UpdateUserRequest {
   username?: string
   notes?: string
   role?: 'admin' | 'user'
+  is_test_user?: boolean
   balance?: number
   concurrency?: number
   status?: 'active' | 'disabled'
@@ -1482,7 +1484,20 @@ export interface UserSubscription {
   id: number
   user_id: number
   group_id: number
-  status: 'active' | 'expired' | 'revoked'
+  status: 'active' | 'expired' | 'suspended' | 'revoked'
+  stripe_customer_id?: string | null
+  stripe_subscription_id?: string | null
+  stripe_price_id?: string | null
+  stripe_environment?: 'live' | 'sandbox' | string | null
+  stripe_provider_instance_id?: string | null
+  stripe_status?: string | null
+  current_period_start?: string | null
+  current_period_end?: string | null
+  trial_start?: string | null
+  trial_end?: string | null
+  cancel_at_period_end?: boolean
+  past_due_since?: string | null
+  trial_used?: boolean
   daily_usage_usd: number
   weekly_usage_usd: number
   monthly_usage_usd: number

@@ -54,6 +54,22 @@ func (SubscriptionPlan) Fields() []ent.Field {
 		field.String("product_name").
 			MaxLen(100).
 			Default(""),
+		field.String("stripe_price_id").
+			MaxLen(128).
+			Optional().
+			Nillable(),
+		field.String("stripe_sandbox_price_id").
+			MaxLen(128).
+			Optional().
+			Nillable(),
+		field.Int("stripe_trial_days").
+			Default(0),
+		field.String("billing_provider").
+			MaxLen(30).
+			Default("internal"),
+		field.String("billing_mode").
+			MaxLen(30).
+			Default("fixed_period"),
 		field.Bool("for_sale").
 			Default(true),
 		field.Int("sort_order").
@@ -73,5 +89,8 @@ func (SubscriptionPlan) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("group_id"),
 		index.Fields("for_sale"),
+		index.Fields("stripe_price_id"),
+		index.Fields("stripe_sandbox_price_id"),
+		index.Fields("billing_provider"),
 	}
 }

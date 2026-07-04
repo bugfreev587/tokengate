@@ -45,6 +45,29 @@
       <div class="grid grid-cols-2 gap-4">
         <div><label class="input-label">{{ t('payment.admin.sortOrder') }}</label><input v-model.number="planForm.sort_order" type="number" min="0" class="input" /></div>
       </div>
+      <div class="rounded-lg border border-gray-200 p-3 dark:border-dark-600">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('payment.admin.stripeBilling') }}</h3>
+          <div class="grid w-full max-w-md grid-cols-2 gap-3">
+            <Select v-model="planForm.billing_provider" :options="billingProviderOptions" />
+            <Select v-model="planForm.billing_mode" :options="billingModeOptions" />
+          </div>
+        </div>
+        <div v-if="planForm.billing_provider === 'stripe'" class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="input-label">{{ t('payment.admin.stripeLivePriceId') }}</label>
+            <input v-model.trim="planForm.stripe_price_id" type="text" class="input font-mono text-xs" placeholder="price_..." />
+          </div>
+          <div>
+            <label class="input-label">{{ t('payment.admin.stripeSandboxPriceId') }}</label>
+            <input v-model.trim="planForm.stripe_sandbox_price_id" type="text" class="input font-mono text-xs" placeholder="price_..." />
+          </div>
+          <div>
+            <label class="input-label">{{ t('payment.admin.stripeTrialDays') }}</label>
+            <input v-model.number="planForm.stripe_trial_days" type="number" min="0" class="input" />
+          </div>
+        </div>
+      </div>
       <div>
         <label class="input-label">{{ t('payment.admin.features') }}</label>
         <textarea v-model="planFeaturesText" rows="3" class="input" :placeholder="t('payment.admin.featuresPlaceholder')"></textarea>
@@ -105,13 +128,38 @@ const { t } = useI18n()
 const appStore = useAppStore()
 
 const saving = ref(false)
-const planForm = reactive({ name: '', group_id: null as number | null, description: '', price: 0, original_price: 0, validity_days: 30, validity_unit: 'days', sort_order: 0, for_sale: true })
+const planForm = reactive({
+  name: '',
+  group_id: null as number | null,
+  description: '',
+  price: 0,
+  original_price: 0,
+  validity_days: 30,
+  validity_unit: 'days',
+  sort_order: 0,
+  for_sale: true,
+  billing_provider: 'internal',
+  billing_mode: 'fixed_period',
+  stripe_price_id: '',
+  stripe_sandbox_price_id: '',
+  stripe_trial_days: 0,
+})
 const planFeaturesText = ref('')
 
 const validityUnitOptions = computed(() => [
   { value: 'days', label: t('payment.admin.days') },
   { value: 'weeks', label: t('payment.admin.weeks') },
   { value: 'months', label: t('payment.admin.months') },
+])
+
+const billingProviderOptions = computed(() => [
+  { value: 'internal', label: t('payment.admin.billingProviderInternal') },
+  { value: 'stripe', label: t('payment.admin.billingProviderStripe') },
+])
+
+const billingModeOptions = computed(() => [
+  { value: 'fixed_period', label: t('payment.admin.billingModeFixedPeriod') },
+  { value: 'subscription', label: t('payment.admin.billingModeSubscription') },
 ])
 
 const groupOptions = computed(() =>
@@ -133,10 +181,40 @@ const selectedGroupInfo = computed(() => {
 watch(() => props.show, (visible) => {
   if (!visible) return
   if (props.plan) {
-    Object.assign(planForm, { name: props.plan.name, group_id: props.plan.group_id, description: props.plan.description, price: props.plan.price, original_price: props.plan.original_price || 0, validity_days: props.plan.validity_days, validity_unit: props.plan.validity_unit || 'days', sort_order: props.plan.sort_order || 0, for_sale: props.plan.for_sale })
+    Object.assign(planForm, {
+      name: props.plan.name,
+      group_id: props.plan.group_id,
+      description: props.plan.description,
+      price: props.plan.price,
+      original_price: props.plan.original_price || 0,
+      validity_days: props.plan.validity_days,
+      validity_unit: props.plan.validity_unit || 'days',
+      sort_order: props.plan.sort_order || 0,
+      for_sale: props.plan.for_sale,
+      billing_provider: props.plan.billing_provider || 'internal',
+      billing_mode: props.plan.billing_mode || 'fixed_period',
+      stripe_price_id: props.plan.stripe_price_id || '',
+      stripe_sandbox_price_id: props.plan.stripe_sandbox_price_id || '',
+      stripe_trial_days: props.plan.stripe_trial_days || 0,
+    })
     planFeaturesText.value = (props.plan.features || []).join('\n')
   } else {
-    Object.assign(planForm, { name: '', group_id: null, description: '', price: 0, original_price: 0, validity_days: 30, validity_unit: 'days', sort_order: 0, for_sale: true })
+    Object.assign(planForm, {
+      name: '',
+      group_id: null,
+      description: '',
+      price: 0,
+      original_price: 0,
+      validity_days: 30,
+      validity_unit: 'days',
+      sort_order: 0,
+      for_sale: true,
+      billing_provider: 'internal',
+      billing_mode: 'fixed_period',
+      stripe_price_id: '',
+      stripe_sandbox_price_id: '',
+      stripe_trial_days: 0,
+    })
     planFeaturesText.value = ''
   }
 })
@@ -154,6 +232,11 @@ function buildPlanPayload() {
     validity_unit: planForm.validity_unit,
     sort_order: planForm.sort_order,
     for_sale: planForm.for_sale,
+    billing_provider: planForm.billing_provider,
+    billing_mode: planForm.billing_mode,
+    stripe_price_id: planForm.stripe_price_id.trim(),
+    stripe_sandbox_price_id: planForm.stripe_sandbox_price_id.trim(),
+    stripe_trial_days: Math.max(0, Number(planForm.stripe_trial_days) || 0),
     features,
   }
 }

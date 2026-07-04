@@ -21,6 +21,8 @@ type PaymentProviderInstance struct {
 	ProviderKey string `json:"provider_key,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// Environment holds the value of the "environment" field.
+	Environment string `json:"environment,omitempty"`
 	// Config holds the value of the "config" field.
 	Config string `json:"config,omitempty"`
 	// SupportedTypes holds the value of the "supported_types" field.
@@ -53,7 +55,7 @@ func (*PaymentProviderInstance) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case paymentproviderinstance.FieldID, paymentproviderinstance.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case paymentproviderinstance.FieldProviderKey, paymentproviderinstance.FieldName, paymentproviderinstance.FieldConfig, paymentproviderinstance.FieldSupportedTypes, paymentproviderinstance.FieldPaymentMode, paymentproviderinstance.FieldLimits:
+		case paymentproviderinstance.FieldProviderKey, paymentproviderinstance.FieldName, paymentproviderinstance.FieldEnvironment, paymentproviderinstance.FieldConfig, paymentproviderinstance.FieldSupportedTypes, paymentproviderinstance.FieldPaymentMode, paymentproviderinstance.FieldLimits:
 			values[i] = new(sql.NullString)
 		case paymentproviderinstance.FieldCreatedAt, paymentproviderinstance.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -89,6 +91,12 @@ func (_m *PaymentProviderInstance) assignValues(columns []string, values []any) 
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				_m.Name = value.String
+			}
+		case paymentproviderinstance.FieldEnvironment:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field environment", values[i])
+			} else if value.Valid {
+				_m.Environment = value.String
 			}
 		case paymentproviderinstance.FieldConfig:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -191,6 +199,9 @@ func (_m *PaymentProviderInstance) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
+	builder.WriteString(", ")
+	builder.WriteString("environment=")
+	builder.WriteString(_m.Environment)
 	builder.WriteString(", ")
 	builder.WriteString("config=")
 	builder.WriteString(_m.Config)

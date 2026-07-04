@@ -11,6 +11,20 @@ type UserSubscription struct {
 	ExpiresAt time.Time
 	Status    string
 
+	StripeCustomerID         string
+	StripeSubscriptionID     string
+	StripePriceID            string
+	StripeEnvironment        string
+	StripeProviderInstanceID string
+	StripeStatus             string
+	CurrentPeriodStart       *time.Time
+	CurrentPeriodEnd         *time.Time
+	TrialStart               *time.Time
+	TrialEnd                 *time.Time
+	CancelAtPeriodEnd        bool
+	PastDueSince             *time.Time
+	TrialUsed                bool
+
 	DailyWindowStart   *time.Time
 	WeeklyWindowStart  *time.Time
 	MonthlyWindowStart *time.Time

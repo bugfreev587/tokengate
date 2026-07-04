@@ -81,8 +81,22 @@
               >
                 {{ t(`userSubscriptions.status.${subscription.status}`) }}
               </span>
+              <span
+                v-if="subscription.cancel_at_period_end"
+                class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+              >
+                {{ t('userSubscriptions.cancelAtPeriodEnd') }}
+              </span>
               <button
-                v-if="subscription.status === 'active'"
+                v-if="subscription.stripe_customer_id"
+                class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-dark-600 dark:text-gray-200 dark:hover:bg-dark-700"
+                :disabled="managingSubscriptionId === subscription.id"
+                @click="openBillingPortal(subscription)"
+              >
+                {{ t('payment.manageSubscription') }}
+              </button>
+              <button
+                v-else-if="subscription.status === 'active'"
                 :class="['rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-colors', platformButtonClass(subscription.group?.platform || '')]"
                 @click="router.push({ path: '/purchase', query: { tab: 'subscription', group: String(subscription.group_id) } })"
               >
@@ -268,6 +282,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import subscriptionsAPI from '@/api/subscriptions'
+import { paymentAPI } from '@/api/payment'
 import type { UserSubscription } from '@/types'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import Icon from '@/components/icons/Icon.vue'
@@ -290,6 +305,7 @@ const appStore = useAppStore()
 
 const subscriptions = ref<UserSubscription[]>([])
 const loading = ref(true)
+const managingSubscriptionId = ref<number | null>(null)
 
 async function loadSubscriptions() {
   try {
@@ -375,6 +391,25 @@ function formatResetTime(windowStart: string | null, windowHours: number): strin
   }
 
   return `${minutes}m`
+}
+
+async function openBillingPortal(subscription: UserSubscription) {
+  if (!subscription.stripe_customer_id || managingSubscriptionId.value) return
+  try {
+    managingSubscriptionId.value = subscription.id
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const res = await paymentAPI.createBillingPortal({
+      return_url: origin ? `${origin}/subscriptions` : '/subscriptions',
+    })
+    if (res.data.url) {
+      window.location.href = res.data.url
+    }
+  } catch (error) {
+    console.error('Failed to open billing portal:', error)
+    appStore.showError(t('userSubscriptions.failedToOpenPortal'))
+  } finally {
+    managingSubscriptionId.value = null
+  }
 }
 
 onMounted(() => {

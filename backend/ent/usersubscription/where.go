@@ -95,6 +95,71 @@ func Status(v string) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldEQ(FieldStatus, v))
 }
 
+// StripeCustomerID applies equality check predicate on the "stripe_customer_id" field. It's identical to StripeCustomerIDEQ.
+func StripeCustomerID(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripeCustomerID, v))
+}
+
+// StripeSubscriptionID applies equality check predicate on the "stripe_subscription_id" field. It's identical to StripeSubscriptionIDEQ.
+func StripeSubscriptionID(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripeSubscriptionID, v))
+}
+
+// StripePriceID applies equality check predicate on the "stripe_price_id" field. It's identical to StripePriceIDEQ.
+func StripePriceID(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripePriceID, v))
+}
+
+// StripeEnvironment applies equality check predicate on the "stripe_environment" field. It's identical to StripeEnvironmentEQ.
+func StripeEnvironment(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripeEnvironment, v))
+}
+
+// StripeProviderInstanceID applies equality check predicate on the "stripe_provider_instance_id" field. It's identical to StripeProviderInstanceIDEQ.
+func StripeProviderInstanceID(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripeProviderInstanceID, v))
+}
+
+// StripeStatus applies equality check predicate on the "stripe_status" field. It's identical to StripeStatusEQ.
+func StripeStatus(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripeStatus, v))
+}
+
+// CurrentPeriodStart applies equality check predicate on the "current_period_start" field. It's identical to CurrentPeriodStartEQ.
+func CurrentPeriodStart(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldCurrentPeriodStart, v))
+}
+
+// CurrentPeriodEnd applies equality check predicate on the "current_period_end" field. It's identical to CurrentPeriodEndEQ.
+func CurrentPeriodEnd(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldCurrentPeriodEnd, v))
+}
+
+// TrialStart applies equality check predicate on the "trial_start" field. It's identical to TrialStartEQ.
+func TrialStart(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldTrialStart, v))
+}
+
+// TrialEnd applies equality check predicate on the "trial_end" field. It's identical to TrialEndEQ.
+func TrialEnd(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldTrialEnd, v))
+}
+
+// CancelAtPeriodEnd applies equality check predicate on the "cancel_at_period_end" field. It's identical to CancelAtPeriodEndEQ.
+func CancelAtPeriodEnd(v bool) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldCancelAtPeriodEnd, v))
+}
+
+// PastDueSince applies equality check predicate on the "past_due_since" field. It's identical to PastDueSinceEQ.
+func PastDueSince(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldPastDueSince, v))
+}
+
+// TrialUsed applies equality check predicate on the "trial_used" field. It's identical to TrialUsedEQ.
+func TrialUsed(v bool) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldTrialUsed, v))
+}
+
 // DailyWindowStart applies equality check predicate on the "daily_window_start" field. It's identical to DailyWindowStartEQ.
 func DailyWindowStart(v time.Time) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldEQ(FieldDailyWindowStart, v))
@@ -453,6 +518,716 @@ func StatusEqualFold(v string) predicate.UserSubscription {
 // StatusContainsFold applies the ContainsFold predicate on the "status" field.
 func StatusContainsFold(v string) predicate.UserSubscription {
 	return predicate.UserSubscription(sql.FieldContainsFold(FieldStatus, v))
+}
+
+// StripeCustomerIDEQ applies the EQ predicate on the "stripe_customer_id" field.
+func StripeCustomerIDEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripeCustomerID, v))
+}
+
+// StripeCustomerIDNEQ applies the NEQ predicate on the "stripe_customer_id" field.
+func StripeCustomerIDNEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldStripeCustomerID, v))
+}
+
+// StripeCustomerIDIn applies the In predicate on the "stripe_customer_id" field.
+func StripeCustomerIDIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIn(FieldStripeCustomerID, vs...))
+}
+
+// StripeCustomerIDNotIn applies the NotIn predicate on the "stripe_customer_id" field.
+func StripeCustomerIDNotIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotIn(FieldStripeCustomerID, vs...))
+}
+
+// StripeCustomerIDGT applies the GT predicate on the "stripe_customer_id" field.
+func StripeCustomerIDGT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGT(FieldStripeCustomerID, v))
+}
+
+// StripeCustomerIDGTE applies the GTE predicate on the "stripe_customer_id" field.
+func StripeCustomerIDGTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGTE(FieldStripeCustomerID, v))
+}
+
+// StripeCustomerIDLT applies the LT predicate on the "stripe_customer_id" field.
+func StripeCustomerIDLT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLT(FieldStripeCustomerID, v))
+}
+
+// StripeCustomerIDLTE applies the LTE predicate on the "stripe_customer_id" field.
+func StripeCustomerIDLTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLTE(FieldStripeCustomerID, v))
+}
+
+// StripeCustomerIDContains applies the Contains predicate on the "stripe_customer_id" field.
+func StripeCustomerIDContains(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContains(FieldStripeCustomerID, v))
+}
+
+// StripeCustomerIDHasPrefix applies the HasPrefix predicate on the "stripe_customer_id" field.
+func StripeCustomerIDHasPrefix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasPrefix(FieldStripeCustomerID, v))
+}
+
+// StripeCustomerIDHasSuffix applies the HasSuffix predicate on the "stripe_customer_id" field.
+func StripeCustomerIDHasSuffix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasSuffix(FieldStripeCustomerID, v))
+}
+
+// StripeCustomerIDIsNil applies the IsNil predicate on the "stripe_customer_id" field.
+func StripeCustomerIDIsNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIsNull(FieldStripeCustomerID))
+}
+
+// StripeCustomerIDNotNil applies the NotNil predicate on the "stripe_customer_id" field.
+func StripeCustomerIDNotNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotNull(FieldStripeCustomerID))
+}
+
+// StripeCustomerIDEqualFold applies the EqualFold predicate on the "stripe_customer_id" field.
+func StripeCustomerIDEqualFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEqualFold(FieldStripeCustomerID, v))
+}
+
+// StripeCustomerIDContainsFold applies the ContainsFold predicate on the "stripe_customer_id" field.
+func StripeCustomerIDContainsFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContainsFold(FieldStripeCustomerID, v))
+}
+
+// StripeSubscriptionIDEQ applies the EQ predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripeSubscriptionID, v))
+}
+
+// StripeSubscriptionIDNEQ applies the NEQ predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDNEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldStripeSubscriptionID, v))
+}
+
+// StripeSubscriptionIDIn applies the In predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIn(FieldStripeSubscriptionID, vs...))
+}
+
+// StripeSubscriptionIDNotIn applies the NotIn predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDNotIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotIn(FieldStripeSubscriptionID, vs...))
+}
+
+// StripeSubscriptionIDGT applies the GT predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDGT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGT(FieldStripeSubscriptionID, v))
+}
+
+// StripeSubscriptionIDGTE applies the GTE predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDGTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGTE(FieldStripeSubscriptionID, v))
+}
+
+// StripeSubscriptionIDLT applies the LT predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDLT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLT(FieldStripeSubscriptionID, v))
+}
+
+// StripeSubscriptionIDLTE applies the LTE predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDLTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLTE(FieldStripeSubscriptionID, v))
+}
+
+// StripeSubscriptionIDContains applies the Contains predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDContains(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContains(FieldStripeSubscriptionID, v))
+}
+
+// StripeSubscriptionIDHasPrefix applies the HasPrefix predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDHasPrefix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasPrefix(FieldStripeSubscriptionID, v))
+}
+
+// StripeSubscriptionIDHasSuffix applies the HasSuffix predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDHasSuffix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasSuffix(FieldStripeSubscriptionID, v))
+}
+
+// StripeSubscriptionIDIsNil applies the IsNil predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDIsNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIsNull(FieldStripeSubscriptionID))
+}
+
+// StripeSubscriptionIDNotNil applies the NotNil predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDNotNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotNull(FieldStripeSubscriptionID))
+}
+
+// StripeSubscriptionIDEqualFold applies the EqualFold predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDEqualFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEqualFold(FieldStripeSubscriptionID, v))
+}
+
+// StripeSubscriptionIDContainsFold applies the ContainsFold predicate on the "stripe_subscription_id" field.
+func StripeSubscriptionIDContainsFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContainsFold(FieldStripeSubscriptionID, v))
+}
+
+// StripePriceIDEQ applies the EQ predicate on the "stripe_price_id" field.
+func StripePriceIDEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripePriceID, v))
+}
+
+// StripePriceIDNEQ applies the NEQ predicate on the "stripe_price_id" field.
+func StripePriceIDNEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldStripePriceID, v))
+}
+
+// StripePriceIDIn applies the In predicate on the "stripe_price_id" field.
+func StripePriceIDIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIn(FieldStripePriceID, vs...))
+}
+
+// StripePriceIDNotIn applies the NotIn predicate on the "stripe_price_id" field.
+func StripePriceIDNotIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotIn(FieldStripePriceID, vs...))
+}
+
+// StripePriceIDGT applies the GT predicate on the "stripe_price_id" field.
+func StripePriceIDGT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGT(FieldStripePriceID, v))
+}
+
+// StripePriceIDGTE applies the GTE predicate on the "stripe_price_id" field.
+func StripePriceIDGTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGTE(FieldStripePriceID, v))
+}
+
+// StripePriceIDLT applies the LT predicate on the "stripe_price_id" field.
+func StripePriceIDLT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLT(FieldStripePriceID, v))
+}
+
+// StripePriceIDLTE applies the LTE predicate on the "stripe_price_id" field.
+func StripePriceIDLTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLTE(FieldStripePriceID, v))
+}
+
+// StripePriceIDContains applies the Contains predicate on the "stripe_price_id" field.
+func StripePriceIDContains(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContains(FieldStripePriceID, v))
+}
+
+// StripePriceIDHasPrefix applies the HasPrefix predicate on the "stripe_price_id" field.
+func StripePriceIDHasPrefix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasPrefix(FieldStripePriceID, v))
+}
+
+// StripePriceIDHasSuffix applies the HasSuffix predicate on the "stripe_price_id" field.
+func StripePriceIDHasSuffix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasSuffix(FieldStripePriceID, v))
+}
+
+// StripePriceIDIsNil applies the IsNil predicate on the "stripe_price_id" field.
+func StripePriceIDIsNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIsNull(FieldStripePriceID))
+}
+
+// StripePriceIDNotNil applies the NotNil predicate on the "stripe_price_id" field.
+func StripePriceIDNotNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotNull(FieldStripePriceID))
+}
+
+// StripePriceIDEqualFold applies the EqualFold predicate on the "stripe_price_id" field.
+func StripePriceIDEqualFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEqualFold(FieldStripePriceID, v))
+}
+
+// StripePriceIDContainsFold applies the ContainsFold predicate on the "stripe_price_id" field.
+func StripePriceIDContainsFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContainsFold(FieldStripePriceID, v))
+}
+
+// StripeEnvironmentEQ applies the EQ predicate on the "stripe_environment" field.
+func StripeEnvironmentEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripeEnvironment, v))
+}
+
+// StripeEnvironmentNEQ applies the NEQ predicate on the "stripe_environment" field.
+func StripeEnvironmentNEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldStripeEnvironment, v))
+}
+
+// StripeEnvironmentIn applies the In predicate on the "stripe_environment" field.
+func StripeEnvironmentIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIn(FieldStripeEnvironment, vs...))
+}
+
+// StripeEnvironmentNotIn applies the NotIn predicate on the "stripe_environment" field.
+func StripeEnvironmentNotIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotIn(FieldStripeEnvironment, vs...))
+}
+
+// StripeEnvironmentGT applies the GT predicate on the "stripe_environment" field.
+func StripeEnvironmentGT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGT(FieldStripeEnvironment, v))
+}
+
+// StripeEnvironmentGTE applies the GTE predicate on the "stripe_environment" field.
+func StripeEnvironmentGTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGTE(FieldStripeEnvironment, v))
+}
+
+// StripeEnvironmentLT applies the LT predicate on the "stripe_environment" field.
+func StripeEnvironmentLT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLT(FieldStripeEnvironment, v))
+}
+
+// StripeEnvironmentLTE applies the LTE predicate on the "stripe_environment" field.
+func StripeEnvironmentLTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLTE(FieldStripeEnvironment, v))
+}
+
+// StripeEnvironmentContains applies the Contains predicate on the "stripe_environment" field.
+func StripeEnvironmentContains(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContains(FieldStripeEnvironment, v))
+}
+
+// StripeEnvironmentHasPrefix applies the HasPrefix predicate on the "stripe_environment" field.
+func StripeEnvironmentHasPrefix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasPrefix(FieldStripeEnvironment, v))
+}
+
+// StripeEnvironmentHasSuffix applies the HasSuffix predicate on the "stripe_environment" field.
+func StripeEnvironmentHasSuffix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasSuffix(FieldStripeEnvironment, v))
+}
+
+// StripeEnvironmentEqualFold applies the EqualFold predicate on the "stripe_environment" field.
+func StripeEnvironmentEqualFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEqualFold(FieldStripeEnvironment, v))
+}
+
+// StripeEnvironmentContainsFold applies the ContainsFold predicate on the "stripe_environment" field.
+func StripeEnvironmentContainsFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContainsFold(FieldStripeEnvironment, v))
+}
+
+// StripeProviderInstanceIDEQ applies the EQ predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripeProviderInstanceID, v))
+}
+
+// StripeProviderInstanceIDNEQ applies the NEQ predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDNEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldStripeProviderInstanceID, v))
+}
+
+// StripeProviderInstanceIDIn applies the In predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIn(FieldStripeProviderInstanceID, vs...))
+}
+
+// StripeProviderInstanceIDNotIn applies the NotIn predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDNotIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotIn(FieldStripeProviderInstanceID, vs...))
+}
+
+// StripeProviderInstanceIDGT applies the GT predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDGT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGT(FieldStripeProviderInstanceID, v))
+}
+
+// StripeProviderInstanceIDGTE applies the GTE predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDGTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGTE(FieldStripeProviderInstanceID, v))
+}
+
+// StripeProviderInstanceIDLT applies the LT predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDLT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLT(FieldStripeProviderInstanceID, v))
+}
+
+// StripeProviderInstanceIDLTE applies the LTE predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDLTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLTE(FieldStripeProviderInstanceID, v))
+}
+
+// StripeProviderInstanceIDContains applies the Contains predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDContains(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContains(FieldStripeProviderInstanceID, v))
+}
+
+// StripeProviderInstanceIDHasPrefix applies the HasPrefix predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDHasPrefix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasPrefix(FieldStripeProviderInstanceID, v))
+}
+
+// StripeProviderInstanceIDHasSuffix applies the HasSuffix predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDHasSuffix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasSuffix(FieldStripeProviderInstanceID, v))
+}
+
+// StripeProviderInstanceIDIsNil applies the IsNil predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDIsNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIsNull(FieldStripeProviderInstanceID))
+}
+
+// StripeProviderInstanceIDNotNil applies the NotNil predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDNotNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotNull(FieldStripeProviderInstanceID))
+}
+
+// StripeProviderInstanceIDEqualFold applies the EqualFold predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDEqualFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEqualFold(FieldStripeProviderInstanceID, v))
+}
+
+// StripeProviderInstanceIDContainsFold applies the ContainsFold predicate on the "stripe_provider_instance_id" field.
+func StripeProviderInstanceIDContainsFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContainsFold(FieldStripeProviderInstanceID, v))
+}
+
+// StripeStatusEQ applies the EQ predicate on the "stripe_status" field.
+func StripeStatusEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldStripeStatus, v))
+}
+
+// StripeStatusNEQ applies the NEQ predicate on the "stripe_status" field.
+func StripeStatusNEQ(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldStripeStatus, v))
+}
+
+// StripeStatusIn applies the In predicate on the "stripe_status" field.
+func StripeStatusIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIn(FieldStripeStatus, vs...))
+}
+
+// StripeStatusNotIn applies the NotIn predicate on the "stripe_status" field.
+func StripeStatusNotIn(vs ...string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotIn(FieldStripeStatus, vs...))
+}
+
+// StripeStatusGT applies the GT predicate on the "stripe_status" field.
+func StripeStatusGT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGT(FieldStripeStatus, v))
+}
+
+// StripeStatusGTE applies the GTE predicate on the "stripe_status" field.
+func StripeStatusGTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGTE(FieldStripeStatus, v))
+}
+
+// StripeStatusLT applies the LT predicate on the "stripe_status" field.
+func StripeStatusLT(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLT(FieldStripeStatus, v))
+}
+
+// StripeStatusLTE applies the LTE predicate on the "stripe_status" field.
+func StripeStatusLTE(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLTE(FieldStripeStatus, v))
+}
+
+// StripeStatusContains applies the Contains predicate on the "stripe_status" field.
+func StripeStatusContains(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContains(FieldStripeStatus, v))
+}
+
+// StripeStatusHasPrefix applies the HasPrefix predicate on the "stripe_status" field.
+func StripeStatusHasPrefix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasPrefix(FieldStripeStatus, v))
+}
+
+// StripeStatusHasSuffix applies the HasSuffix predicate on the "stripe_status" field.
+func StripeStatusHasSuffix(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldHasSuffix(FieldStripeStatus, v))
+}
+
+// StripeStatusIsNil applies the IsNil predicate on the "stripe_status" field.
+func StripeStatusIsNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIsNull(FieldStripeStatus))
+}
+
+// StripeStatusNotNil applies the NotNil predicate on the "stripe_status" field.
+func StripeStatusNotNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotNull(FieldStripeStatus))
+}
+
+// StripeStatusEqualFold applies the EqualFold predicate on the "stripe_status" field.
+func StripeStatusEqualFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEqualFold(FieldStripeStatus, v))
+}
+
+// StripeStatusContainsFold applies the ContainsFold predicate on the "stripe_status" field.
+func StripeStatusContainsFold(v string) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldContainsFold(FieldStripeStatus, v))
+}
+
+// CurrentPeriodStartEQ applies the EQ predicate on the "current_period_start" field.
+func CurrentPeriodStartEQ(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldCurrentPeriodStart, v))
+}
+
+// CurrentPeriodStartNEQ applies the NEQ predicate on the "current_period_start" field.
+func CurrentPeriodStartNEQ(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldCurrentPeriodStart, v))
+}
+
+// CurrentPeriodStartIn applies the In predicate on the "current_period_start" field.
+func CurrentPeriodStartIn(vs ...time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIn(FieldCurrentPeriodStart, vs...))
+}
+
+// CurrentPeriodStartNotIn applies the NotIn predicate on the "current_period_start" field.
+func CurrentPeriodStartNotIn(vs ...time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotIn(FieldCurrentPeriodStart, vs...))
+}
+
+// CurrentPeriodStartGT applies the GT predicate on the "current_period_start" field.
+func CurrentPeriodStartGT(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGT(FieldCurrentPeriodStart, v))
+}
+
+// CurrentPeriodStartGTE applies the GTE predicate on the "current_period_start" field.
+func CurrentPeriodStartGTE(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGTE(FieldCurrentPeriodStart, v))
+}
+
+// CurrentPeriodStartLT applies the LT predicate on the "current_period_start" field.
+func CurrentPeriodStartLT(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLT(FieldCurrentPeriodStart, v))
+}
+
+// CurrentPeriodStartLTE applies the LTE predicate on the "current_period_start" field.
+func CurrentPeriodStartLTE(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLTE(FieldCurrentPeriodStart, v))
+}
+
+// CurrentPeriodStartIsNil applies the IsNil predicate on the "current_period_start" field.
+func CurrentPeriodStartIsNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIsNull(FieldCurrentPeriodStart))
+}
+
+// CurrentPeriodStartNotNil applies the NotNil predicate on the "current_period_start" field.
+func CurrentPeriodStartNotNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotNull(FieldCurrentPeriodStart))
+}
+
+// CurrentPeriodEndEQ applies the EQ predicate on the "current_period_end" field.
+func CurrentPeriodEndEQ(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldCurrentPeriodEnd, v))
+}
+
+// CurrentPeriodEndNEQ applies the NEQ predicate on the "current_period_end" field.
+func CurrentPeriodEndNEQ(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldCurrentPeriodEnd, v))
+}
+
+// CurrentPeriodEndIn applies the In predicate on the "current_period_end" field.
+func CurrentPeriodEndIn(vs ...time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIn(FieldCurrentPeriodEnd, vs...))
+}
+
+// CurrentPeriodEndNotIn applies the NotIn predicate on the "current_period_end" field.
+func CurrentPeriodEndNotIn(vs ...time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotIn(FieldCurrentPeriodEnd, vs...))
+}
+
+// CurrentPeriodEndGT applies the GT predicate on the "current_period_end" field.
+func CurrentPeriodEndGT(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGT(FieldCurrentPeriodEnd, v))
+}
+
+// CurrentPeriodEndGTE applies the GTE predicate on the "current_period_end" field.
+func CurrentPeriodEndGTE(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGTE(FieldCurrentPeriodEnd, v))
+}
+
+// CurrentPeriodEndLT applies the LT predicate on the "current_period_end" field.
+func CurrentPeriodEndLT(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLT(FieldCurrentPeriodEnd, v))
+}
+
+// CurrentPeriodEndLTE applies the LTE predicate on the "current_period_end" field.
+func CurrentPeriodEndLTE(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLTE(FieldCurrentPeriodEnd, v))
+}
+
+// CurrentPeriodEndIsNil applies the IsNil predicate on the "current_period_end" field.
+func CurrentPeriodEndIsNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIsNull(FieldCurrentPeriodEnd))
+}
+
+// CurrentPeriodEndNotNil applies the NotNil predicate on the "current_period_end" field.
+func CurrentPeriodEndNotNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotNull(FieldCurrentPeriodEnd))
+}
+
+// TrialStartEQ applies the EQ predicate on the "trial_start" field.
+func TrialStartEQ(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldTrialStart, v))
+}
+
+// TrialStartNEQ applies the NEQ predicate on the "trial_start" field.
+func TrialStartNEQ(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldTrialStart, v))
+}
+
+// TrialStartIn applies the In predicate on the "trial_start" field.
+func TrialStartIn(vs ...time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIn(FieldTrialStart, vs...))
+}
+
+// TrialStartNotIn applies the NotIn predicate on the "trial_start" field.
+func TrialStartNotIn(vs ...time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotIn(FieldTrialStart, vs...))
+}
+
+// TrialStartGT applies the GT predicate on the "trial_start" field.
+func TrialStartGT(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGT(FieldTrialStart, v))
+}
+
+// TrialStartGTE applies the GTE predicate on the "trial_start" field.
+func TrialStartGTE(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGTE(FieldTrialStart, v))
+}
+
+// TrialStartLT applies the LT predicate on the "trial_start" field.
+func TrialStartLT(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLT(FieldTrialStart, v))
+}
+
+// TrialStartLTE applies the LTE predicate on the "trial_start" field.
+func TrialStartLTE(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLTE(FieldTrialStart, v))
+}
+
+// TrialStartIsNil applies the IsNil predicate on the "trial_start" field.
+func TrialStartIsNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIsNull(FieldTrialStart))
+}
+
+// TrialStartNotNil applies the NotNil predicate on the "trial_start" field.
+func TrialStartNotNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotNull(FieldTrialStart))
+}
+
+// TrialEndEQ applies the EQ predicate on the "trial_end" field.
+func TrialEndEQ(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldTrialEnd, v))
+}
+
+// TrialEndNEQ applies the NEQ predicate on the "trial_end" field.
+func TrialEndNEQ(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldTrialEnd, v))
+}
+
+// TrialEndIn applies the In predicate on the "trial_end" field.
+func TrialEndIn(vs ...time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIn(FieldTrialEnd, vs...))
+}
+
+// TrialEndNotIn applies the NotIn predicate on the "trial_end" field.
+func TrialEndNotIn(vs ...time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotIn(FieldTrialEnd, vs...))
+}
+
+// TrialEndGT applies the GT predicate on the "trial_end" field.
+func TrialEndGT(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGT(FieldTrialEnd, v))
+}
+
+// TrialEndGTE applies the GTE predicate on the "trial_end" field.
+func TrialEndGTE(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGTE(FieldTrialEnd, v))
+}
+
+// TrialEndLT applies the LT predicate on the "trial_end" field.
+func TrialEndLT(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLT(FieldTrialEnd, v))
+}
+
+// TrialEndLTE applies the LTE predicate on the "trial_end" field.
+func TrialEndLTE(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLTE(FieldTrialEnd, v))
+}
+
+// TrialEndIsNil applies the IsNil predicate on the "trial_end" field.
+func TrialEndIsNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIsNull(FieldTrialEnd))
+}
+
+// TrialEndNotNil applies the NotNil predicate on the "trial_end" field.
+func TrialEndNotNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotNull(FieldTrialEnd))
+}
+
+// CancelAtPeriodEndEQ applies the EQ predicate on the "cancel_at_period_end" field.
+func CancelAtPeriodEndEQ(v bool) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldCancelAtPeriodEnd, v))
+}
+
+// CancelAtPeriodEndNEQ applies the NEQ predicate on the "cancel_at_period_end" field.
+func CancelAtPeriodEndNEQ(v bool) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldCancelAtPeriodEnd, v))
+}
+
+// PastDueSinceEQ applies the EQ predicate on the "past_due_since" field.
+func PastDueSinceEQ(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldPastDueSince, v))
+}
+
+// PastDueSinceNEQ applies the NEQ predicate on the "past_due_since" field.
+func PastDueSinceNEQ(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldPastDueSince, v))
+}
+
+// PastDueSinceIn applies the In predicate on the "past_due_since" field.
+func PastDueSinceIn(vs ...time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIn(FieldPastDueSince, vs...))
+}
+
+// PastDueSinceNotIn applies the NotIn predicate on the "past_due_since" field.
+func PastDueSinceNotIn(vs ...time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotIn(FieldPastDueSince, vs...))
+}
+
+// PastDueSinceGT applies the GT predicate on the "past_due_since" field.
+func PastDueSinceGT(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGT(FieldPastDueSince, v))
+}
+
+// PastDueSinceGTE applies the GTE predicate on the "past_due_since" field.
+func PastDueSinceGTE(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldGTE(FieldPastDueSince, v))
+}
+
+// PastDueSinceLT applies the LT predicate on the "past_due_since" field.
+func PastDueSinceLT(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLT(FieldPastDueSince, v))
+}
+
+// PastDueSinceLTE applies the LTE predicate on the "past_due_since" field.
+func PastDueSinceLTE(v time.Time) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldLTE(FieldPastDueSince, v))
+}
+
+// PastDueSinceIsNil applies the IsNil predicate on the "past_due_since" field.
+func PastDueSinceIsNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldIsNull(FieldPastDueSince))
+}
+
+// PastDueSinceNotNil applies the NotNil predicate on the "past_due_since" field.
+func PastDueSinceNotNil() predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNotNull(FieldPastDueSince))
+}
+
+// TrialUsedEQ applies the EQ predicate on the "trial_used" field.
+func TrialUsedEQ(v bool) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldEQ(FieldTrialUsed, v))
+}
+
+// TrialUsedNEQ applies the NEQ predicate on the "trial_used" field.
+func TrialUsedNEQ(v bool) predicate.UserSubscription {
+	return predicate.UserSubscription(sql.FieldNEQ(FieldTrialUsed, v))
 }
 
 // DailyWindowStartEQ applies the EQ predicate on the "daily_window_start" field.

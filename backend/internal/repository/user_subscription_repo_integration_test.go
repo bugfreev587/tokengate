@@ -105,6 +105,77 @@ func (s *UserSubscriptionRepoSuite) TestCreate() {
 	s.Require().Equal(sub.GroupID, got.GroupID)
 }
 
+func (s *UserSubscriptionRepoSuite) TestStripeBillingFieldsRoundTrip() {
+	user := s.mustCreateUser("stripe-billing@test.com", service.RoleUser)
+	group := s.mustCreateGroup("g-stripe-billing")
+	now := time.Now().UTC().Truncate(time.Second)
+	trialEnd := now.Add(7 * 24 * time.Hour)
+	periodEnd := now.Add(30 * 24 * time.Hour)
+
+	sub := &service.UserSubscription{
+		UserID:               user.ID,
+		GroupID:              group.ID,
+		StartsAt:             now,
+		ExpiresAt:            periodEnd,
+		Status:               service.SubscriptionStatusActive,
+		StripeCustomerID:     "cus_test_123",
+		StripeSubscriptionID: "sub_test_123",
+		StripePriceID:        "price_test_123",
+		StripeStatus:         "trialing",
+		CurrentPeriodStart:   &now,
+		CurrentPeriodEnd:     &periodEnd,
+		TrialStart:           &now,
+		TrialEnd:             &trialEnd,
+		CancelAtPeriodEnd:    false,
+		TrialUsed:            true,
+	}
+
+	s.Require().NoError(s.repo.Create(s.ctx, sub))
+
+	got, err := s.repo.GetByUserIDAndGroupID(s.ctx, user.ID, group.ID)
+	s.Require().NoError(err)
+	s.Require().Equal("cus_test_123", got.StripeCustomerID)
+	s.Require().Equal("sub_test_123", got.StripeSubscriptionID)
+	s.Require().Equal("price_test_123", got.StripePriceID)
+	s.Require().Equal("trialing", got.StripeStatus)
+	s.Require().True(got.TrialUsed)
+	s.Require().False(got.CancelAtPeriodEnd)
+	s.Require().NotNil(got.CurrentPeriodStart)
+	s.Require().NotNil(got.CurrentPeriodEnd)
+	s.Require().NotNil(got.TrialStart)
+	s.Require().NotNil(got.TrialEnd)
+}
+
+func (s *UserSubscriptionRepoSuite) TestStripeBillingLookups() {
+	user := s.mustCreateUser("stripe-billing-lookup@test.com", service.RoleUser)
+	group := s.mustCreateGroup("g-stripe-billing-lookup")
+	now := time.Now().UTC().Truncate(time.Second)
+
+	sub := &service.UserSubscription{
+		UserID:               user.ID,
+		GroupID:              group.ID,
+		StartsAt:             now,
+		ExpiresAt:            now.Add(30 * 24 * time.Hour),
+		Status:               service.SubscriptionStatusActive,
+		StripeCustomerID:     "cus_lookup_123",
+		StripeSubscriptionID: "sub_lookup_123",
+		StripePriceID:        "price_lookup_123",
+		StripeStatus:         "active",
+	}
+
+	s.Require().NoError(s.repo.Create(s.ctx, sub))
+
+	bySubID, err := s.repo.GetByStripeSubscriptionID(s.ctx, "sub_lookup_123")
+	s.Require().NoError(err)
+	s.Require().Equal(sub.ID, bySubID.ID)
+	s.Require().Equal(user.ID, bySubID.UserID)
+
+	byCustomerID, err := s.repo.ListByStripeCustomerID(s.ctx, "cus_lookup_123")
+	s.Require().NoError(err)
+	s.Require().Len(byCustomerID, 1)
+	s.Require().Equal(sub.ID, byCustomerID[0].ID)
+}
+
 func (s *UserSubscriptionRepoSuite) TestGetByID_WithPreloads() {
 	user := s.mustCreateUser("preload@test.com", service.RoleUser)
 	group := s.mustCreateGroup("g-preload")

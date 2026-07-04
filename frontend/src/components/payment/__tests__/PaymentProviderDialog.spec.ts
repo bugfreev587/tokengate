@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import PaymentProviderDialog from '@/components/payment/PaymentProviderDialog.vue'
@@ -28,6 +28,10 @@ vi.mock('vue-i18n', () => ({
     },
   }),
 }))
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+})
 
 function providerFactory(overrides: Partial<ProviderInstance> = {}): ProviderInstance {
   return {
@@ -128,6 +132,39 @@ describe('PaymentProviderDialog payment guide', () => {
     expect(wrapper.text()).toContain(messages['admin.settings.payment.stripeWebhookHint'])
     expect(wrapper.text()).toContain(`Use Stripe API version ${STRIPE_SDK_API_VERSION}.`)
     expect(wrapper.text()).toContain('/api/v1/payment/webhook/stripe')
+  })
+
+  it('uses the configured backend origin for the Stripe webhook URL', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', 'https://api.tokengate.to/api/v1')
+    const wrapper = mountDialog()
+
+    ;(wrapper.vm as unknown as { reset: (key: string) => void }).reset('stripe')
+    await nextTick()
+
+    expect(wrapper.text()).toContain('https://api.tokengate.to/api/v1/payment/webhook/stripe')
+  })
+
+  it('emits the Stripe provider environment when saving a sandbox instance', async () => {
+    const provider = providerFactory({
+      provider_key: 'stripe',
+      name: 'Stripe Sandbox',
+      environment: 'sandbox',
+      supported_types: ['card', 'link'],
+      config: {
+        publishableKey: 'pk_test_123',
+        currency: 'USD',
+      },
+    })
+    const wrapper = mountDialog({ editing: provider })
+
+    ;(wrapper.vm as unknown as { loadProvider: (provider: ProviderInstance) => void }).loadProvider(provider)
+    await nextTick()
+
+    await wrapper.find('form').trigger('submit.prevent')
+
+    const payload = wrapper.emitted('save')?.[0]?.[0] as { environment: string; provider_key: string }
+    expect(payload.provider_key).toBe('stripe')
+    expect(payload.environment).toBe('sandbox')
   })
 
   it('emits an empty Airwallex accountId when the admin clears it', async () => {

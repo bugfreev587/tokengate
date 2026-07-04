@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -19,27 +20,40 @@ import (
 
 // PaymentHandler handles user-facing payment requests.
 type PaymentHandler struct {
-	channelService *service.ChannelService
-	paymentService *service.PaymentService
-	configService  *service.PaymentConfigService
+	channelService       *service.ChannelService
+	paymentService       *service.PaymentService
+	configService        *service.PaymentConfigService
+	stripeBillingService stripeBillingService
 }
 
 // NewPaymentHandler creates a new PaymentHandler.
-func NewPaymentHandler(paymentService *service.PaymentService, configService *service.PaymentConfigService, channelService *service.ChannelService) *PaymentHandler {
+func NewPaymentHandler(paymentService *service.PaymentService, configService *service.PaymentConfigService, channelService *service.ChannelService, stripeBillingService stripeBillingService) *PaymentHandler {
 	return &PaymentHandler{
-		channelService: channelService,
-		paymentService: paymentService,
-		configService:  configService,
+		channelService:       channelService,
+		paymentService:       paymentService,
+		configService:        configService,
+		stripeBillingService: stripeBillingService,
 	}
+}
+
+type stripeBillingService interface {
+	CreateSubscriptionCheckout(context.Context, service.CreateStripeSubscriptionCheckoutInput) (*service.CreateStripeSubscriptionCheckoutOutput, error)
+	CreateBillingPortal(context.Context, service.CreateStripeBillingPortalInput) (*service.CreateStripeBillingPortalOutput, error)
+	HandleNotification(context.Context, *payment.PaymentNotification) (bool, error)
 }
 
 // GetPaymentConfig returns the payment system configuration.
 // GET /api/v1/payment/config
 func (h *PaymentHandler) GetPaymentConfig(c *gin.Context) {
-	cfg, err := h.configService.GetPaymentConfig(c.Request.Context())
+	ctx := c.Request.Context()
+	cfg, err := h.configService.GetPaymentConfig(ctx)
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
+	}
+	if subject, ok := middleware2.GetAuthSubjectFromContext(c); ok && h.paymentService != nil {
+		stripeEnvironment := h.paymentService.ResolveStripeEnvironmentForUser(ctx, subject.UserID)
+		cfg.StripePublishableKey = h.configService.GetStripePublishableKeyForEnvironment(ctx, stripeEnvironment)
 	}
 	response.Success(c, cfg)
 }
@@ -54,19 +68,22 @@ func (h *PaymentHandler) GetPlans(c *gin.Context) {
 	}
 	// Enrich plans with group platform for frontend color coding
 	type planWithPlatform struct {
-		ID            int64    `json:"id"`
-		GroupID       int64    `json:"group_id"`
-		GroupPlatform string   `json:"group_platform"`
-		Name          string   `json:"name"`
-		Description   string   `json:"description"`
-		Price         float64  `json:"price"`
-		OriginalPrice *float64 `json:"original_price,omitempty"`
-		ValidityDays  int      `json:"validity_days"`
-		ValidityUnit  string   `json:"validity_unit"`
-		Features      string   `json:"features"`
-		ProductName   string   `json:"product_name"`
-		ForSale       bool     `json:"for_sale"`
-		SortOrder     int      `json:"sort_order"`
+		ID              int64    `json:"id"`
+		GroupID         int64    `json:"group_id"`
+		GroupPlatform   string   `json:"group_platform"`
+		Name            string   `json:"name"`
+		Description     string   `json:"description"`
+		Price           float64  `json:"price"`
+		OriginalPrice   *float64 `json:"original_price,omitempty"`
+		ValidityDays    int      `json:"validity_days"`
+		ValidityUnit    string   `json:"validity_unit"`
+		Features        string   `json:"features"`
+		ProductName     string   `json:"product_name"`
+		BillingProvider string   `json:"billing_provider"`
+		BillingMode     string   `json:"billing_mode"`
+		StripeTrialDays int      `json:"stripe_trial_days"`
+		ForSale         bool     `json:"for_sale"`
+		SortOrder       int      `json:"sort_order"`
 	}
 	platformMap := h.configService.GetGroupPlatformMap(c.Request.Context(), plans)
 	result := make([]planWithPlatform, 0, len(plans))
@@ -75,7 +92,8 @@ func (h *PaymentHandler) GetPlans(c *gin.Context) {
 			ID: int64(p.ID), GroupID: p.GroupID, GroupPlatform: platformMap[p.GroupID],
 			Name: p.Name, Description: p.Description, Price: p.Price, OriginalPrice: p.OriginalPrice,
 			ValidityDays: p.ValidityDays, ValidityUnit: p.ValidityUnit, Features: p.Features,
-			ProductName: p.ProductName, ForSale: p.ForSale, SortOrder: p.SortOrder,
+			ProductName: p.ProductName, BillingProvider: p.BillingProvider, BillingMode: p.BillingMode,
+			StripeTrialDays: p.StripeTrialDays, ForSale: p.ForSale, SortOrder: p.SortOrder,
 		})
 	}
 	response.Success(c, result)
@@ -97,9 +115,13 @@ func (h *PaymentHandler) GetChannels(c *gin.Context) {
 // GET /api/v1/payment/checkout-info
 func (h *PaymentHandler) GetCheckoutInfo(c *gin.Context) {
 	ctx := c.Request.Context()
+	stripeEnvironment := payment.ProviderEnvironmentLive
+	if subject, ok := middleware2.GetAuthSubjectFromContext(c); ok && h.paymentService != nil {
+		stripeEnvironment = h.paymentService.ResolveStripeEnvironmentForUser(ctx, subject.UserID)
+	}
 
 	// Fetch limits (methods + global range)
-	limitsResp, err := h.configService.GetAvailableMethodLimits(ctx)
+	limitsResp, err := h.configService.GetAvailableMethodLimitsForEnvironment(ctx, stripeEnvironment)
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
@@ -126,7 +148,8 @@ func (h *PaymentHandler) GetCheckoutInfo(c *gin.Context) {
 			ModelScopes: gi.ModelScopes,
 			Name:        p.Name, Description: p.Description, Price: p.Price, OriginalPrice: p.OriginalPrice,
 			ValidityDays: p.ValidityDays, ValidityUnit: p.ValidityUnit, Features: parseFeatures(p.Features),
-			ProductName: p.ProductName,
+			ProductName: p.ProductName, BillingProvider: p.BillingProvider, BillingMode: p.BillingMode,
+			StripeTrialDays: p.StripeTrialDays,
 		})
 	}
 
@@ -140,7 +163,7 @@ func (h *PaymentHandler) GetCheckoutInfo(c *gin.Context) {
 		RechargeFeeRate:           cfg.RechargeFeeRate,
 		HelpText:                  cfg.HelpText,
 		HelpImageURL:              cfg.HelpImageURL,
-		StripePublishableKey:      cfg.StripePublishableKey,
+		StripePublishableKey:      h.configService.GetStripePublishableKeyForEnvironment(ctx, stripeEnvironment),
 	})
 }
 
@@ -175,6 +198,9 @@ type checkoutPlan struct {
 	ValidityUnit    string   `json:"validity_unit"`
 	Features        []string `json:"features"`
 	ProductName     string   `json:"product_name"`
+	BillingProvider string   `json:"billing_provider"`
+	BillingMode     string   `json:"billing_mode"`
+	StripeTrialDays int      `json:"stripe_trial_days"`
 }
 
 // parseFeatures splits a newline-separated features string into a string slice.
@@ -197,7 +223,12 @@ func parseFeatures(raw string) []string {
 // GetLimits returns per-payment-type limits derived from enabled provider instances.
 // GET /api/v1/payment/limits
 func (h *PaymentHandler) GetLimits(c *gin.Context) {
-	resp, err := h.configService.GetAvailableMethodLimits(c.Request.Context())
+	ctx := c.Request.Context()
+	stripeEnvironment := payment.ProviderEnvironmentLive
+	if subject, ok := middleware2.GetAuthSubjectFromContext(c); ok && h.paymentService != nil {
+		stripeEnvironment = h.paymentService.ResolveStripeEnvironmentForUser(ctx, subject.UserID)
+	}
+	resp, err := h.configService.GetAvailableMethodLimitsForEnvironment(ctx, stripeEnvironment)
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return
@@ -270,6 +301,76 @@ func (h *PaymentHandler) CreateOrder(c *gin.Context) {
 		return
 	}
 	response.Success(c, result)
+}
+
+type createStripeSubscriptionCheckoutRequest struct {
+	PlanID     int64  `json:"plan_id" binding:"required"`
+	SuccessURL string `json:"success_url" binding:"required"`
+	CancelURL  string `json:"cancel_url" binding:"required"`
+}
+
+// CreateStripeSubscriptionCheckout creates a Stripe Billing subscription
+// Checkout Session for BYO Pro.
+func (h *PaymentHandler) CreateStripeSubscriptionCheckout(c *gin.Context) {
+	subject, ok := requireAuth(c)
+	if !ok {
+		return
+	}
+	if h.stripeBillingService == nil {
+		response.ErrorFrom(c, service.ErrStripeBillingUnavailable)
+		return
+	}
+
+	var req createStripeSubscriptionCheckoutRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+
+	out, err := h.stripeBillingService.CreateSubscriptionCheckout(c.Request.Context(), service.CreateStripeSubscriptionCheckoutInput{
+		UserID:     subject.UserID,
+		PlanID:     req.PlanID,
+		SuccessURL: req.SuccessURL,
+		CancelURL:  req.CancelURL,
+	})
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, out)
+}
+
+type createStripeBillingPortalRequest struct {
+	ReturnURL string `json:"return_url" binding:"required"`
+}
+
+// CreateStripeBillingPortal creates a Stripe Billing Portal session for the
+// authenticated user.
+func (h *PaymentHandler) CreateStripeBillingPortal(c *gin.Context) {
+	subject, ok := requireAuth(c)
+	if !ok {
+		return
+	}
+	if h.stripeBillingService == nil {
+		response.ErrorFrom(c, service.ErrStripeBillingUnavailable)
+		return
+	}
+
+	var req createStripeBillingPortalRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+
+	out, err := h.stripeBillingService.CreateBillingPortal(c.Request.Context(), service.CreateStripeBillingPortalInput{
+		UserID:    subject.UserID,
+		ReturnURL: req.ReturnURL,
+	})
+	if err != nil {
+		response.ErrorFrom(c, err)
+		return
+	}
+	response.Success(c, out)
 }
 
 func applyWeChatPaymentResumeClaims(req *CreateOrderRequest, claims *service.WeChatPaymentResumeClaims) error {

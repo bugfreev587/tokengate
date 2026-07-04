@@ -173,6 +173,21 @@ func TestIsSensitiveProviderConfigField(t *testing.T) {
 	}
 }
 
+func TestValidateProviderConfigReturnsBadRequestForInvalidStripeConfig(t *testing.T) {
+	t.Parallel()
+
+	svc := &PaymentConfigService{}
+
+	err := svc.validateProviderConfig(payment.TypeStripe, map[string]string{
+		"publishableKey": "sk_live_wrong_field",
+		"currency":       "USD",
+	})
+
+	require.Error(t, err)
+	assert.True(t, infraerrors.IsBadRequest(err), "expected invalid provider config to be a bad request")
+	assert.Contains(t, infraerrors.Message(err), "stripe config missing required key: secretKey")
+}
+
 func TestJoinTypes(t *testing.T) {
 	t.Parallel()
 

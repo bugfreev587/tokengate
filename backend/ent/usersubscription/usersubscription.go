@@ -31,6 +31,32 @@ const (
 	FieldExpiresAt = "expires_at"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldStripeCustomerID holds the string denoting the stripe_customer_id field in the database.
+	FieldStripeCustomerID = "stripe_customer_id"
+	// FieldStripeSubscriptionID holds the string denoting the stripe_subscription_id field in the database.
+	FieldStripeSubscriptionID = "stripe_subscription_id"
+	// FieldStripePriceID holds the string denoting the stripe_price_id field in the database.
+	FieldStripePriceID = "stripe_price_id"
+	// FieldStripeEnvironment holds the string denoting the stripe_environment field in the database.
+	FieldStripeEnvironment = "stripe_environment"
+	// FieldStripeProviderInstanceID holds the string denoting the stripe_provider_instance_id field in the database.
+	FieldStripeProviderInstanceID = "stripe_provider_instance_id"
+	// FieldStripeStatus holds the string denoting the stripe_status field in the database.
+	FieldStripeStatus = "stripe_status"
+	// FieldCurrentPeriodStart holds the string denoting the current_period_start field in the database.
+	FieldCurrentPeriodStart = "current_period_start"
+	// FieldCurrentPeriodEnd holds the string denoting the current_period_end field in the database.
+	FieldCurrentPeriodEnd = "current_period_end"
+	// FieldTrialStart holds the string denoting the trial_start field in the database.
+	FieldTrialStart = "trial_start"
+	// FieldTrialEnd holds the string denoting the trial_end field in the database.
+	FieldTrialEnd = "trial_end"
+	// FieldCancelAtPeriodEnd holds the string denoting the cancel_at_period_end field in the database.
+	FieldCancelAtPeriodEnd = "cancel_at_period_end"
+	// FieldPastDueSince holds the string denoting the past_due_since field in the database.
+	FieldPastDueSince = "past_due_since"
+	// FieldTrialUsed holds the string denoting the trial_used field in the database.
+	FieldTrialUsed = "trial_used"
 	// FieldDailyWindowStart holds the string denoting the daily_window_start field in the database.
 	FieldDailyWindowStart = "daily_window_start"
 	// FieldWeeklyWindowStart holds the string denoting the weekly_window_start field in the database.
@@ -100,6 +126,19 @@ var Columns = []string{
 	FieldStartsAt,
 	FieldExpiresAt,
 	FieldStatus,
+	FieldStripeCustomerID,
+	FieldStripeSubscriptionID,
+	FieldStripePriceID,
+	FieldStripeEnvironment,
+	FieldStripeProviderInstanceID,
+	FieldStripeStatus,
+	FieldCurrentPeriodStart,
+	FieldCurrentPeriodEnd,
+	FieldTrialStart,
+	FieldTrialEnd,
+	FieldCancelAtPeriodEnd,
+	FieldPastDueSince,
+	FieldTrialUsed,
 	FieldDailyWindowStart,
 	FieldWeeklyWindowStart,
 	FieldMonthlyWindowStart,
@@ -139,6 +178,24 @@ var (
 	DefaultStatus string
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(string) error
+	// StripeCustomerIDValidator is a validator for the "stripe_customer_id" field. It is called by the builders before save.
+	StripeCustomerIDValidator func(string) error
+	// StripeSubscriptionIDValidator is a validator for the "stripe_subscription_id" field. It is called by the builders before save.
+	StripeSubscriptionIDValidator func(string) error
+	// StripePriceIDValidator is a validator for the "stripe_price_id" field. It is called by the builders before save.
+	StripePriceIDValidator func(string) error
+	// DefaultStripeEnvironment holds the default value on creation for the "stripe_environment" field.
+	DefaultStripeEnvironment string
+	// StripeEnvironmentValidator is a validator for the "stripe_environment" field. It is called by the builders before save.
+	StripeEnvironmentValidator func(string) error
+	// StripeProviderInstanceIDValidator is a validator for the "stripe_provider_instance_id" field. It is called by the builders before save.
+	StripeProviderInstanceIDValidator func(string) error
+	// StripeStatusValidator is a validator for the "stripe_status" field. It is called by the builders before save.
+	StripeStatusValidator func(string) error
+	// DefaultCancelAtPeriodEnd holds the default value on creation for the "cancel_at_period_end" field.
+	DefaultCancelAtPeriodEnd bool
+	// DefaultTrialUsed holds the default value on creation for the "trial_used" field.
+	DefaultTrialUsed bool
 	// DefaultDailyUsageUsd holds the default value on creation for the "daily_usage_usd" field.
 	DefaultDailyUsageUsd float64
 	// DefaultWeeklyUsageUsd holds the default value on creation for the "weekly_usage_usd" field.
@@ -195,6 +252,71 @@ func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByStripeCustomerID orders the results by the stripe_customer_id field.
+func ByStripeCustomerID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStripeCustomerID, opts...).ToFunc()
+}
+
+// ByStripeSubscriptionID orders the results by the stripe_subscription_id field.
+func ByStripeSubscriptionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStripeSubscriptionID, opts...).ToFunc()
+}
+
+// ByStripePriceID orders the results by the stripe_price_id field.
+func ByStripePriceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStripePriceID, opts...).ToFunc()
+}
+
+// ByStripeEnvironment orders the results by the stripe_environment field.
+func ByStripeEnvironment(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStripeEnvironment, opts...).ToFunc()
+}
+
+// ByStripeProviderInstanceID orders the results by the stripe_provider_instance_id field.
+func ByStripeProviderInstanceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStripeProviderInstanceID, opts...).ToFunc()
+}
+
+// ByStripeStatus orders the results by the stripe_status field.
+func ByStripeStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStripeStatus, opts...).ToFunc()
+}
+
+// ByCurrentPeriodStart orders the results by the current_period_start field.
+func ByCurrentPeriodStart(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCurrentPeriodStart, opts...).ToFunc()
+}
+
+// ByCurrentPeriodEnd orders the results by the current_period_end field.
+func ByCurrentPeriodEnd(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCurrentPeriodEnd, opts...).ToFunc()
+}
+
+// ByTrialStart orders the results by the trial_start field.
+func ByTrialStart(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTrialStart, opts...).ToFunc()
+}
+
+// ByTrialEnd orders the results by the trial_end field.
+func ByTrialEnd(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTrialEnd, opts...).ToFunc()
+}
+
+// ByCancelAtPeriodEnd orders the results by the cancel_at_period_end field.
+func ByCancelAtPeriodEnd(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCancelAtPeriodEnd, opts...).ToFunc()
+}
+
+// ByPastDueSince orders the results by the past_due_since field.
+func ByPastDueSince(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPastDueSince, opts...).ToFunc()
+}
+
+// ByTrialUsed orders the results by the trial_used field.
+func ByTrialUsed(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTrialUsed, opts...).ToFunc()
 }
 
 // ByDailyWindowStart orders the results by the daily_window_start field.

@@ -132,6 +132,21 @@ func (s *PaymentConfigService) CreatePlan(ctx context.Context, req CreatePlanReq
 	if req.OriginalPrice != nil {
 		b.SetOriginalPrice(*req.OriginalPrice)
 	}
+	if stripePriceID := strings.TrimSpace(req.StripePriceID); stripePriceID != "" {
+		b.SetStripePriceID(stripePriceID)
+	}
+	if stripeSandboxPriceID := strings.TrimSpace(req.StripeSandboxPriceID); stripeSandboxPriceID != "" {
+		b.SetStripeSandboxPriceID(stripeSandboxPriceID)
+	}
+	if req.StripeTrialDays > 0 {
+		b.SetStripeTrialDays(req.StripeTrialDays)
+	}
+	if billingProvider := strings.TrimSpace(req.BillingProvider); billingProvider != "" {
+		b.SetBillingProvider(billingProvider)
+	}
+	if billingMode := strings.TrimSpace(req.BillingMode); billingMode != "" {
+		b.SetBillingMode(billingMode)
+	}
 	return b.Save(ctx)
 }
 
@@ -169,6 +184,29 @@ func (s *PaymentConfigService) UpdatePlan(ctx context.Context, id int64, req Upd
 	}
 	if req.ProductName != nil {
 		u.SetProductName(*req.ProductName)
+	}
+	if req.StripePriceID != nil {
+		if stripePriceID := strings.TrimSpace(*req.StripePriceID); stripePriceID != "" {
+			u.SetStripePriceID(stripePriceID)
+		} else {
+			u.ClearStripePriceID()
+		}
+	}
+	if req.StripeSandboxPriceID != nil {
+		if stripeSandboxPriceID := strings.TrimSpace(*req.StripeSandboxPriceID); stripeSandboxPriceID != "" {
+			u.SetStripeSandboxPriceID(stripeSandboxPriceID)
+		} else {
+			u.ClearStripeSandboxPriceID()
+		}
+	}
+	if req.StripeTrialDays != nil {
+		u.SetStripeTrialDays(*req.StripeTrialDays)
+	}
+	if req.BillingProvider != nil {
+		u.SetBillingProvider(strings.TrimSpace(*req.BillingProvider))
+	}
+	if req.BillingMode != nil {
+		u.SetBillingMode(strings.TrimSpace(*req.BillingMode))
 	}
 	if req.ForSale != nil {
 		u.SetForSale(*req.ForSale)

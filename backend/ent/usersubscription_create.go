@@ -105,6 +105,188 @@ func (_c *UserSubscriptionCreate) SetNillableStatus(v *string) *UserSubscription
 	return _c
 }
 
+// SetStripeCustomerID sets the "stripe_customer_id" field.
+func (_c *UserSubscriptionCreate) SetStripeCustomerID(v string) *UserSubscriptionCreate {
+	_c.mutation.SetStripeCustomerID(v)
+	return _c
+}
+
+// SetNillableStripeCustomerID sets the "stripe_customer_id" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableStripeCustomerID(v *string) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetStripeCustomerID(*v)
+	}
+	return _c
+}
+
+// SetStripeSubscriptionID sets the "stripe_subscription_id" field.
+func (_c *UserSubscriptionCreate) SetStripeSubscriptionID(v string) *UserSubscriptionCreate {
+	_c.mutation.SetStripeSubscriptionID(v)
+	return _c
+}
+
+// SetNillableStripeSubscriptionID sets the "stripe_subscription_id" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableStripeSubscriptionID(v *string) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetStripeSubscriptionID(*v)
+	}
+	return _c
+}
+
+// SetStripePriceID sets the "stripe_price_id" field.
+func (_c *UserSubscriptionCreate) SetStripePriceID(v string) *UserSubscriptionCreate {
+	_c.mutation.SetStripePriceID(v)
+	return _c
+}
+
+// SetNillableStripePriceID sets the "stripe_price_id" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableStripePriceID(v *string) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetStripePriceID(*v)
+	}
+	return _c
+}
+
+// SetStripeEnvironment sets the "stripe_environment" field.
+func (_c *UserSubscriptionCreate) SetStripeEnvironment(v string) *UserSubscriptionCreate {
+	_c.mutation.SetStripeEnvironment(v)
+	return _c
+}
+
+// SetNillableStripeEnvironment sets the "stripe_environment" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableStripeEnvironment(v *string) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetStripeEnvironment(*v)
+	}
+	return _c
+}
+
+// SetStripeProviderInstanceID sets the "stripe_provider_instance_id" field.
+func (_c *UserSubscriptionCreate) SetStripeProviderInstanceID(v string) *UserSubscriptionCreate {
+	_c.mutation.SetStripeProviderInstanceID(v)
+	return _c
+}
+
+// SetNillableStripeProviderInstanceID sets the "stripe_provider_instance_id" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableStripeProviderInstanceID(v *string) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetStripeProviderInstanceID(*v)
+	}
+	return _c
+}
+
+// SetStripeStatus sets the "stripe_status" field.
+func (_c *UserSubscriptionCreate) SetStripeStatus(v string) *UserSubscriptionCreate {
+	_c.mutation.SetStripeStatus(v)
+	return _c
+}
+
+// SetNillableStripeStatus sets the "stripe_status" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableStripeStatus(v *string) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetStripeStatus(*v)
+	}
+	return _c
+}
+
+// SetCurrentPeriodStart sets the "current_period_start" field.
+func (_c *UserSubscriptionCreate) SetCurrentPeriodStart(v time.Time) *UserSubscriptionCreate {
+	_c.mutation.SetCurrentPeriodStart(v)
+	return _c
+}
+
+// SetNillableCurrentPeriodStart sets the "current_period_start" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableCurrentPeriodStart(v *time.Time) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetCurrentPeriodStart(*v)
+	}
+	return _c
+}
+
+// SetCurrentPeriodEnd sets the "current_period_end" field.
+func (_c *UserSubscriptionCreate) SetCurrentPeriodEnd(v time.Time) *UserSubscriptionCreate {
+	_c.mutation.SetCurrentPeriodEnd(v)
+	return _c
+}
+
+// SetNillableCurrentPeriodEnd sets the "current_period_end" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableCurrentPeriodEnd(v *time.Time) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetCurrentPeriodEnd(*v)
+	}
+	return _c
+}
+
+// SetTrialStart sets the "trial_start" field.
+func (_c *UserSubscriptionCreate) SetTrialStart(v time.Time) *UserSubscriptionCreate {
+	_c.mutation.SetTrialStart(v)
+	return _c
+}
+
+// SetNillableTrialStart sets the "trial_start" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableTrialStart(v *time.Time) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetTrialStart(*v)
+	}
+	return _c
+}
+
+// SetTrialEnd sets the "trial_end" field.
+func (_c *UserSubscriptionCreate) SetTrialEnd(v time.Time) *UserSubscriptionCreate {
+	_c.mutation.SetTrialEnd(v)
+	return _c
+}
+
+// SetNillableTrialEnd sets the "trial_end" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableTrialEnd(v *time.Time) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetTrialEnd(*v)
+	}
+	return _c
+}
+
+// SetCancelAtPeriodEnd sets the "cancel_at_period_end" field.
+func (_c *UserSubscriptionCreate) SetCancelAtPeriodEnd(v bool) *UserSubscriptionCreate {
+	_c.mutation.SetCancelAtPeriodEnd(v)
+	return _c
+}
+
+// SetNillableCancelAtPeriodEnd sets the "cancel_at_period_end" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableCancelAtPeriodEnd(v *bool) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetCancelAtPeriodEnd(*v)
+	}
+	return _c
+}
+
+// SetPastDueSince sets the "past_due_since" field.
+func (_c *UserSubscriptionCreate) SetPastDueSince(v time.Time) *UserSubscriptionCreate {
+	_c.mutation.SetPastDueSince(v)
+	return _c
+}
+
+// SetNillablePastDueSince sets the "past_due_since" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillablePastDueSince(v *time.Time) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetPastDueSince(*v)
+	}
+	return _c
+}
+
+// SetTrialUsed sets the "trial_used" field.
+func (_c *UserSubscriptionCreate) SetTrialUsed(v bool) *UserSubscriptionCreate {
+	_c.mutation.SetTrialUsed(v)
+	return _c
+}
+
+// SetNillableTrialUsed sets the "trial_used" field if the given value is not nil.
+func (_c *UserSubscriptionCreate) SetNillableTrialUsed(v *bool) *UserSubscriptionCreate {
+	if v != nil {
+		_c.SetTrialUsed(*v)
+	}
+	return _c
+}
+
 // SetDailyWindowStart sets the "daily_window_start" field.
 func (_c *UserSubscriptionCreate) SetDailyWindowStart(v time.Time) *UserSubscriptionCreate {
 	_c.mutation.SetDailyWindowStart(v)
@@ -330,6 +512,18 @@ func (_c *UserSubscriptionCreate) defaults() error {
 		v := usersubscription.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.StripeEnvironment(); !ok {
+		v := usersubscription.DefaultStripeEnvironment
+		_c.mutation.SetStripeEnvironment(v)
+	}
+	if _, ok := _c.mutation.CancelAtPeriodEnd(); !ok {
+		v := usersubscription.DefaultCancelAtPeriodEnd
+		_c.mutation.SetCancelAtPeriodEnd(v)
+	}
+	if _, ok := _c.mutation.TrialUsed(); !ok {
+		v := usersubscription.DefaultTrialUsed
+		_c.mutation.SetTrialUsed(v)
+	}
 	if _, ok := _c.mutation.DailyUsageUsd(); !ok {
 		v := usersubscription.DefaultDailyUsageUsd
 		_c.mutation.SetDailyUsageUsd(v)
@@ -379,6 +573,45 @@ func (_c *UserSubscriptionCreate) check() error {
 		if err := usersubscription.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.status": %w`, err)}
 		}
+	}
+	if v, ok := _c.mutation.StripeCustomerID(); ok {
+		if err := usersubscription.StripeCustomerIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_customer_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_customer_id": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.StripeSubscriptionID(); ok {
+		if err := usersubscription.StripeSubscriptionIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_subscription_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_subscription_id": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.StripePriceID(); ok {
+		if err := usersubscription.StripePriceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_price_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_price_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.StripeEnvironment(); !ok {
+		return &ValidationError{Name: "stripe_environment", err: errors.New(`ent: missing required field "UserSubscription.stripe_environment"`)}
+	}
+	if v, ok := _c.mutation.StripeEnvironment(); ok {
+		if err := usersubscription.StripeEnvironmentValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_environment", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_environment": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.StripeProviderInstanceID(); ok {
+		if err := usersubscription.StripeProviderInstanceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_provider_instance_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_provider_instance_id": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.StripeStatus(); ok {
+		if err := usersubscription.StripeStatusValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_status", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.CancelAtPeriodEnd(); !ok {
+		return &ValidationError{Name: "cancel_at_period_end", err: errors.New(`ent: missing required field "UserSubscription.cancel_at_period_end"`)}
+	}
+	if _, ok := _c.mutation.TrialUsed(); !ok {
+		return &ValidationError{Name: "trial_used", err: errors.New(`ent: missing required field "UserSubscription.trial_used"`)}
 	}
 	if _, ok := _c.mutation.DailyUsageUsd(); !ok {
 		return &ValidationError{Name: "daily_usage_usd", err: errors.New(`ent: missing required field "UserSubscription.daily_usage_usd"`)}
@@ -448,6 +681,58 @@ func (_c *UserSubscriptionCreate) createSpec() (*UserSubscription, *sqlgraph.Cre
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(usersubscription.FieldStatus, field.TypeString, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.StripeCustomerID(); ok {
+		_spec.SetField(usersubscription.FieldStripeCustomerID, field.TypeString, value)
+		_node.StripeCustomerID = &value
+	}
+	if value, ok := _c.mutation.StripeSubscriptionID(); ok {
+		_spec.SetField(usersubscription.FieldStripeSubscriptionID, field.TypeString, value)
+		_node.StripeSubscriptionID = &value
+	}
+	if value, ok := _c.mutation.StripePriceID(); ok {
+		_spec.SetField(usersubscription.FieldStripePriceID, field.TypeString, value)
+		_node.StripePriceID = &value
+	}
+	if value, ok := _c.mutation.StripeEnvironment(); ok {
+		_spec.SetField(usersubscription.FieldStripeEnvironment, field.TypeString, value)
+		_node.StripeEnvironment = value
+	}
+	if value, ok := _c.mutation.StripeProviderInstanceID(); ok {
+		_spec.SetField(usersubscription.FieldStripeProviderInstanceID, field.TypeString, value)
+		_node.StripeProviderInstanceID = &value
+	}
+	if value, ok := _c.mutation.StripeStatus(); ok {
+		_spec.SetField(usersubscription.FieldStripeStatus, field.TypeString, value)
+		_node.StripeStatus = &value
+	}
+	if value, ok := _c.mutation.CurrentPeriodStart(); ok {
+		_spec.SetField(usersubscription.FieldCurrentPeriodStart, field.TypeTime, value)
+		_node.CurrentPeriodStart = &value
+	}
+	if value, ok := _c.mutation.CurrentPeriodEnd(); ok {
+		_spec.SetField(usersubscription.FieldCurrentPeriodEnd, field.TypeTime, value)
+		_node.CurrentPeriodEnd = &value
+	}
+	if value, ok := _c.mutation.TrialStart(); ok {
+		_spec.SetField(usersubscription.FieldTrialStart, field.TypeTime, value)
+		_node.TrialStart = &value
+	}
+	if value, ok := _c.mutation.TrialEnd(); ok {
+		_spec.SetField(usersubscription.FieldTrialEnd, field.TypeTime, value)
+		_node.TrialEnd = &value
+	}
+	if value, ok := _c.mutation.CancelAtPeriodEnd(); ok {
+		_spec.SetField(usersubscription.FieldCancelAtPeriodEnd, field.TypeBool, value)
+		_node.CancelAtPeriodEnd = value
+	}
+	if value, ok := _c.mutation.PastDueSince(); ok {
+		_spec.SetField(usersubscription.FieldPastDueSince, field.TypeTime, value)
+		_node.PastDueSince = &value
+	}
+	if value, ok := _c.mutation.TrialUsed(); ok {
+		_spec.SetField(usersubscription.FieldTrialUsed, field.TypeBool, value)
+		_node.TrialUsed = value
 	}
 	if value, ok := _c.mutation.DailyWindowStart(); ok {
 		_spec.SetField(usersubscription.FieldDailyWindowStart, field.TypeTime, value)
@@ -687,6 +972,222 @@ func (u *UserSubscriptionUpsert) SetStatus(v string) *UserSubscriptionUpsert {
 // UpdateStatus sets the "status" field to the value that was provided on create.
 func (u *UserSubscriptionUpsert) UpdateStatus() *UserSubscriptionUpsert {
 	u.SetExcluded(usersubscription.FieldStatus)
+	return u
+}
+
+// SetStripeCustomerID sets the "stripe_customer_id" field.
+func (u *UserSubscriptionUpsert) SetStripeCustomerID(v string) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldStripeCustomerID, v)
+	return u
+}
+
+// UpdateStripeCustomerID sets the "stripe_customer_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateStripeCustomerID() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldStripeCustomerID)
+	return u
+}
+
+// ClearStripeCustomerID clears the value of the "stripe_customer_id" field.
+func (u *UserSubscriptionUpsert) ClearStripeCustomerID() *UserSubscriptionUpsert {
+	u.SetNull(usersubscription.FieldStripeCustomerID)
+	return u
+}
+
+// SetStripeSubscriptionID sets the "stripe_subscription_id" field.
+func (u *UserSubscriptionUpsert) SetStripeSubscriptionID(v string) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldStripeSubscriptionID, v)
+	return u
+}
+
+// UpdateStripeSubscriptionID sets the "stripe_subscription_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateStripeSubscriptionID() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldStripeSubscriptionID)
+	return u
+}
+
+// ClearStripeSubscriptionID clears the value of the "stripe_subscription_id" field.
+func (u *UserSubscriptionUpsert) ClearStripeSubscriptionID() *UserSubscriptionUpsert {
+	u.SetNull(usersubscription.FieldStripeSubscriptionID)
+	return u
+}
+
+// SetStripePriceID sets the "stripe_price_id" field.
+func (u *UserSubscriptionUpsert) SetStripePriceID(v string) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldStripePriceID, v)
+	return u
+}
+
+// UpdateStripePriceID sets the "stripe_price_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateStripePriceID() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldStripePriceID)
+	return u
+}
+
+// ClearStripePriceID clears the value of the "stripe_price_id" field.
+func (u *UserSubscriptionUpsert) ClearStripePriceID() *UserSubscriptionUpsert {
+	u.SetNull(usersubscription.FieldStripePriceID)
+	return u
+}
+
+// SetStripeEnvironment sets the "stripe_environment" field.
+func (u *UserSubscriptionUpsert) SetStripeEnvironment(v string) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldStripeEnvironment, v)
+	return u
+}
+
+// UpdateStripeEnvironment sets the "stripe_environment" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateStripeEnvironment() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldStripeEnvironment)
+	return u
+}
+
+// SetStripeProviderInstanceID sets the "stripe_provider_instance_id" field.
+func (u *UserSubscriptionUpsert) SetStripeProviderInstanceID(v string) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldStripeProviderInstanceID, v)
+	return u
+}
+
+// UpdateStripeProviderInstanceID sets the "stripe_provider_instance_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateStripeProviderInstanceID() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldStripeProviderInstanceID)
+	return u
+}
+
+// ClearStripeProviderInstanceID clears the value of the "stripe_provider_instance_id" field.
+func (u *UserSubscriptionUpsert) ClearStripeProviderInstanceID() *UserSubscriptionUpsert {
+	u.SetNull(usersubscription.FieldStripeProviderInstanceID)
+	return u
+}
+
+// SetStripeStatus sets the "stripe_status" field.
+func (u *UserSubscriptionUpsert) SetStripeStatus(v string) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldStripeStatus, v)
+	return u
+}
+
+// UpdateStripeStatus sets the "stripe_status" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateStripeStatus() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldStripeStatus)
+	return u
+}
+
+// ClearStripeStatus clears the value of the "stripe_status" field.
+func (u *UserSubscriptionUpsert) ClearStripeStatus() *UserSubscriptionUpsert {
+	u.SetNull(usersubscription.FieldStripeStatus)
+	return u
+}
+
+// SetCurrentPeriodStart sets the "current_period_start" field.
+func (u *UserSubscriptionUpsert) SetCurrentPeriodStart(v time.Time) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldCurrentPeriodStart, v)
+	return u
+}
+
+// UpdateCurrentPeriodStart sets the "current_period_start" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateCurrentPeriodStart() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldCurrentPeriodStart)
+	return u
+}
+
+// ClearCurrentPeriodStart clears the value of the "current_period_start" field.
+func (u *UserSubscriptionUpsert) ClearCurrentPeriodStart() *UserSubscriptionUpsert {
+	u.SetNull(usersubscription.FieldCurrentPeriodStart)
+	return u
+}
+
+// SetCurrentPeriodEnd sets the "current_period_end" field.
+func (u *UserSubscriptionUpsert) SetCurrentPeriodEnd(v time.Time) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldCurrentPeriodEnd, v)
+	return u
+}
+
+// UpdateCurrentPeriodEnd sets the "current_period_end" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateCurrentPeriodEnd() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldCurrentPeriodEnd)
+	return u
+}
+
+// ClearCurrentPeriodEnd clears the value of the "current_period_end" field.
+func (u *UserSubscriptionUpsert) ClearCurrentPeriodEnd() *UserSubscriptionUpsert {
+	u.SetNull(usersubscription.FieldCurrentPeriodEnd)
+	return u
+}
+
+// SetTrialStart sets the "trial_start" field.
+func (u *UserSubscriptionUpsert) SetTrialStart(v time.Time) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldTrialStart, v)
+	return u
+}
+
+// UpdateTrialStart sets the "trial_start" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateTrialStart() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldTrialStart)
+	return u
+}
+
+// ClearTrialStart clears the value of the "trial_start" field.
+func (u *UserSubscriptionUpsert) ClearTrialStart() *UserSubscriptionUpsert {
+	u.SetNull(usersubscription.FieldTrialStart)
+	return u
+}
+
+// SetTrialEnd sets the "trial_end" field.
+func (u *UserSubscriptionUpsert) SetTrialEnd(v time.Time) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldTrialEnd, v)
+	return u
+}
+
+// UpdateTrialEnd sets the "trial_end" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateTrialEnd() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldTrialEnd)
+	return u
+}
+
+// ClearTrialEnd clears the value of the "trial_end" field.
+func (u *UserSubscriptionUpsert) ClearTrialEnd() *UserSubscriptionUpsert {
+	u.SetNull(usersubscription.FieldTrialEnd)
+	return u
+}
+
+// SetCancelAtPeriodEnd sets the "cancel_at_period_end" field.
+func (u *UserSubscriptionUpsert) SetCancelAtPeriodEnd(v bool) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldCancelAtPeriodEnd, v)
+	return u
+}
+
+// UpdateCancelAtPeriodEnd sets the "cancel_at_period_end" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateCancelAtPeriodEnd() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldCancelAtPeriodEnd)
+	return u
+}
+
+// SetPastDueSince sets the "past_due_since" field.
+func (u *UserSubscriptionUpsert) SetPastDueSince(v time.Time) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldPastDueSince, v)
+	return u
+}
+
+// UpdatePastDueSince sets the "past_due_since" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdatePastDueSince() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldPastDueSince)
+	return u
+}
+
+// ClearPastDueSince clears the value of the "past_due_since" field.
+func (u *UserSubscriptionUpsert) ClearPastDueSince() *UserSubscriptionUpsert {
+	u.SetNull(usersubscription.FieldPastDueSince)
+	return u
+}
+
+// SetTrialUsed sets the "trial_used" field.
+func (u *UserSubscriptionUpsert) SetTrialUsed(v bool) *UserSubscriptionUpsert {
+	u.Set(usersubscription.FieldTrialUsed, v)
+	return u
+}
+
+// UpdateTrialUsed sets the "trial_used" field to the value that was provided on create.
+func (u *UserSubscriptionUpsert) UpdateTrialUsed() *UserSubscriptionUpsert {
+	u.SetExcluded(usersubscription.FieldTrialUsed)
 	return u
 }
 
@@ -993,6 +1494,258 @@ func (u *UserSubscriptionUpsertOne) SetStatus(v string) *UserSubscriptionUpsertO
 func (u *UserSubscriptionUpsertOne) UpdateStatus() *UserSubscriptionUpsertOne {
 	return u.Update(func(s *UserSubscriptionUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetStripeCustomerID sets the "stripe_customer_id" field.
+func (u *UserSubscriptionUpsertOne) SetStripeCustomerID(v string) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripeCustomerID(v)
+	})
+}
+
+// UpdateStripeCustomerID sets the "stripe_customer_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateStripeCustomerID() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripeCustomerID()
+	})
+}
+
+// ClearStripeCustomerID clears the value of the "stripe_customer_id" field.
+func (u *UserSubscriptionUpsertOne) ClearStripeCustomerID() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearStripeCustomerID()
+	})
+}
+
+// SetStripeSubscriptionID sets the "stripe_subscription_id" field.
+func (u *UserSubscriptionUpsertOne) SetStripeSubscriptionID(v string) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripeSubscriptionID(v)
+	})
+}
+
+// UpdateStripeSubscriptionID sets the "stripe_subscription_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateStripeSubscriptionID() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripeSubscriptionID()
+	})
+}
+
+// ClearStripeSubscriptionID clears the value of the "stripe_subscription_id" field.
+func (u *UserSubscriptionUpsertOne) ClearStripeSubscriptionID() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearStripeSubscriptionID()
+	})
+}
+
+// SetStripePriceID sets the "stripe_price_id" field.
+func (u *UserSubscriptionUpsertOne) SetStripePriceID(v string) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripePriceID(v)
+	})
+}
+
+// UpdateStripePriceID sets the "stripe_price_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateStripePriceID() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripePriceID()
+	})
+}
+
+// ClearStripePriceID clears the value of the "stripe_price_id" field.
+func (u *UserSubscriptionUpsertOne) ClearStripePriceID() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearStripePriceID()
+	})
+}
+
+// SetStripeEnvironment sets the "stripe_environment" field.
+func (u *UserSubscriptionUpsertOne) SetStripeEnvironment(v string) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripeEnvironment(v)
+	})
+}
+
+// UpdateStripeEnvironment sets the "stripe_environment" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateStripeEnvironment() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripeEnvironment()
+	})
+}
+
+// SetStripeProviderInstanceID sets the "stripe_provider_instance_id" field.
+func (u *UserSubscriptionUpsertOne) SetStripeProviderInstanceID(v string) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripeProviderInstanceID(v)
+	})
+}
+
+// UpdateStripeProviderInstanceID sets the "stripe_provider_instance_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateStripeProviderInstanceID() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripeProviderInstanceID()
+	})
+}
+
+// ClearStripeProviderInstanceID clears the value of the "stripe_provider_instance_id" field.
+func (u *UserSubscriptionUpsertOne) ClearStripeProviderInstanceID() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearStripeProviderInstanceID()
+	})
+}
+
+// SetStripeStatus sets the "stripe_status" field.
+func (u *UserSubscriptionUpsertOne) SetStripeStatus(v string) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripeStatus(v)
+	})
+}
+
+// UpdateStripeStatus sets the "stripe_status" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateStripeStatus() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripeStatus()
+	})
+}
+
+// ClearStripeStatus clears the value of the "stripe_status" field.
+func (u *UserSubscriptionUpsertOne) ClearStripeStatus() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearStripeStatus()
+	})
+}
+
+// SetCurrentPeriodStart sets the "current_period_start" field.
+func (u *UserSubscriptionUpsertOne) SetCurrentPeriodStart(v time.Time) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetCurrentPeriodStart(v)
+	})
+}
+
+// UpdateCurrentPeriodStart sets the "current_period_start" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateCurrentPeriodStart() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateCurrentPeriodStart()
+	})
+}
+
+// ClearCurrentPeriodStart clears the value of the "current_period_start" field.
+func (u *UserSubscriptionUpsertOne) ClearCurrentPeriodStart() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearCurrentPeriodStart()
+	})
+}
+
+// SetCurrentPeriodEnd sets the "current_period_end" field.
+func (u *UserSubscriptionUpsertOne) SetCurrentPeriodEnd(v time.Time) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetCurrentPeriodEnd(v)
+	})
+}
+
+// UpdateCurrentPeriodEnd sets the "current_period_end" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateCurrentPeriodEnd() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateCurrentPeriodEnd()
+	})
+}
+
+// ClearCurrentPeriodEnd clears the value of the "current_period_end" field.
+func (u *UserSubscriptionUpsertOne) ClearCurrentPeriodEnd() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearCurrentPeriodEnd()
+	})
+}
+
+// SetTrialStart sets the "trial_start" field.
+func (u *UserSubscriptionUpsertOne) SetTrialStart(v time.Time) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetTrialStart(v)
+	})
+}
+
+// UpdateTrialStart sets the "trial_start" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateTrialStart() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateTrialStart()
+	})
+}
+
+// ClearTrialStart clears the value of the "trial_start" field.
+func (u *UserSubscriptionUpsertOne) ClearTrialStart() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearTrialStart()
+	})
+}
+
+// SetTrialEnd sets the "trial_end" field.
+func (u *UserSubscriptionUpsertOne) SetTrialEnd(v time.Time) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetTrialEnd(v)
+	})
+}
+
+// UpdateTrialEnd sets the "trial_end" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateTrialEnd() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateTrialEnd()
+	})
+}
+
+// ClearTrialEnd clears the value of the "trial_end" field.
+func (u *UserSubscriptionUpsertOne) ClearTrialEnd() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearTrialEnd()
+	})
+}
+
+// SetCancelAtPeriodEnd sets the "cancel_at_period_end" field.
+func (u *UserSubscriptionUpsertOne) SetCancelAtPeriodEnd(v bool) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetCancelAtPeriodEnd(v)
+	})
+}
+
+// UpdateCancelAtPeriodEnd sets the "cancel_at_period_end" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateCancelAtPeriodEnd() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateCancelAtPeriodEnd()
+	})
+}
+
+// SetPastDueSince sets the "past_due_since" field.
+func (u *UserSubscriptionUpsertOne) SetPastDueSince(v time.Time) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetPastDueSince(v)
+	})
+}
+
+// UpdatePastDueSince sets the "past_due_since" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdatePastDueSince() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdatePastDueSince()
+	})
+}
+
+// ClearPastDueSince clears the value of the "past_due_since" field.
+func (u *UserSubscriptionUpsertOne) ClearPastDueSince() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearPastDueSince()
+	})
+}
+
+// SetTrialUsed sets the "trial_used" field.
+func (u *UserSubscriptionUpsertOne) SetTrialUsed(v bool) *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetTrialUsed(v)
+	})
+}
+
+// UpdateTrialUsed sets the "trial_used" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertOne) UpdateTrialUsed() *UserSubscriptionUpsertOne {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateTrialUsed()
 	})
 }
 
@@ -1491,6 +2244,258 @@ func (u *UserSubscriptionUpsertBulk) SetStatus(v string) *UserSubscriptionUpsert
 func (u *UserSubscriptionUpsertBulk) UpdateStatus() *UserSubscriptionUpsertBulk {
 	return u.Update(func(s *UserSubscriptionUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetStripeCustomerID sets the "stripe_customer_id" field.
+func (u *UserSubscriptionUpsertBulk) SetStripeCustomerID(v string) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripeCustomerID(v)
+	})
+}
+
+// UpdateStripeCustomerID sets the "stripe_customer_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateStripeCustomerID() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripeCustomerID()
+	})
+}
+
+// ClearStripeCustomerID clears the value of the "stripe_customer_id" field.
+func (u *UserSubscriptionUpsertBulk) ClearStripeCustomerID() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearStripeCustomerID()
+	})
+}
+
+// SetStripeSubscriptionID sets the "stripe_subscription_id" field.
+func (u *UserSubscriptionUpsertBulk) SetStripeSubscriptionID(v string) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripeSubscriptionID(v)
+	})
+}
+
+// UpdateStripeSubscriptionID sets the "stripe_subscription_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateStripeSubscriptionID() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripeSubscriptionID()
+	})
+}
+
+// ClearStripeSubscriptionID clears the value of the "stripe_subscription_id" field.
+func (u *UserSubscriptionUpsertBulk) ClearStripeSubscriptionID() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearStripeSubscriptionID()
+	})
+}
+
+// SetStripePriceID sets the "stripe_price_id" field.
+func (u *UserSubscriptionUpsertBulk) SetStripePriceID(v string) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripePriceID(v)
+	})
+}
+
+// UpdateStripePriceID sets the "stripe_price_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateStripePriceID() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripePriceID()
+	})
+}
+
+// ClearStripePriceID clears the value of the "stripe_price_id" field.
+func (u *UserSubscriptionUpsertBulk) ClearStripePriceID() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearStripePriceID()
+	})
+}
+
+// SetStripeEnvironment sets the "stripe_environment" field.
+func (u *UserSubscriptionUpsertBulk) SetStripeEnvironment(v string) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripeEnvironment(v)
+	})
+}
+
+// UpdateStripeEnvironment sets the "stripe_environment" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateStripeEnvironment() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripeEnvironment()
+	})
+}
+
+// SetStripeProviderInstanceID sets the "stripe_provider_instance_id" field.
+func (u *UserSubscriptionUpsertBulk) SetStripeProviderInstanceID(v string) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripeProviderInstanceID(v)
+	})
+}
+
+// UpdateStripeProviderInstanceID sets the "stripe_provider_instance_id" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateStripeProviderInstanceID() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripeProviderInstanceID()
+	})
+}
+
+// ClearStripeProviderInstanceID clears the value of the "stripe_provider_instance_id" field.
+func (u *UserSubscriptionUpsertBulk) ClearStripeProviderInstanceID() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearStripeProviderInstanceID()
+	})
+}
+
+// SetStripeStatus sets the "stripe_status" field.
+func (u *UserSubscriptionUpsertBulk) SetStripeStatus(v string) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetStripeStatus(v)
+	})
+}
+
+// UpdateStripeStatus sets the "stripe_status" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateStripeStatus() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateStripeStatus()
+	})
+}
+
+// ClearStripeStatus clears the value of the "stripe_status" field.
+func (u *UserSubscriptionUpsertBulk) ClearStripeStatus() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearStripeStatus()
+	})
+}
+
+// SetCurrentPeriodStart sets the "current_period_start" field.
+func (u *UserSubscriptionUpsertBulk) SetCurrentPeriodStart(v time.Time) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetCurrentPeriodStart(v)
+	})
+}
+
+// UpdateCurrentPeriodStart sets the "current_period_start" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateCurrentPeriodStart() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateCurrentPeriodStart()
+	})
+}
+
+// ClearCurrentPeriodStart clears the value of the "current_period_start" field.
+func (u *UserSubscriptionUpsertBulk) ClearCurrentPeriodStart() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearCurrentPeriodStart()
+	})
+}
+
+// SetCurrentPeriodEnd sets the "current_period_end" field.
+func (u *UserSubscriptionUpsertBulk) SetCurrentPeriodEnd(v time.Time) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetCurrentPeriodEnd(v)
+	})
+}
+
+// UpdateCurrentPeriodEnd sets the "current_period_end" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateCurrentPeriodEnd() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateCurrentPeriodEnd()
+	})
+}
+
+// ClearCurrentPeriodEnd clears the value of the "current_period_end" field.
+func (u *UserSubscriptionUpsertBulk) ClearCurrentPeriodEnd() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearCurrentPeriodEnd()
+	})
+}
+
+// SetTrialStart sets the "trial_start" field.
+func (u *UserSubscriptionUpsertBulk) SetTrialStart(v time.Time) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetTrialStart(v)
+	})
+}
+
+// UpdateTrialStart sets the "trial_start" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateTrialStart() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateTrialStart()
+	})
+}
+
+// ClearTrialStart clears the value of the "trial_start" field.
+func (u *UserSubscriptionUpsertBulk) ClearTrialStart() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearTrialStart()
+	})
+}
+
+// SetTrialEnd sets the "trial_end" field.
+func (u *UserSubscriptionUpsertBulk) SetTrialEnd(v time.Time) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetTrialEnd(v)
+	})
+}
+
+// UpdateTrialEnd sets the "trial_end" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateTrialEnd() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateTrialEnd()
+	})
+}
+
+// ClearTrialEnd clears the value of the "trial_end" field.
+func (u *UserSubscriptionUpsertBulk) ClearTrialEnd() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearTrialEnd()
+	})
+}
+
+// SetCancelAtPeriodEnd sets the "cancel_at_period_end" field.
+func (u *UserSubscriptionUpsertBulk) SetCancelAtPeriodEnd(v bool) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetCancelAtPeriodEnd(v)
+	})
+}
+
+// UpdateCancelAtPeriodEnd sets the "cancel_at_period_end" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateCancelAtPeriodEnd() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateCancelAtPeriodEnd()
+	})
+}
+
+// SetPastDueSince sets the "past_due_since" field.
+func (u *UserSubscriptionUpsertBulk) SetPastDueSince(v time.Time) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetPastDueSince(v)
+	})
+}
+
+// UpdatePastDueSince sets the "past_due_since" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdatePastDueSince() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdatePastDueSince()
+	})
+}
+
+// ClearPastDueSince clears the value of the "past_due_since" field.
+func (u *UserSubscriptionUpsertBulk) ClearPastDueSince() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.ClearPastDueSince()
+	})
+}
+
+// SetTrialUsed sets the "trial_used" field.
+func (u *UserSubscriptionUpsertBulk) SetTrialUsed(v bool) *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.SetTrialUsed(v)
+	})
+}
+
+// UpdateTrialUsed sets the "trial_used" field to the value that was provided on create.
+func (u *UserSubscriptionUpsertBulk) UpdateTrialUsed() *UserSubscriptionUpsertBulk {
+	return u.Update(func(s *UserSubscriptionUpsert) {
+		s.UpdateTrialUsed()
 	})
 }
 

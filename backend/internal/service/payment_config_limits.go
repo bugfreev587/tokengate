@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	dbent "github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/paymentproviderinstance"
@@ -15,11 +16,16 @@ import (
 // instances and returns limits for each, plus the global widest range.
 // Stripe sub-types (card, link) are aggregated under "stripe".
 func (s *PaymentConfigService) GetAvailableMethodLimits(ctx context.Context) (*MethodLimitsResponse, error) {
+	return s.GetAvailableMethodLimitsForEnvironment(ctx, "")
+}
+
+func (s *PaymentConfigService) GetAvailableMethodLimitsForEnvironment(ctx context.Context, environment string) (*MethodLimitsResponse, error) {
 	instances, err := s.entClient.PaymentProviderInstance.Query().
 		Where(paymentproviderinstance.EnabledEQ(true)).All(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("query provider instances: %w", err)
 	}
+	instances = filterStripeInstancesByEnvironment(instances, environment)
 	typeInstances := pcGroupByPaymentType(instances)
 	typeInstances = s.pcApplyEnabledVisibleMethodInstances(ctx, typeInstances, instances)
 	resp := &MethodLimitsResponse{
@@ -36,6 +42,25 @@ func (s *PaymentConfigService) GetAvailableMethodLimits(ctx context.Context) (*M
 	}
 	resp.GlobalMin, resp.GlobalMax = pcComputeGlobalRange(resp.Methods)
 	return resp, nil
+}
+
+func filterStripeInstancesByEnvironment(instances []*dbent.PaymentProviderInstance, environment string) []*dbent.PaymentProviderInstance {
+	environment = strings.TrimSpace(environment)
+	if environment == "" {
+		return instances
+	}
+	environment = payment.NormalizeProviderEnvironment(environment)
+	filtered := make([]*dbent.PaymentProviderInstance, 0, len(instances))
+	for _, inst := range instances {
+		if inst == nil {
+			continue
+		}
+		if inst.ProviderKey == payment.TypeStripe && payment.NormalizeProviderEnvironment(inst.Environment) != environment {
+			continue
+		}
+		filtered = append(filtered, inst)
+	}
+	return filtered
 }
 
 func (s *PaymentConfigService) pcApplyEnabledVisibleMethodInstances(ctx context.Context, typeInstances map[string][]*dbent.PaymentProviderInstance, instances []*dbent.PaymentProviderInstance) map[string][]*dbent.PaymentProviderInstance {
@@ -100,6 +125,10 @@ func (s *PaymentConfigService) GetMethodLimits(ctx context.Context, types []stri
 }
 
 func (s *PaymentConfigService) ValidateMethodCurrencyConsistency(ctx context.Context, paymentType string) (string, error) {
+	return s.ValidateMethodCurrencyConsistencyForEnvironment(ctx, paymentType, "")
+}
+
+func (s *PaymentConfigService) ValidateMethodCurrencyConsistencyForEnvironment(ctx context.Context, paymentType string, environment string) (string, error) {
 	method := NormalizeVisibleMethod(paymentType)
 	if method == "" || s == nil || s.entClient == nil {
 		return payment.DefaultPaymentCurrency, nil
@@ -110,6 +139,7 @@ func (s *PaymentConfigService) ValidateMethodCurrencyConsistency(ctx context.Con
 	if err != nil {
 		return "", fmt.Errorf("query provider instances: %w", err)
 	}
+	instances = filterStripeInstancesByEnvironment(instances, environment)
 
 	typeInstances := pcGroupByPaymentType(instances)
 	typeInstances = s.pcApplyEnabledVisibleMethodInstances(ctx, typeInstances, instances)

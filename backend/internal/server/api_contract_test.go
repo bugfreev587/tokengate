@@ -1855,6 +1855,9 @@ func (stubUserSubscriptionRepo) GetByUserIDAndGroupID(ctx context.Context, userI
 func (stubUserSubscriptionRepo) GetActiveByUserIDAndGroupID(ctx context.Context, userID, groupID int64) (*service.UserSubscription, error) {
 	return nil, errors.New("not implemented")
 }
+func (stubUserSubscriptionRepo) GetByStripeSubscriptionID(ctx context.Context, stripeSubscriptionID string) (*service.UserSubscription, error) {
+	return nil, errors.New("not implemented")
+}
 func (stubUserSubscriptionRepo) Update(ctx context.Context, sub *service.UserSubscription) error {
 	return errors.New("not implemented")
 }
@@ -1866,6 +1869,9 @@ func (r *stubUserSubscriptionRepo) ListByUserID(ctx context.Context, userID int6
 		return nil, nil
 	}
 	return append([]service.UserSubscription(nil), r.byUser[userID]...), nil
+}
+func (stubUserSubscriptionRepo) ListByStripeCustomerID(ctx context.Context, stripeCustomerID string) ([]service.UserSubscription, error) {
+	return nil, errors.New("not implemented")
 }
 func (r *stubUserSubscriptionRepo) ListActiveByUserID(ctx context.Context, userID int64) ([]service.UserSubscription, error) {
 	if r.activeByUser == nil {

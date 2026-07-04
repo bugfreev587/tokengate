@@ -173,3 +173,28 @@ export function extractBaseUrl(fullUrl: string, path: string): string {
   // Fallback: try to extract origin
   try { return new URL(fullUrl).origin } catch { return fullUrl }
 }
+
+/** Resolve the public base URL for provider webhook endpoints.
+ * Prefer the backend/API origin when the frontend is served from another host.
+ */
+export function resolveWebhookBaseUrl(apiBaseUrl: string | undefined, pageOrigin: string): string {
+  const fallbackOrigin = normalizeOrigin(pageOrigin)
+  const raw = (apiBaseUrl || '').trim()
+  if (!raw) return fallbackOrigin
+
+  try {
+    return new URL(raw, fallbackOrigin || undefined).origin
+  } catch {
+    return fallbackOrigin
+  }
+}
+
+function normalizeOrigin(value: string): string {
+  const raw = (value || '').trim()
+  if (!raw) return ''
+  try {
+    return new URL(raw).origin
+  } catch {
+    return raw.replace(/\/+$/, '')
+  }
+}

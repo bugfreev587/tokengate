@@ -25,7 +25,10 @@ import (
 // draft the admin will complete later.
 func (s *PaymentConfigService) validateProviderConfig(providerKey string, config map[string]string) error {
 	_, err := provider.CreateProvider(providerKey, "_validate_", config)
-	return err
+	if err != nil {
+		return infraerrors.BadRequest("VALIDATION_ERROR", err.Error()).WithCause(err)
+	}
+	return nil
 }
 
 // --- Provider Instance CRUD ---
@@ -39,6 +42,7 @@ type ProviderInstanceResponse struct {
 	ID              int64             `json:"id"`
 	ProviderKey     string            `json:"provider_key"`
 	Name            string            `json:"name"`
+	Environment     string            `json:"environment"`
 	Config          map[string]string `json:"config"`
 	SupportedTypes  []string          `json:"supported_types"`
 	Limits          string            `json:"limits"`
@@ -60,6 +64,7 @@ func (s *PaymentConfigService) ListProviderInstancesWithConfig(ctx context.Conte
 	for _, inst := range instances {
 		resp := ProviderInstanceResponse{
 			ID: int64(inst.ID), ProviderKey: inst.ProviderKey, Name: inst.Name,
+			Environment:    payment.NormalizeProviderEnvironment(inst.Environment),
 			SupportedTypes: splitTypes(inst.SupportedTypes), Limits: inst.Limits,
 			Enabled: inst.Enabled, RefundEnabled: inst.RefundEnabled, AllowUserRefund: inst.AllowUserRefund,
 			SortOrder: inst.SortOrder, PaymentMode: inst.PaymentMode,
@@ -185,6 +190,10 @@ func (s *PaymentConfigService) CreateProviderInstance(ctx context.Context, req C
 	if err := validateProviderRequest(req.ProviderKey, req.Name, typesStr); err != nil {
 		return nil, err
 	}
+	environment, err := normalizeProviderEnvironmentForRequest(req.Environment)
+	if err != nil {
+		return nil, err
+	}
 	if err := s.validateVisibleMethodEnablementConflicts(ctx, 0, req.ProviderKey, typesStr, req.Enabled); err != nil {
 		return nil, err
 	}
@@ -199,11 +208,22 @@ func (s *PaymentConfigService) CreateProviderInstance(ctx context.Context, req C
 	}
 	allowUserRefund := req.AllowUserRefund && req.RefundEnabled
 	return s.entClient.PaymentProviderInstance.Create().
-		SetProviderKey(req.ProviderKey).SetName(req.Name).SetConfig(enc).
+		SetProviderKey(req.ProviderKey).SetName(req.Name).SetEnvironment(environment).SetConfig(enc).
 		SetSupportedTypes(typesStr).SetEnabled(req.Enabled).SetPaymentMode(req.PaymentMode).
 		SetSortOrder(req.SortOrder).SetLimits(req.Limits).SetRefundEnabled(req.RefundEnabled).
 		SetAllowUserRefund(allowUserRefund).
 		Save(ctx)
+}
+
+func normalizeProviderEnvironmentForRequest(raw string) (string, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return payment.ProviderEnvironmentLive, nil
+	}
+	if !payment.IsValidProviderEnvironment(raw) {
+		return "", infraerrors.BadRequest("VALIDATION_ERROR", fmt.Sprintf("invalid provider environment: %s", raw))
+	}
+	return payment.NormalizeProviderEnvironment(raw), nil
 }
 
 func validateProviderRequest(providerKey, name, supportedTypes string) error {
@@ -247,6 +267,22 @@ func (s *PaymentConfigService) UpdateProviderInstance(ctx context.Context, id in
 	}
 	if err := s.validateVisibleMethodEnablementConflicts(ctx, id, current.ProviderKey, nextSupportedTypes, nextEnabled); err != nil {
 		return nil, err
+	}
+	if req.Environment != nil {
+		nextEnvironment, err := normalizeProviderEnvironmentForRequest(*req.Environment)
+		if err != nil {
+			return nil, err
+		}
+		if nextEnvironment != payment.NormalizeProviderEnvironment(current.Environment) {
+			count, err := getPendingOrderCount()
+			if err != nil {
+				return nil, err
+			}
+			if count > 0 {
+				return nil, infraerrors.Conflict("PENDING_ORDERS", "instance has pending orders").
+					WithMetadata(map[string]string{"count": strconv.Itoa(count)})
+			}
+		}
 	}
 	var mergedConfig map[string]string
 	if req.Config != nil {
@@ -301,6 +337,13 @@ func (s *PaymentConfigService) UpdateProviderInstance(ctx context.Context, id in
 	u := s.entClient.PaymentProviderInstance.UpdateOneID(id)
 	if req.Name != nil {
 		u.SetName(*req.Name)
+	}
+	if req.Environment != nil {
+		environment, err := normalizeProviderEnvironmentForRequest(*req.Environment)
+		if err != nil {
+			return nil, err
+		}
+		u.SetEnvironment(environment)
 	}
 	if mergedConfig != nil {
 		enc, err := s.encryptConfig(mergedConfig)

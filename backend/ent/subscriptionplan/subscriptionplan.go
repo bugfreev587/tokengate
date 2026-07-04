@@ -31,6 +31,16 @@ const (
 	FieldFeatures = "features"
 	// FieldProductName holds the string denoting the product_name field in the database.
 	FieldProductName = "product_name"
+	// FieldStripePriceID holds the string denoting the stripe_price_id field in the database.
+	FieldStripePriceID = "stripe_price_id"
+	// FieldStripeSandboxPriceID holds the string denoting the stripe_sandbox_price_id field in the database.
+	FieldStripeSandboxPriceID = "stripe_sandbox_price_id"
+	// FieldStripeTrialDays holds the string denoting the stripe_trial_days field in the database.
+	FieldStripeTrialDays = "stripe_trial_days"
+	// FieldBillingProvider holds the string denoting the billing_provider field in the database.
+	FieldBillingProvider = "billing_provider"
+	// FieldBillingMode holds the string denoting the billing_mode field in the database.
+	FieldBillingMode = "billing_mode"
 	// FieldForSale holds the string denoting the for_sale field in the database.
 	FieldForSale = "for_sale"
 	// FieldSortOrder holds the string denoting the sort_order field in the database.
@@ -55,6 +65,11 @@ var Columns = []string{
 	FieldValidityUnit,
 	FieldFeatures,
 	FieldProductName,
+	FieldStripePriceID,
+	FieldStripeSandboxPriceID,
+	FieldStripeTrialDays,
+	FieldBillingProvider,
+	FieldBillingMode,
 	FieldForSale,
 	FieldSortOrder,
 	FieldCreatedAt,
@@ -88,6 +103,20 @@ var (
 	DefaultProductName string
 	// ProductNameValidator is a validator for the "product_name" field. It is called by the builders before save.
 	ProductNameValidator func(string) error
+	// StripePriceIDValidator is a validator for the "stripe_price_id" field. It is called by the builders before save.
+	StripePriceIDValidator func(string) error
+	// StripeSandboxPriceIDValidator is a validator for the "stripe_sandbox_price_id" field. It is called by the builders before save.
+	StripeSandboxPriceIDValidator func(string) error
+	// DefaultStripeTrialDays holds the default value on creation for the "stripe_trial_days" field.
+	DefaultStripeTrialDays int
+	// DefaultBillingProvider holds the default value on creation for the "billing_provider" field.
+	DefaultBillingProvider string
+	// BillingProviderValidator is a validator for the "billing_provider" field. It is called by the builders before save.
+	BillingProviderValidator func(string) error
+	// DefaultBillingMode holds the default value on creation for the "billing_mode" field.
+	DefaultBillingMode string
+	// BillingModeValidator is a validator for the "billing_mode" field. It is called by the builders before save.
+	BillingModeValidator func(string) error
 	// DefaultForSale holds the default value on creation for the "for_sale" field.
 	DefaultForSale bool
 	// DefaultSortOrder holds the default value on creation for the "sort_order" field.
@@ -151,6 +180,31 @@ func ByFeatures(opts ...sql.OrderTermOption) OrderOption {
 // ByProductName orders the results by the product_name field.
 func ByProductName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProductName, opts...).ToFunc()
+}
+
+// ByStripePriceID orders the results by the stripe_price_id field.
+func ByStripePriceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStripePriceID, opts...).ToFunc()
+}
+
+// ByStripeSandboxPriceID orders the results by the stripe_sandbox_price_id field.
+func ByStripeSandboxPriceID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStripeSandboxPriceID, opts...).ToFunc()
+}
+
+// ByStripeTrialDays orders the results by the stripe_trial_days field.
+func ByStripeTrialDays(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStripeTrialDays, opts...).ToFunc()
+}
+
+// ByBillingProvider orders the results by the billing_provider field.
+func ByBillingProvider(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBillingProvider, opts...).ToFunc()
+}
+
+// ByBillingMode orders the results by the billing_mode field.
+func ByBillingMode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBillingMode, opts...).ToFunc()
 }
 
 // ByForSale orders the results by the for_sale field.

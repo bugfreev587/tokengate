@@ -35,6 +35,32 @@ type UserSubscription struct {
 	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
+	// StripeCustomerID holds the value of the "stripe_customer_id" field.
+	StripeCustomerID *string `json:"stripe_customer_id,omitempty"`
+	// StripeSubscriptionID holds the value of the "stripe_subscription_id" field.
+	StripeSubscriptionID *string `json:"stripe_subscription_id,omitempty"`
+	// StripePriceID holds the value of the "stripe_price_id" field.
+	StripePriceID *string `json:"stripe_price_id,omitempty"`
+	// StripeEnvironment holds the value of the "stripe_environment" field.
+	StripeEnvironment string `json:"stripe_environment,omitempty"`
+	// StripeProviderInstanceID holds the value of the "stripe_provider_instance_id" field.
+	StripeProviderInstanceID *string `json:"stripe_provider_instance_id,omitempty"`
+	// StripeStatus holds the value of the "stripe_status" field.
+	StripeStatus *string `json:"stripe_status,omitempty"`
+	// CurrentPeriodStart holds the value of the "current_period_start" field.
+	CurrentPeriodStart *time.Time `json:"current_period_start,omitempty"`
+	// CurrentPeriodEnd holds the value of the "current_period_end" field.
+	CurrentPeriodEnd *time.Time `json:"current_period_end,omitempty"`
+	// TrialStart holds the value of the "trial_start" field.
+	TrialStart *time.Time `json:"trial_start,omitempty"`
+	// TrialEnd holds the value of the "trial_end" field.
+	TrialEnd *time.Time `json:"trial_end,omitempty"`
+	// CancelAtPeriodEnd holds the value of the "cancel_at_period_end" field.
+	CancelAtPeriodEnd bool `json:"cancel_at_period_end,omitempty"`
+	// PastDueSince holds the value of the "past_due_since" field.
+	PastDueSince *time.Time `json:"past_due_since,omitempty"`
+	// TrialUsed holds the value of the "trial_used" field.
+	TrialUsed bool `json:"trial_used,omitempty"`
 	// DailyWindowStart holds the value of the "daily_window_start" field.
 	DailyWindowStart *time.Time `json:"daily_window_start,omitempty"`
 	// WeeklyWindowStart holds the value of the "weekly_window_start" field.
@@ -121,13 +147,15 @@ func (*UserSubscription) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case usersubscription.FieldCancelAtPeriodEnd, usersubscription.FieldTrialUsed:
+			values[i] = new(sql.NullBool)
 		case usersubscription.FieldDailyUsageUsd, usersubscription.FieldWeeklyUsageUsd, usersubscription.FieldMonthlyUsageUsd:
 			values[i] = new(sql.NullFloat64)
 		case usersubscription.FieldID, usersubscription.FieldUserID, usersubscription.FieldGroupID, usersubscription.FieldAssignedBy:
 			values[i] = new(sql.NullInt64)
-		case usersubscription.FieldStatus, usersubscription.FieldNotes:
+		case usersubscription.FieldStatus, usersubscription.FieldStripeCustomerID, usersubscription.FieldStripeSubscriptionID, usersubscription.FieldStripePriceID, usersubscription.FieldStripeEnvironment, usersubscription.FieldStripeProviderInstanceID, usersubscription.FieldStripeStatus, usersubscription.FieldNotes:
 			values[i] = new(sql.NullString)
-		case usersubscription.FieldCreatedAt, usersubscription.FieldUpdatedAt, usersubscription.FieldDeletedAt, usersubscription.FieldStartsAt, usersubscription.FieldExpiresAt, usersubscription.FieldDailyWindowStart, usersubscription.FieldWeeklyWindowStart, usersubscription.FieldMonthlyWindowStart, usersubscription.FieldAssignedAt:
+		case usersubscription.FieldCreatedAt, usersubscription.FieldUpdatedAt, usersubscription.FieldDeletedAt, usersubscription.FieldStartsAt, usersubscription.FieldExpiresAt, usersubscription.FieldCurrentPeriodStart, usersubscription.FieldCurrentPeriodEnd, usersubscription.FieldTrialStart, usersubscription.FieldTrialEnd, usersubscription.FieldPastDueSince, usersubscription.FieldDailyWindowStart, usersubscription.FieldWeeklyWindowStart, usersubscription.FieldMonthlyWindowStart, usersubscription.FieldAssignedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -198,6 +226,94 @@ func (_m *UserSubscription) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = value.String
+			}
+		case usersubscription.FieldStripeCustomerID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stripe_customer_id", values[i])
+			} else if value.Valid {
+				_m.StripeCustomerID = new(string)
+				*_m.StripeCustomerID = value.String
+			}
+		case usersubscription.FieldStripeSubscriptionID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stripe_subscription_id", values[i])
+			} else if value.Valid {
+				_m.StripeSubscriptionID = new(string)
+				*_m.StripeSubscriptionID = value.String
+			}
+		case usersubscription.FieldStripePriceID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stripe_price_id", values[i])
+			} else if value.Valid {
+				_m.StripePriceID = new(string)
+				*_m.StripePriceID = value.String
+			}
+		case usersubscription.FieldStripeEnvironment:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stripe_environment", values[i])
+			} else if value.Valid {
+				_m.StripeEnvironment = value.String
+			}
+		case usersubscription.FieldStripeProviderInstanceID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stripe_provider_instance_id", values[i])
+			} else if value.Valid {
+				_m.StripeProviderInstanceID = new(string)
+				*_m.StripeProviderInstanceID = value.String
+			}
+		case usersubscription.FieldStripeStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stripe_status", values[i])
+			} else if value.Valid {
+				_m.StripeStatus = new(string)
+				*_m.StripeStatus = value.String
+			}
+		case usersubscription.FieldCurrentPeriodStart:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field current_period_start", values[i])
+			} else if value.Valid {
+				_m.CurrentPeriodStart = new(time.Time)
+				*_m.CurrentPeriodStart = value.Time
+			}
+		case usersubscription.FieldCurrentPeriodEnd:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field current_period_end", values[i])
+			} else if value.Valid {
+				_m.CurrentPeriodEnd = new(time.Time)
+				*_m.CurrentPeriodEnd = value.Time
+			}
+		case usersubscription.FieldTrialStart:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field trial_start", values[i])
+			} else if value.Valid {
+				_m.TrialStart = new(time.Time)
+				*_m.TrialStart = value.Time
+			}
+		case usersubscription.FieldTrialEnd:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field trial_end", values[i])
+			} else if value.Valid {
+				_m.TrialEnd = new(time.Time)
+				*_m.TrialEnd = value.Time
+			}
+		case usersubscription.FieldCancelAtPeriodEnd:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field cancel_at_period_end", values[i])
+			} else if value.Valid {
+				_m.CancelAtPeriodEnd = value.Bool
+			}
+		case usersubscription.FieldPastDueSince:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field past_due_since", values[i])
+			} else if value.Valid {
+				_m.PastDueSince = new(time.Time)
+				*_m.PastDueSince = value.Time
+			}
+		case usersubscription.FieldTrialUsed:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field trial_used", values[i])
+			} else if value.Valid {
+				_m.TrialUsed = value.Bool
 			}
 		case usersubscription.FieldDailyWindowStart:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -339,6 +455,65 @@ func (_m *UserSubscription) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(_m.Status)
+	builder.WriteString(", ")
+	if v := _m.StripeCustomerID; v != nil {
+		builder.WriteString("stripe_customer_id=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.StripeSubscriptionID; v != nil {
+		builder.WriteString("stripe_subscription_id=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.StripePriceID; v != nil {
+		builder.WriteString("stripe_price_id=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("stripe_environment=")
+	builder.WriteString(_m.StripeEnvironment)
+	builder.WriteString(", ")
+	if v := _m.StripeProviderInstanceID; v != nil {
+		builder.WriteString("stripe_provider_instance_id=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.StripeStatus; v != nil {
+		builder.WriteString("stripe_status=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.CurrentPeriodStart; v != nil {
+		builder.WriteString("current_period_start=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.CurrentPeriodEnd; v != nil {
+		builder.WriteString("current_period_end=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.TrialStart; v != nil {
+		builder.WriteString("trial_start=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.TrialEnd; v != nil {
+		builder.WriteString("trial_end=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("cancel_at_period_end=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CancelAtPeriodEnd))
+	builder.WriteString(", ")
+	if v := _m.PastDueSince; v != nil {
+		builder.WriteString("past_due_since=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("trial_used=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TrialUsed))
 	builder.WriteString(", ")
 	if v := _m.DailyWindowStart; v != nil {
 		builder.WriteString("daily_window_start=")

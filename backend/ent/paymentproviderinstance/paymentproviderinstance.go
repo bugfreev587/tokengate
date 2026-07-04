@@ -17,6 +17,8 @@ const (
 	FieldProviderKey = "provider_key"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldEnvironment holds the string denoting the environment field in the database.
+	FieldEnvironment = "environment"
 	// FieldConfig holds the string denoting the config field in the database.
 	FieldConfig = "config"
 	// FieldSupportedTypes holds the string denoting the supported_types field in the database.
@@ -46,6 +48,7 @@ var Columns = []string{
 	FieldID,
 	FieldProviderKey,
 	FieldName,
+	FieldEnvironment,
 	FieldConfig,
 	FieldSupportedTypes,
 	FieldEnabled,
@@ -75,6 +78,10 @@ var (
 	DefaultName string
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// DefaultEnvironment holds the default value on creation for the "environment" field.
+	DefaultEnvironment string
+	// EnvironmentValidator is a validator for the "environment" field. It is called by the builders before save.
+	EnvironmentValidator func(string) error
 	// DefaultSupportedTypes holds the default value on creation for the "supported_types" field.
 	DefaultSupportedTypes string
 	// SupportedTypesValidator is a validator for the "supported_types" field. It is called by the builders before save.
@@ -117,6 +124,11 @@ func ByProviderKey(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByEnvironment orders the results by the environment field.
+func ByEnvironment(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEnvironment, opts...).ToFunc()
 }
 
 // ByConfig orders the results by the config field.

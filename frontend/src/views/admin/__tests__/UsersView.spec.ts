@@ -228,4 +228,54 @@ describe('admin UsersView', () => {
 
     expect(updateUser).toHaveBeenCalledWith(42, { role: 'admin' })
   })
+
+  it('marks a user as test user from the More menu after confirmation', async () => {
+    updateUser.mockResolvedValue({ ...createAdminUser(), is_test_user: true })
+
+    const wrapper = mount(UsersView, {
+      global: {
+        stubs: {
+          AppLayout: { template: '<div><slot /></div>' },
+          TablePageLayout: {
+            template: '<div><slot name="filters" /><slot name="table" /><slot name="pagination" /></div>'
+          },
+          DataTable: DataTableStub,
+          Pagination: true,
+          ConfirmDialog: ConfirmDialogStub,
+          EmptyState: true,
+          GroupBadge: true,
+          Select: true,
+          UserAttributesConfigModal: true,
+          UserConcurrencyCell: true,
+          UserCreateModal: true,
+          UserEditModal: true,
+          UserApiKeysModal: true,
+          UserAllowedGroupsModal: true,
+          UserBalanceModal: true,
+          UserBalanceHistoryModal: true,
+          GroupReplaceModal: true,
+          Icon: true,
+          Teleport: true
+        }
+      }
+    })
+
+    await flushPromises()
+
+    const moreButton = wrapper.findAll('button').find((button) => button.text().includes('common.more'))
+    expect(moreButton).toBeTruthy()
+    await moreButton!.trigger('click', { clientX: 320, clientY: 120 })
+    await flushPromises()
+
+    const setTestUserButton = wrapper.findAll('button').find((button) => button.text().includes('admin.users.setTestUser'))
+    expect(setTestUserButton).toBeTruthy()
+    await setTestUserButton!.trigger('click')
+    await flushPromises()
+
+    expect(wrapper.get('[data-test="confirm-title"]').text()).toBe('admin.users.setTestUser')
+    await wrapper.get('[data-test="confirm-dialog-confirm"]').trigger('click')
+    await flushPromises()
+
+    expect(updateUser).toHaveBeenCalledWith(42, { is_test_user: true })
+  })
 })

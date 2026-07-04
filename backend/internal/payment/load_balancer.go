@@ -48,6 +48,7 @@ type DefaultLoadBalancer struct {
 type contextKey string
 
 const wxpayJSAPIAppIDContextKey contextKey = "payment.wxpay.jsapi_app_id"
+const providerEnvironmentContextKey contextKey = "payment.provider_environment"
 
 // NewDefaultLoadBalancer creates a new load balancer.
 func NewDefaultLoadBalancer(db *dbent.Client, encryptionKey []byte) *DefaultLoadBalancer {
@@ -68,6 +69,27 @@ func wxpayJSAPIAppIDFromContext(ctx context.Context) string {
 	}
 	appID, _ := ctx.Value(wxpayJSAPIAppIDContextKey).(string)
 	return strings.TrimSpace(appID)
+}
+
+func WithProviderEnvironment(ctx context.Context, environment string) context.Context {
+	environment = strings.TrimSpace(environment)
+	if environment == "" {
+		return ctx
+	}
+	environment = NormalizeProviderEnvironment(environment)
+	return context.WithValue(ctx, providerEnvironmentContextKey, environment)
+}
+
+func ProviderEnvironmentFromContext(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	env, _ := ctx.Value(providerEnvironmentContextKey).(string)
+	env = strings.TrimSpace(env)
+	if env == "" {
+		return ""
+	}
+	return NormalizeProviderEnvironment(env)
 }
 
 // instanceCandidate pairs an instance with its pre-fetched daily usage.
@@ -137,7 +159,11 @@ func (lb *DefaultLoadBalancer) queryEnabledInstances(
 
 	var matched []*dbent.PaymentProviderInstance
 	expectedWxpayJSAPIAppID := wxpayJSAPIAppIDFromContext(ctx)
+	expectedEnvironment := ProviderEnvironmentFromContext(ctx)
 	for _, inst := range instances {
+		if expectedEnvironment != "" && inst.ProviderKey == TypeStripe && NormalizeProviderEnvironment(inst.Environment) != expectedEnvironment {
+			continue
+		}
 		// Stripe: match by provider_key because supported_types lists sub-types (card,link,alipay,wxpay),
 		// not "stripe" itself. The checkout page aggregates all sub-types under "stripe".
 		if paymentType == TypeStripe {
@@ -308,6 +334,7 @@ func (lb *DefaultLoadBalancer) buildSelection(selected *dbent.PaymentProviderIns
 	return &InstanceSelection{
 		InstanceID:     fmt.Sprintf("%d", selected.ID),
 		ProviderKey:    selected.ProviderKey,
+		Environment:    NormalizeProviderEnvironment(selected.Environment),
 		Config:         config,
 		SupportedTypes: selected.SupportedTypes,
 		PaymentMode:    selected.PaymentMode,

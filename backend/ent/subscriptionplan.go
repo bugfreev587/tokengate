@@ -35,6 +35,16 @@ type SubscriptionPlan struct {
 	Features string `json:"features,omitempty"`
 	// ProductName holds the value of the "product_name" field.
 	ProductName string `json:"product_name,omitempty"`
+	// StripePriceID holds the value of the "stripe_price_id" field.
+	StripePriceID *string `json:"stripe_price_id,omitempty"`
+	// StripeSandboxPriceID holds the value of the "stripe_sandbox_price_id" field.
+	StripeSandboxPriceID *string `json:"stripe_sandbox_price_id,omitempty"`
+	// StripeTrialDays holds the value of the "stripe_trial_days" field.
+	StripeTrialDays int `json:"stripe_trial_days,omitempty"`
+	// BillingProvider holds the value of the "billing_provider" field.
+	BillingProvider string `json:"billing_provider,omitempty"`
+	// BillingMode holds the value of the "billing_mode" field.
+	BillingMode string `json:"billing_mode,omitempty"`
 	// ForSale holds the value of the "for_sale" field.
 	ForSale bool `json:"for_sale,omitempty"`
 	// SortOrder holds the value of the "sort_order" field.
@@ -55,9 +65,9 @@ func (*SubscriptionPlan) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case subscriptionplan.FieldPrice, subscriptionplan.FieldOriginalPrice:
 			values[i] = new(sql.NullFloat64)
-		case subscriptionplan.FieldID, subscriptionplan.FieldGroupID, subscriptionplan.FieldValidityDays, subscriptionplan.FieldSortOrder:
+		case subscriptionplan.FieldID, subscriptionplan.FieldGroupID, subscriptionplan.FieldValidityDays, subscriptionplan.FieldStripeTrialDays, subscriptionplan.FieldSortOrder:
 			values[i] = new(sql.NullInt64)
-		case subscriptionplan.FieldName, subscriptionplan.FieldDescription, subscriptionplan.FieldValidityUnit, subscriptionplan.FieldFeatures, subscriptionplan.FieldProductName:
+		case subscriptionplan.FieldName, subscriptionplan.FieldDescription, subscriptionplan.FieldValidityUnit, subscriptionplan.FieldFeatures, subscriptionplan.FieldProductName, subscriptionplan.FieldStripePriceID, subscriptionplan.FieldStripeSandboxPriceID, subscriptionplan.FieldBillingProvider, subscriptionplan.FieldBillingMode:
 			values[i] = new(sql.NullString)
 		case subscriptionplan.FieldCreatedAt, subscriptionplan.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -136,6 +146,38 @@ func (_m *SubscriptionPlan) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field product_name", values[i])
 			} else if value.Valid {
 				_m.ProductName = value.String
+			}
+		case subscriptionplan.FieldStripePriceID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stripe_price_id", values[i])
+			} else if value.Valid {
+				_m.StripePriceID = new(string)
+				*_m.StripePriceID = value.String
+			}
+		case subscriptionplan.FieldStripeSandboxPriceID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stripe_sandbox_price_id", values[i])
+			} else if value.Valid {
+				_m.StripeSandboxPriceID = new(string)
+				*_m.StripeSandboxPriceID = value.String
+			}
+		case subscriptionplan.FieldStripeTrialDays:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field stripe_trial_days", values[i])
+			} else if value.Valid {
+				_m.StripeTrialDays = int(value.Int64)
+			}
+		case subscriptionplan.FieldBillingProvider:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field billing_provider", values[i])
+			} else if value.Valid {
+				_m.BillingProvider = value.String
+			}
+		case subscriptionplan.FieldBillingMode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field billing_mode", values[i])
+			} else if value.Valid {
+				_m.BillingMode = value.String
 			}
 		case subscriptionplan.FieldForSale:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -225,6 +267,25 @@ func (_m *SubscriptionPlan) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("product_name=")
 	builder.WriteString(_m.ProductName)
+	builder.WriteString(", ")
+	if v := _m.StripePriceID; v != nil {
+		builder.WriteString("stripe_price_id=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := _m.StripeSandboxPriceID; v != nil {
+		builder.WriteString("stripe_sandbox_price_id=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	builder.WriteString("stripe_trial_days=")
+	builder.WriteString(fmt.Sprintf("%v", _m.StripeTrialDays))
+	builder.WriteString(", ")
+	builder.WriteString("billing_provider=")
+	builder.WriteString(_m.BillingProvider)
+	builder.WriteString(", ")
+	builder.WriteString("billing_mode=")
+	builder.WriteString(_m.BillingMode)
 	builder.WriteString(", ")
 	builder.WriteString("for_sale=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ForSale))

@@ -36,6 +36,9 @@ func (PaymentProviderInstance) Fields() []ent.Field {
 		field.String("name").
 			MaxLen(100).
 			Default(""),
+		field.String("environment").
+			MaxLen(20).
+			Default("live"),
 		field.String("config").
 			SchemaType(map[string]string{dialect.Postgres: "text"}),
 		field.String("supported_types").
@@ -70,5 +73,6 @@ func (PaymentProviderInstance) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("provider_key"),
 		index.Fields("enabled"),
+		index.Fields("environment"),
 	}
 }

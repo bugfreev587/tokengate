@@ -630,6 +630,10 @@ func (r *stubUserSubscriptionRepo) GetActiveByUserIDAndGroupID(ctx context.Conte
 	return nil, errors.New("not implemented")
 }
 
+func (r *stubUserSubscriptionRepo) GetByStripeSubscriptionID(ctx context.Context, stripeSubscriptionID string) (*service.UserSubscription, error) {
+	return nil, errors.New("not implemented")
+}
+
 func (r *stubUserSubscriptionRepo) Update(ctx context.Context, sub *service.UserSubscription) error {
 	return errors.New("not implemented")
 }
@@ -639,6 +643,10 @@ func (r *stubUserSubscriptionRepo) Delete(ctx context.Context, id int64) error {
 }
 
 func (r *stubUserSubscriptionRepo) ListByUserID(ctx context.Context, userID int64) ([]service.UserSubscription, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (r *stubUserSubscriptionRepo) ListByStripeCustomerID(ctx context.Context, stripeCustomerID string) ([]service.UserSubscription, error) {
 	return nil, errors.New("not implemented")
 }
 

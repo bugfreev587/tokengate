@@ -127,6 +127,248 @@ func (_u *UserSubscriptionUpdate) SetNillableStatus(v *string) *UserSubscription
 	return _u
 }
 
+// SetStripeCustomerID sets the "stripe_customer_id" field.
+func (_u *UserSubscriptionUpdate) SetStripeCustomerID(v string) *UserSubscriptionUpdate {
+	_u.mutation.SetStripeCustomerID(v)
+	return _u
+}
+
+// SetNillableStripeCustomerID sets the "stripe_customer_id" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableStripeCustomerID(v *string) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetStripeCustomerID(*v)
+	}
+	return _u
+}
+
+// ClearStripeCustomerID clears the value of the "stripe_customer_id" field.
+func (_u *UserSubscriptionUpdate) ClearStripeCustomerID() *UserSubscriptionUpdate {
+	_u.mutation.ClearStripeCustomerID()
+	return _u
+}
+
+// SetStripeSubscriptionID sets the "stripe_subscription_id" field.
+func (_u *UserSubscriptionUpdate) SetStripeSubscriptionID(v string) *UserSubscriptionUpdate {
+	_u.mutation.SetStripeSubscriptionID(v)
+	return _u
+}
+
+// SetNillableStripeSubscriptionID sets the "stripe_subscription_id" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableStripeSubscriptionID(v *string) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetStripeSubscriptionID(*v)
+	}
+	return _u
+}
+
+// ClearStripeSubscriptionID clears the value of the "stripe_subscription_id" field.
+func (_u *UserSubscriptionUpdate) ClearStripeSubscriptionID() *UserSubscriptionUpdate {
+	_u.mutation.ClearStripeSubscriptionID()
+	return _u
+}
+
+// SetStripePriceID sets the "stripe_price_id" field.
+func (_u *UserSubscriptionUpdate) SetStripePriceID(v string) *UserSubscriptionUpdate {
+	_u.mutation.SetStripePriceID(v)
+	return _u
+}
+
+// SetNillableStripePriceID sets the "stripe_price_id" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableStripePriceID(v *string) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetStripePriceID(*v)
+	}
+	return _u
+}
+
+// ClearStripePriceID clears the value of the "stripe_price_id" field.
+func (_u *UserSubscriptionUpdate) ClearStripePriceID() *UserSubscriptionUpdate {
+	_u.mutation.ClearStripePriceID()
+	return _u
+}
+
+// SetStripeEnvironment sets the "stripe_environment" field.
+func (_u *UserSubscriptionUpdate) SetStripeEnvironment(v string) *UserSubscriptionUpdate {
+	_u.mutation.SetStripeEnvironment(v)
+	return _u
+}
+
+// SetNillableStripeEnvironment sets the "stripe_environment" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableStripeEnvironment(v *string) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetStripeEnvironment(*v)
+	}
+	return _u
+}
+
+// SetStripeProviderInstanceID sets the "stripe_provider_instance_id" field.
+func (_u *UserSubscriptionUpdate) SetStripeProviderInstanceID(v string) *UserSubscriptionUpdate {
+	_u.mutation.SetStripeProviderInstanceID(v)
+	return _u
+}
+
+// SetNillableStripeProviderInstanceID sets the "stripe_provider_instance_id" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableStripeProviderInstanceID(v *string) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetStripeProviderInstanceID(*v)
+	}
+	return _u
+}
+
+// ClearStripeProviderInstanceID clears the value of the "stripe_provider_instance_id" field.
+func (_u *UserSubscriptionUpdate) ClearStripeProviderInstanceID() *UserSubscriptionUpdate {
+	_u.mutation.ClearStripeProviderInstanceID()
+	return _u
+}
+
+// SetStripeStatus sets the "stripe_status" field.
+func (_u *UserSubscriptionUpdate) SetStripeStatus(v string) *UserSubscriptionUpdate {
+	_u.mutation.SetStripeStatus(v)
+	return _u
+}
+
+// SetNillableStripeStatus sets the "stripe_status" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableStripeStatus(v *string) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetStripeStatus(*v)
+	}
+	return _u
+}
+
+// ClearStripeStatus clears the value of the "stripe_status" field.
+func (_u *UserSubscriptionUpdate) ClearStripeStatus() *UserSubscriptionUpdate {
+	_u.mutation.ClearStripeStatus()
+	return _u
+}
+
+// SetCurrentPeriodStart sets the "current_period_start" field.
+func (_u *UserSubscriptionUpdate) SetCurrentPeriodStart(v time.Time) *UserSubscriptionUpdate {
+	_u.mutation.SetCurrentPeriodStart(v)
+	return _u
+}
+
+// SetNillableCurrentPeriodStart sets the "current_period_start" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableCurrentPeriodStart(v *time.Time) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetCurrentPeriodStart(*v)
+	}
+	return _u
+}
+
+// ClearCurrentPeriodStart clears the value of the "current_period_start" field.
+func (_u *UserSubscriptionUpdate) ClearCurrentPeriodStart() *UserSubscriptionUpdate {
+	_u.mutation.ClearCurrentPeriodStart()
+	return _u
+}
+
+// SetCurrentPeriodEnd sets the "current_period_end" field.
+func (_u *UserSubscriptionUpdate) SetCurrentPeriodEnd(v time.Time) *UserSubscriptionUpdate {
+	_u.mutation.SetCurrentPeriodEnd(v)
+	return _u
+}
+
+// SetNillableCurrentPeriodEnd sets the "current_period_end" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableCurrentPeriodEnd(v *time.Time) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetCurrentPeriodEnd(*v)
+	}
+	return _u
+}
+
+// ClearCurrentPeriodEnd clears the value of the "current_period_end" field.
+func (_u *UserSubscriptionUpdate) ClearCurrentPeriodEnd() *UserSubscriptionUpdate {
+	_u.mutation.ClearCurrentPeriodEnd()
+	return _u
+}
+
+// SetTrialStart sets the "trial_start" field.
+func (_u *UserSubscriptionUpdate) SetTrialStart(v time.Time) *UserSubscriptionUpdate {
+	_u.mutation.SetTrialStart(v)
+	return _u
+}
+
+// SetNillableTrialStart sets the "trial_start" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableTrialStart(v *time.Time) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetTrialStart(*v)
+	}
+	return _u
+}
+
+// ClearTrialStart clears the value of the "trial_start" field.
+func (_u *UserSubscriptionUpdate) ClearTrialStart() *UserSubscriptionUpdate {
+	_u.mutation.ClearTrialStart()
+	return _u
+}
+
+// SetTrialEnd sets the "trial_end" field.
+func (_u *UserSubscriptionUpdate) SetTrialEnd(v time.Time) *UserSubscriptionUpdate {
+	_u.mutation.SetTrialEnd(v)
+	return _u
+}
+
+// SetNillableTrialEnd sets the "trial_end" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableTrialEnd(v *time.Time) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetTrialEnd(*v)
+	}
+	return _u
+}
+
+// ClearTrialEnd clears the value of the "trial_end" field.
+func (_u *UserSubscriptionUpdate) ClearTrialEnd() *UserSubscriptionUpdate {
+	_u.mutation.ClearTrialEnd()
+	return _u
+}
+
+// SetCancelAtPeriodEnd sets the "cancel_at_period_end" field.
+func (_u *UserSubscriptionUpdate) SetCancelAtPeriodEnd(v bool) *UserSubscriptionUpdate {
+	_u.mutation.SetCancelAtPeriodEnd(v)
+	return _u
+}
+
+// SetNillableCancelAtPeriodEnd sets the "cancel_at_period_end" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableCancelAtPeriodEnd(v *bool) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetCancelAtPeriodEnd(*v)
+	}
+	return _u
+}
+
+// SetPastDueSince sets the "past_due_since" field.
+func (_u *UserSubscriptionUpdate) SetPastDueSince(v time.Time) *UserSubscriptionUpdate {
+	_u.mutation.SetPastDueSince(v)
+	return _u
+}
+
+// SetNillablePastDueSince sets the "past_due_since" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillablePastDueSince(v *time.Time) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetPastDueSince(*v)
+	}
+	return _u
+}
+
+// ClearPastDueSince clears the value of the "past_due_since" field.
+func (_u *UserSubscriptionUpdate) ClearPastDueSince() *UserSubscriptionUpdate {
+	_u.mutation.ClearPastDueSince()
+	return _u
+}
+
+// SetTrialUsed sets the "trial_used" field.
+func (_u *UserSubscriptionUpdate) SetTrialUsed(v bool) *UserSubscriptionUpdate {
+	_u.mutation.SetTrialUsed(v)
+	return _u
+}
+
+// SetNillableTrialUsed sets the "trial_used" field if the given value is not nil.
+func (_u *UserSubscriptionUpdate) SetNillableTrialUsed(v *bool) *UserSubscriptionUpdate {
+	if v != nil {
+		_u.SetTrialUsed(*v)
+	}
+	return _u
+}
+
 // SetDailyWindowStart sets the "daily_window_start" field.
 func (_u *UserSubscriptionUpdate) SetDailyWindowStart(v time.Time) *UserSubscriptionUpdate {
 	_u.mutation.SetDailyWindowStart(v)
@@ -441,6 +683,36 @@ func (_u *UserSubscriptionUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.StripeCustomerID(); ok {
+		if err := usersubscription.StripeCustomerIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_customer_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_customer_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripeSubscriptionID(); ok {
+		if err := usersubscription.StripeSubscriptionIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_subscription_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_subscription_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripePriceID(); ok {
+		if err := usersubscription.StripePriceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_price_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_price_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripeEnvironment(); ok {
+		if err := usersubscription.StripeEnvironmentValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_environment", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_environment": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripeProviderInstanceID(); ok {
+		if err := usersubscription.StripeProviderInstanceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_provider_instance_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_provider_instance_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripeStatus(); ok {
+		if err := usersubscription.StripeStatusValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_status", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_status": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserSubscription.user"`)
 	}
@@ -479,6 +751,75 @@ func (_u *UserSubscriptionUpdate) sqlSave(ctx context.Context) (_node int, err e
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(usersubscription.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StripeCustomerID(); ok {
+		_spec.SetField(usersubscription.FieldStripeCustomerID, field.TypeString, value)
+	}
+	if _u.mutation.StripeCustomerIDCleared() {
+		_spec.ClearField(usersubscription.FieldStripeCustomerID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripeSubscriptionID(); ok {
+		_spec.SetField(usersubscription.FieldStripeSubscriptionID, field.TypeString, value)
+	}
+	if _u.mutation.StripeSubscriptionIDCleared() {
+		_spec.ClearField(usersubscription.FieldStripeSubscriptionID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripePriceID(); ok {
+		_spec.SetField(usersubscription.FieldStripePriceID, field.TypeString, value)
+	}
+	if _u.mutation.StripePriceIDCleared() {
+		_spec.ClearField(usersubscription.FieldStripePriceID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripeEnvironment(); ok {
+		_spec.SetField(usersubscription.FieldStripeEnvironment, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StripeProviderInstanceID(); ok {
+		_spec.SetField(usersubscription.FieldStripeProviderInstanceID, field.TypeString, value)
+	}
+	if _u.mutation.StripeProviderInstanceIDCleared() {
+		_spec.ClearField(usersubscription.FieldStripeProviderInstanceID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripeStatus(); ok {
+		_spec.SetField(usersubscription.FieldStripeStatus, field.TypeString, value)
+	}
+	if _u.mutation.StripeStatusCleared() {
+		_spec.ClearField(usersubscription.FieldStripeStatus, field.TypeString)
+	}
+	if value, ok := _u.mutation.CurrentPeriodStart(); ok {
+		_spec.SetField(usersubscription.FieldCurrentPeriodStart, field.TypeTime, value)
+	}
+	if _u.mutation.CurrentPeriodStartCleared() {
+		_spec.ClearField(usersubscription.FieldCurrentPeriodStart, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CurrentPeriodEnd(); ok {
+		_spec.SetField(usersubscription.FieldCurrentPeriodEnd, field.TypeTime, value)
+	}
+	if _u.mutation.CurrentPeriodEndCleared() {
+		_spec.ClearField(usersubscription.FieldCurrentPeriodEnd, field.TypeTime)
+	}
+	if value, ok := _u.mutation.TrialStart(); ok {
+		_spec.SetField(usersubscription.FieldTrialStart, field.TypeTime, value)
+	}
+	if _u.mutation.TrialStartCleared() {
+		_spec.ClearField(usersubscription.FieldTrialStart, field.TypeTime)
+	}
+	if value, ok := _u.mutation.TrialEnd(); ok {
+		_spec.SetField(usersubscription.FieldTrialEnd, field.TypeTime, value)
+	}
+	if _u.mutation.TrialEndCleared() {
+		_spec.ClearField(usersubscription.FieldTrialEnd, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CancelAtPeriodEnd(); ok {
+		_spec.SetField(usersubscription.FieldCancelAtPeriodEnd, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.PastDueSince(); ok {
+		_spec.SetField(usersubscription.FieldPastDueSince, field.TypeTime, value)
+	}
+	if _u.mutation.PastDueSinceCleared() {
+		_spec.ClearField(usersubscription.FieldPastDueSince, field.TypeTime)
+	}
+	if value, ok := _u.mutation.TrialUsed(); ok {
+		_spec.SetField(usersubscription.FieldTrialUsed, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.DailyWindowStart(); ok {
 		_spec.SetField(usersubscription.FieldDailyWindowStart, field.TypeTime, value)
@@ -769,6 +1110,248 @@ func (_u *UserSubscriptionUpdateOne) SetStatus(v string) *UserSubscriptionUpdate
 func (_u *UserSubscriptionUpdateOne) SetNillableStatus(v *string) *UserSubscriptionUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
+	}
+	return _u
+}
+
+// SetStripeCustomerID sets the "stripe_customer_id" field.
+func (_u *UserSubscriptionUpdateOne) SetStripeCustomerID(v string) *UserSubscriptionUpdateOne {
+	_u.mutation.SetStripeCustomerID(v)
+	return _u
+}
+
+// SetNillableStripeCustomerID sets the "stripe_customer_id" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableStripeCustomerID(v *string) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetStripeCustomerID(*v)
+	}
+	return _u
+}
+
+// ClearStripeCustomerID clears the value of the "stripe_customer_id" field.
+func (_u *UserSubscriptionUpdateOne) ClearStripeCustomerID() *UserSubscriptionUpdateOne {
+	_u.mutation.ClearStripeCustomerID()
+	return _u
+}
+
+// SetStripeSubscriptionID sets the "stripe_subscription_id" field.
+func (_u *UserSubscriptionUpdateOne) SetStripeSubscriptionID(v string) *UserSubscriptionUpdateOne {
+	_u.mutation.SetStripeSubscriptionID(v)
+	return _u
+}
+
+// SetNillableStripeSubscriptionID sets the "stripe_subscription_id" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableStripeSubscriptionID(v *string) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetStripeSubscriptionID(*v)
+	}
+	return _u
+}
+
+// ClearStripeSubscriptionID clears the value of the "stripe_subscription_id" field.
+func (_u *UserSubscriptionUpdateOne) ClearStripeSubscriptionID() *UserSubscriptionUpdateOne {
+	_u.mutation.ClearStripeSubscriptionID()
+	return _u
+}
+
+// SetStripePriceID sets the "stripe_price_id" field.
+func (_u *UserSubscriptionUpdateOne) SetStripePriceID(v string) *UserSubscriptionUpdateOne {
+	_u.mutation.SetStripePriceID(v)
+	return _u
+}
+
+// SetNillableStripePriceID sets the "stripe_price_id" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableStripePriceID(v *string) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetStripePriceID(*v)
+	}
+	return _u
+}
+
+// ClearStripePriceID clears the value of the "stripe_price_id" field.
+func (_u *UserSubscriptionUpdateOne) ClearStripePriceID() *UserSubscriptionUpdateOne {
+	_u.mutation.ClearStripePriceID()
+	return _u
+}
+
+// SetStripeEnvironment sets the "stripe_environment" field.
+func (_u *UserSubscriptionUpdateOne) SetStripeEnvironment(v string) *UserSubscriptionUpdateOne {
+	_u.mutation.SetStripeEnvironment(v)
+	return _u
+}
+
+// SetNillableStripeEnvironment sets the "stripe_environment" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableStripeEnvironment(v *string) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetStripeEnvironment(*v)
+	}
+	return _u
+}
+
+// SetStripeProviderInstanceID sets the "stripe_provider_instance_id" field.
+func (_u *UserSubscriptionUpdateOne) SetStripeProviderInstanceID(v string) *UserSubscriptionUpdateOne {
+	_u.mutation.SetStripeProviderInstanceID(v)
+	return _u
+}
+
+// SetNillableStripeProviderInstanceID sets the "stripe_provider_instance_id" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableStripeProviderInstanceID(v *string) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetStripeProviderInstanceID(*v)
+	}
+	return _u
+}
+
+// ClearStripeProviderInstanceID clears the value of the "stripe_provider_instance_id" field.
+func (_u *UserSubscriptionUpdateOne) ClearStripeProviderInstanceID() *UserSubscriptionUpdateOne {
+	_u.mutation.ClearStripeProviderInstanceID()
+	return _u
+}
+
+// SetStripeStatus sets the "stripe_status" field.
+func (_u *UserSubscriptionUpdateOne) SetStripeStatus(v string) *UserSubscriptionUpdateOne {
+	_u.mutation.SetStripeStatus(v)
+	return _u
+}
+
+// SetNillableStripeStatus sets the "stripe_status" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableStripeStatus(v *string) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetStripeStatus(*v)
+	}
+	return _u
+}
+
+// ClearStripeStatus clears the value of the "stripe_status" field.
+func (_u *UserSubscriptionUpdateOne) ClearStripeStatus() *UserSubscriptionUpdateOne {
+	_u.mutation.ClearStripeStatus()
+	return _u
+}
+
+// SetCurrentPeriodStart sets the "current_period_start" field.
+func (_u *UserSubscriptionUpdateOne) SetCurrentPeriodStart(v time.Time) *UserSubscriptionUpdateOne {
+	_u.mutation.SetCurrentPeriodStart(v)
+	return _u
+}
+
+// SetNillableCurrentPeriodStart sets the "current_period_start" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableCurrentPeriodStart(v *time.Time) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetCurrentPeriodStart(*v)
+	}
+	return _u
+}
+
+// ClearCurrentPeriodStart clears the value of the "current_period_start" field.
+func (_u *UserSubscriptionUpdateOne) ClearCurrentPeriodStart() *UserSubscriptionUpdateOne {
+	_u.mutation.ClearCurrentPeriodStart()
+	return _u
+}
+
+// SetCurrentPeriodEnd sets the "current_period_end" field.
+func (_u *UserSubscriptionUpdateOne) SetCurrentPeriodEnd(v time.Time) *UserSubscriptionUpdateOne {
+	_u.mutation.SetCurrentPeriodEnd(v)
+	return _u
+}
+
+// SetNillableCurrentPeriodEnd sets the "current_period_end" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableCurrentPeriodEnd(v *time.Time) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetCurrentPeriodEnd(*v)
+	}
+	return _u
+}
+
+// ClearCurrentPeriodEnd clears the value of the "current_period_end" field.
+func (_u *UserSubscriptionUpdateOne) ClearCurrentPeriodEnd() *UserSubscriptionUpdateOne {
+	_u.mutation.ClearCurrentPeriodEnd()
+	return _u
+}
+
+// SetTrialStart sets the "trial_start" field.
+func (_u *UserSubscriptionUpdateOne) SetTrialStart(v time.Time) *UserSubscriptionUpdateOne {
+	_u.mutation.SetTrialStart(v)
+	return _u
+}
+
+// SetNillableTrialStart sets the "trial_start" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableTrialStart(v *time.Time) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetTrialStart(*v)
+	}
+	return _u
+}
+
+// ClearTrialStart clears the value of the "trial_start" field.
+func (_u *UserSubscriptionUpdateOne) ClearTrialStart() *UserSubscriptionUpdateOne {
+	_u.mutation.ClearTrialStart()
+	return _u
+}
+
+// SetTrialEnd sets the "trial_end" field.
+func (_u *UserSubscriptionUpdateOne) SetTrialEnd(v time.Time) *UserSubscriptionUpdateOne {
+	_u.mutation.SetTrialEnd(v)
+	return _u
+}
+
+// SetNillableTrialEnd sets the "trial_end" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableTrialEnd(v *time.Time) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetTrialEnd(*v)
+	}
+	return _u
+}
+
+// ClearTrialEnd clears the value of the "trial_end" field.
+func (_u *UserSubscriptionUpdateOne) ClearTrialEnd() *UserSubscriptionUpdateOne {
+	_u.mutation.ClearTrialEnd()
+	return _u
+}
+
+// SetCancelAtPeriodEnd sets the "cancel_at_period_end" field.
+func (_u *UserSubscriptionUpdateOne) SetCancelAtPeriodEnd(v bool) *UserSubscriptionUpdateOne {
+	_u.mutation.SetCancelAtPeriodEnd(v)
+	return _u
+}
+
+// SetNillableCancelAtPeriodEnd sets the "cancel_at_period_end" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableCancelAtPeriodEnd(v *bool) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetCancelAtPeriodEnd(*v)
+	}
+	return _u
+}
+
+// SetPastDueSince sets the "past_due_since" field.
+func (_u *UserSubscriptionUpdateOne) SetPastDueSince(v time.Time) *UserSubscriptionUpdateOne {
+	_u.mutation.SetPastDueSince(v)
+	return _u
+}
+
+// SetNillablePastDueSince sets the "past_due_since" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillablePastDueSince(v *time.Time) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetPastDueSince(*v)
+	}
+	return _u
+}
+
+// ClearPastDueSince clears the value of the "past_due_since" field.
+func (_u *UserSubscriptionUpdateOne) ClearPastDueSince() *UserSubscriptionUpdateOne {
+	_u.mutation.ClearPastDueSince()
+	return _u
+}
+
+// SetTrialUsed sets the "trial_used" field.
+func (_u *UserSubscriptionUpdateOne) SetTrialUsed(v bool) *UserSubscriptionUpdateOne {
+	_u.mutation.SetTrialUsed(v)
+	return _u
+}
+
+// SetNillableTrialUsed sets the "trial_used" field if the given value is not nil.
+func (_u *UserSubscriptionUpdateOne) SetNillableTrialUsed(v *bool) *UserSubscriptionUpdateOne {
+	if v != nil {
+		_u.SetTrialUsed(*v)
 	}
 	return _u
 }
@@ -1100,6 +1683,36 @@ func (_u *UserSubscriptionUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.StripeCustomerID(); ok {
+		if err := usersubscription.StripeCustomerIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_customer_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_customer_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripeSubscriptionID(); ok {
+		if err := usersubscription.StripeSubscriptionIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_subscription_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_subscription_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripePriceID(); ok {
+		if err := usersubscription.StripePriceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_price_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_price_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripeEnvironment(); ok {
+		if err := usersubscription.StripeEnvironmentValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_environment", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_environment": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripeProviderInstanceID(); ok {
+		if err := usersubscription.StripeProviderInstanceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_provider_instance_id", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_provider_instance_id": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.StripeStatus(); ok {
+		if err := usersubscription.StripeStatusValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_status", err: fmt.Errorf(`ent: validator failed for field "UserSubscription.stripe_status": %w`, err)}
+		}
+	}
 	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserSubscription.user"`)
 	}
@@ -1155,6 +1768,75 @@ func (_u *UserSubscriptionUpdateOne) sqlSave(ctx context.Context) (_node *UserSu
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(usersubscription.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StripeCustomerID(); ok {
+		_spec.SetField(usersubscription.FieldStripeCustomerID, field.TypeString, value)
+	}
+	if _u.mutation.StripeCustomerIDCleared() {
+		_spec.ClearField(usersubscription.FieldStripeCustomerID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripeSubscriptionID(); ok {
+		_spec.SetField(usersubscription.FieldStripeSubscriptionID, field.TypeString, value)
+	}
+	if _u.mutation.StripeSubscriptionIDCleared() {
+		_spec.ClearField(usersubscription.FieldStripeSubscriptionID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripePriceID(); ok {
+		_spec.SetField(usersubscription.FieldStripePriceID, field.TypeString, value)
+	}
+	if _u.mutation.StripePriceIDCleared() {
+		_spec.ClearField(usersubscription.FieldStripePriceID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripeEnvironment(); ok {
+		_spec.SetField(usersubscription.FieldStripeEnvironment, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.StripeProviderInstanceID(); ok {
+		_spec.SetField(usersubscription.FieldStripeProviderInstanceID, field.TypeString, value)
+	}
+	if _u.mutation.StripeProviderInstanceIDCleared() {
+		_spec.ClearField(usersubscription.FieldStripeProviderInstanceID, field.TypeString)
+	}
+	if value, ok := _u.mutation.StripeStatus(); ok {
+		_spec.SetField(usersubscription.FieldStripeStatus, field.TypeString, value)
+	}
+	if _u.mutation.StripeStatusCleared() {
+		_spec.ClearField(usersubscription.FieldStripeStatus, field.TypeString)
+	}
+	if value, ok := _u.mutation.CurrentPeriodStart(); ok {
+		_spec.SetField(usersubscription.FieldCurrentPeriodStart, field.TypeTime, value)
+	}
+	if _u.mutation.CurrentPeriodStartCleared() {
+		_spec.ClearField(usersubscription.FieldCurrentPeriodStart, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CurrentPeriodEnd(); ok {
+		_spec.SetField(usersubscription.FieldCurrentPeriodEnd, field.TypeTime, value)
+	}
+	if _u.mutation.CurrentPeriodEndCleared() {
+		_spec.ClearField(usersubscription.FieldCurrentPeriodEnd, field.TypeTime)
+	}
+	if value, ok := _u.mutation.TrialStart(); ok {
+		_spec.SetField(usersubscription.FieldTrialStart, field.TypeTime, value)
+	}
+	if _u.mutation.TrialStartCleared() {
+		_spec.ClearField(usersubscription.FieldTrialStart, field.TypeTime)
+	}
+	if value, ok := _u.mutation.TrialEnd(); ok {
+		_spec.SetField(usersubscription.FieldTrialEnd, field.TypeTime, value)
+	}
+	if _u.mutation.TrialEndCleared() {
+		_spec.ClearField(usersubscription.FieldTrialEnd, field.TypeTime)
+	}
+	if value, ok := _u.mutation.CancelAtPeriodEnd(); ok {
+		_spec.SetField(usersubscription.FieldCancelAtPeriodEnd, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.PastDueSince(); ok {
+		_spec.SetField(usersubscription.FieldPastDueSince, field.TypeTime, value)
+	}
+	if _u.mutation.PastDueSinceCleared() {
+		_spec.ClearField(usersubscription.FieldPastDueSince, field.TypeTime)
+	}
+	if value, ok := _u.mutation.TrialUsed(); ok {
+		_spec.SetField(usersubscription.FieldTrialUsed, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.DailyWindowStart(); ok {
 		_spec.SetField(usersubscription.FieldDailyWindowStart, field.TypeTime, value)

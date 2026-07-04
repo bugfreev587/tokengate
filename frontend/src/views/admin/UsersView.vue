@@ -246,7 +246,7 @@
           :sort-storage-key="USER_SORT_STORAGE_KEY"
           @sort="handleSort"
         >
-          <template #cell-email="{ value }">
+          <template #cell-email="{ value, row }">
             <div class="flex items-center gap-2">
               <div
                 class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30"
@@ -256,6 +256,13 @@
                 </span>
               </div>
               <span class="font-medium text-gray-900 dark:text-white">{{ value }}</span>
+              <span
+                v-if="row.is_test_user"
+                class="inline-flex items-center gap-1 rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
+              >
+                <Icon name="beaker" size="xs" :stroke-width="2" />
+                {{ t('admin.users.testUserBadge') }}
+              </span>
             </div>
           </template>
 
@@ -558,6 +565,15 @@
                 {{ t('admin.users.groups') }}
               </button>
 
+              <!-- Test User -->
+              <button
+                @click="handleSetTestUser(user); closeActionMenu()"
+                class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 dark:text-gray-300 dark:hover:bg-amber-900/20 dark:hover:text-amber-300"
+              >
+                <Icon name="beaker" size="sm" class="text-amber-500" :stroke-width="2" />
+                {{ user.is_test_user ? t('admin.users.unsetTestUser') : t('admin.users.setTestUser') }}
+              </button>
+
               <div class="my-1 border-t border-gray-100 dark:border-dark-700"></div>
 
               <!-- Deposit -->
@@ -624,6 +640,14 @@
       :confirm-text="t('admin.users.makeAdmin')"
       @confirm="confirmMakeAdmin"
       @cancel="closeMakeAdminDialog"
+    />
+    <ConfirmDialog
+      :show="showTestUserDialog"
+      :title="testUserTarget?.is_test_user ? t('admin.users.unsetTestUser') : t('admin.users.setTestUser')"
+      :message="testUserTarget?.is_test_user ? t('admin.users.unsetTestUserConfirm', { email: testUserTarget?.email }) : t('admin.users.setTestUserConfirm', { email: testUserTarget?.email })"
+      :confirm-text="testUserTarget?.is_test_user ? t('admin.users.unsetTestUser') : t('admin.users.setTestUser')"
+      @confirm="confirmSetTestUser"
+      @cancel="closeTestUserDialog"
     />
     <UserCreateModal :show="showCreateModal" @close="showCreateModal = false" @success="loadUsers" />
     <UserEditModal :show="showEditModal" :user="editingUser" @close="closeEditModal" @success="loadUsers" />
@@ -977,11 +1001,13 @@ const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteDialog = ref(false)
 const showMakeAdminDialog = ref(false)
+const showTestUserDialog = ref(false)
 const showApiKeysModal = ref(false)
 const showAttributesModal = ref(false)
 const editingUser = ref<AdminUser | null>(null)
 const deletingUser = ref<AdminUser | null>(null)
 const makeAdminUser = ref<AdminUser | null>(null)
+const testUserTarget = ref<AdminUser | null>(null)
 const viewingUser = ref<AdminUser | null>(null)
 let abortController: AbortController | null = null
 let secondaryDataSeq = 0
@@ -1377,6 +1403,30 @@ const handleMakeAdmin = (user: AdminUser) => {
 const closeMakeAdminDialog = () => {
   showMakeAdminDialog.value = false
   makeAdminUser.value = null
+}
+
+const handleSetTestUser = (user: AdminUser) => {
+  testUserTarget.value = user
+  showTestUserDialog.value = true
+}
+
+const closeTestUserDialog = () => {
+  showTestUserDialog.value = false
+  testUserTarget.value = null
+}
+
+const confirmSetTestUser = async () => {
+  if (!testUserTarget.value) return
+  const nextValue = !testUserTarget.value.is_test_user
+  try {
+    await adminAPI.users.update(testUserTarget.value.id, { is_test_user: nextValue })
+    appStore.showSuccess(nextValue ? t('admin.users.setTestUserSuccess') : t('admin.users.unsetTestUserSuccess'))
+    closeTestUserDialog()
+    loadUsers()
+  } catch (error: any) {
+    appStore.showError(error.response?.data?.detail || t('admin.users.failedToSetTestUser'))
+    console.error('Error updating test user flag:', error)
+  }
 }
 
 const confirmMakeAdmin = async () => {

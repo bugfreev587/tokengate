@@ -45,6 +45,53 @@ func (UserSubscription) Fields() []ent.Field {
 		field.String("status").
 			MaxLen(20).
 			Default(domain.SubscriptionStatusActive),
+		field.String("stripe_customer_id").
+			MaxLen(128).
+			Optional().
+			Nillable(),
+		field.String("stripe_subscription_id").
+			MaxLen(128).
+			Optional().
+			Nillable(),
+		field.String("stripe_price_id").
+			MaxLen(128).
+			Optional().
+			Nillable(),
+		field.String("stripe_environment").
+			MaxLen(20).
+			Default("live"),
+		field.String("stripe_provider_instance_id").
+			MaxLen(64).
+			Optional().
+			Nillable(),
+		field.String("stripe_status").
+			MaxLen(30).
+			Optional().
+			Nillable(),
+		field.Time("current_period_start").
+			Optional().
+			Nillable().
+			SchemaType(map[string]string{dialect.Postgres: "timestamptz"}),
+		field.Time("current_period_end").
+			Optional().
+			Nillable().
+			SchemaType(map[string]string{dialect.Postgres: "timestamptz"}),
+		field.Time("trial_start").
+			Optional().
+			Nillable().
+			SchemaType(map[string]string{dialect.Postgres: "timestamptz"}),
+		field.Time("trial_end").
+			Optional().
+			Nillable().
+			SchemaType(map[string]string{dialect.Postgres: "timestamptz"}),
+		field.Bool("cancel_at_period_end").
+			Default(false),
+		field.Time("past_due_since").
+			Optional().
+			Nillable().
+			SchemaType(map[string]string{dialect.Postgres: "timestamptz"}),
+		field.Bool("trial_used").
+			Default(false),
 
 		field.Time("daily_window_start").
 			Optional().
@@ -111,6 +158,11 @@ func (UserSubscription) Indexes() []ent.Index {
 		// 活跃订阅查询复合索引（线上由 SQL 迁移创建部分索引，schema 仅用于模型可读性对齐）
 		index.Fields("user_id", "status", "expires_at"),
 		index.Fields("assigned_by"),
+		index.Fields("stripe_subscription_id"),
+		index.Fields("stripe_customer_id"),
+		index.Fields("stripe_environment"),
+		index.Fields("stripe_provider_instance_id"),
+		index.Fields("stripe_status"),
 		// 唯一约束通过部分索引实现（WHERE deleted_at IS NULL），支持软删除后重新订阅
 		// 见迁移文件 016_soft_delete_partial_unique_indexes.sql
 		index.Fields("user_id", "group_id"),

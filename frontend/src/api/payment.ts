@@ -12,7 +12,11 @@ import type {
   CheckoutInfoResponse,
   CreateOrderRequest,
   CreateOrderResult,
-  PaymentOrder
+  PaymentOrder,
+  CreateSubscriptionCheckoutRequest,
+  CreateSubscriptionCheckoutResponse,
+  CreateBillingPortalRequest,
+  CreateBillingPortalResponse
 } from '@/types/payment'
 import type { BasePaginationResponse } from '@/types'
 
@@ -45,6 +49,16 @@ export const paymentAPI = {
   /** Create a new payment order */
   createOrder(data: CreateOrderRequest) {
     return apiClient.post<CreateOrderResult>('/payment/orders', data)
+  },
+
+  /** Create a Stripe Billing subscription Checkout Session */
+  createSubscriptionCheckout(data: CreateSubscriptionCheckoutRequest) {
+    return apiClient.post<CreateSubscriptionCheckoutResponse>('/payment/subscriptions/checkout', data)
+  },
+
+  /** Create a Stripe Billing Portal session */
+  createBillingPortal(data: CreateBillingPortalRequest) {
+    return apiClient.post<CreateBillingPortalResponse>('/payment/subscriptions/portal', data)
   },
 
   /** Get current user's orders */

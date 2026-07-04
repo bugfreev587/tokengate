@@ -85,6 +85,11 @@ func Role(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldRole, v))
 }
 
+// IsTestUser applies equality check predicate on the "is_test_user" field. It's identical to IsTestUserEQ.
+func IsTestUser(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldIsTestUser, v))
+}
+
 // Balance applies equality check predicate on the "balance" field. It's identical to BalanceEQ.
 func Balance(v float64) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldBalance, v))
@@ -493,6 +498,16 @@ func RoleEqualFold(v string) predicate.User {
 // RoleContainsFold applies the ContainsFold predicate on the "role" field.
 func RoleContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldRole, v))
+}
+
+// IsTestUserEQ applies the EQ predicate on the "is_test_user" field.
+func IsTestUserEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldIsTestUser, v))
+}
+
+// IsTestUserNEQ applies the NEQ predicate on the "is_test_user" field.
+func IsTestUserNEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldIsTestUser, v))
 }
 
 // BalanceEQ applies the EQ predicate on the "balance" field.

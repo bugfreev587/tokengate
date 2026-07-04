@@ -99,6 +99,31 @@ func ProductName(v string) predicate.SubscriptionPlan {
 	return predicate.SubscriptionPlan(sql.FieldEQ(FieldProductName, v))
 }
 
+// StripePriceID applies equality check predicate on the "stripe_price_id" field. It's identical to StripePriceIDEQ.
+func StripePriceID(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEQ(FieldStripePriceID, v))
+}
+
+// StripeSandboxPriceID applies equality check predicate on the "stripe_sandbox_price_id" field. It's identical to StripeSandboxPriceIDEQ.
+func StripeSandboxPriceID(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEQ(FieldStripeSandboxPriceID, v))
+}
+
+// StripeTrialDays applies equality check predicate on the "stripe_trial_days" field. It's identical to StripeTrialDaysEQ.
+func StripeTrialDays(v int) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEQ(FieldStripeTrialDays, v))
+}
+
+// BillingProvider applies equality check predicate on the "billing_provider" field. It's identical to BillingProviderEQ.
+func BillingProvider(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEQ(FieldBillingProvider, v))
+}
+
+// BillingMode applies equality check predicate on the "billing_mode" field. It's identical to BillingModeEQ.
+func BillingMode(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEQ(FieldBillingMode, v))
+}
+
 // ForSale applies equality check predicate on the "for_sale" field. It's identical to ForSaleEQ.
 func ForSale(v bool) predicate.SubscriptionPlan {
 	return predicate.SubscriptionPlan(sql.FieldEQ(FieldForSale, v))
@@ -612,6 +637,326 @@ func ProductNameEqualFold(v string) predicate.SubscriptionPlan {
 // ProductNameContainsFold applies the ContainsFold predicate on the "product_name" field.
 func ProductNameContainsFold(v string) predicate.SubscriptionPlan {
 	return predicate.SubscriptionPlan(sql.FieldContainsFold(FieldProductName, v))
+}
+
+// StripePriceIDEQ applies the EQ predicate on the "stripe_price_id" field.
+func StripePriceIDEQ(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEQ(FieldStripePriceID, v))
+}
+
+// StripePriceIDNEQ applies the NEQ predicate on the "stripe_price_id" field.
+func StripePriceIDNEQ(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNEQ(FieldStripePriceID, v))
+}
+
+// StripePriceIDIn applies the In predicate on the "stripe_price_id" field.
+func StripePriceIDIn(vs ...string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldIn(FieldStripePriceID, vs...))
+}
+
+// StripePriceIDNotIn applies the NotIn predicate on the "stripe_price_id" field.
+func StripePriceIDNotIn(vs ...string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNotIn(FieldStripePriceID, vs...))
+}
+
+// StripePriceIDGT applies the GT predicate on the "stripe_price_id" field.
+func StripePriceIDGT(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldGT(FieldStripePriceID, v))
+}
+
+// StripePriceIDGTE applies the GTE predicate on the "stripe_price_id" field.
+func StripePriceIDGTE(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldGTE(FieldStripePriceID, v))
+}
+
+// StripePriceIDLT applies the LT predicate on the "stripe_price_id" field.
+func StripePriceIDLT(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldLT(FieldStripePriceID, v))
+}
+
+// StripePriceIDLTE applies the LTE predicate on the "stripe_price_id" field.
+func StripePriceIDLTE(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldLTE(FieldStripePriceID, v))
+}
+
+// StripePriceIDContains applies the Contains predicate on the "stripe_price_id" field.
+func StripePriceIDContains(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldContains(FieldStripePriceID, v))
+}
+
+// StripePriceIDHasPrefix applies the HasPrefix predicate on the "stripe_price_id" field.
+func StripePriceIDHasPrefix(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldHasPrefix(FieldStripePriceID, v))
+}
+
+// StripePriceIDHasSuffix applies the HasSuffix predicate on the "stripe_price_id" field.
+func StripePriceIDHasSuffix(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldHasSuffix(FieldStripePriceID, v))
+}
+
+// StripePriceIDIsNil applies the IsNil predicate on the "stripe_price_id" field.
+func StripePriceIDIsNil() predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldIsNull(FieldStripePriceID))
+}
+
+// StripePriceIDNotNil applies the NotNil predicate on the "stripe_price_id" field.
+func StripePriceIDNotNil() predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNotNull(FieldStripePriceID))
+}
+
+// StripePriceIDEqualFold applies the EqualFold predicate on the "stripe_price_id" field.
+func StripePriceIDEqualFold(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEqualFold(FieldStripePriceID, v))
+}
+
+// StripePriceIDContainsFold applies the ContainsFold predicate on the "stripe_price_id" field.
+func StripePriceIDContainsFold(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldContainsFold(FieldStripePriceID, v))
+}
+
+// StripeSandboxPriceIDEQ applies the EQ predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDEQ(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEQ(FieldStripeSandboxPriceID, v))
+}
+
+// StripeSandboxPriceIDNEQ applies the NEQ predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDNEQ(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNEQ(FieldStripeSandboxPriceID, v))
+}
+
+// StripeSandboxPriceIDIn applies the In predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDIn(vs ...string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldIn(FieldStripeSandboxPriceID, vs...))
+}
+
+// StripeSandboxPriceIDNotIn applies the NotIn predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDNotIn(vs ...string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNotIn(FieldStripeSandboxPriceID, vs...))
+}
+
+// StripeSandboxPriceIDGT applies the GT predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDGT(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldGT(FieldStripeSandboxPriceID, v))
+}
+
+// StripeSandboxPriceIDGTE applies the GTE predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDGTE(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldGTE(FieldStripeSandboxPriceID, v))
+}
+
+// StripeSandboxPriceIDLT applies the LT predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDLT(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldLT(FieldStripeSandboxPriceID, v))
+}
+
+// StripeSandboxPriceIDLTE applies the LTE predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDLTE(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldLTE(FieldStripeSandboxPriceID, v))
+}
+
+// StripeSandboxPriceIDContains applies the Contains predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDContains(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldContains(FieldStripeSandboxPriceID, v))
+}
+
+// StripeSandboxPriceIDHasPrefix applies the HasPrefix predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDHasPrefix(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldHasPrefix(FieldStripeSandboxPriceID, v))
+}
+
+// StripeSandboxPriceIDHasSuffix applies the HasSuffix predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDHasSuffix(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldHasSuffix(FieldStripeSandboxPriceID, v))
+}
+
+// StripeSandboxPriceIDIsNil applies the IsNil predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDIsNil() predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldIsNull(FieldStripeSandboxPriceID))
+}
+
+// StripeSandboxPriceIDNotNil applies the NotNil predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDNotNil() predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNotNull(FieldStripeSandboxPriceID))
+}
+
+// StripeSandboxPriceIDEqualFold applies the EqualFold predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDEqualFold(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEqualFold(FieldStripeSandboxPriceID, v))
+}
+
+// StripeSandboxPriceIDContainsFold applies the ContainsFold predicate on the "stripe_sandbox_price_id" field.
+func StripeSandboxPriceIDContainsFold(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldContainsFold(FieldStripeSandboxPriceID, v))
+}
+
+// StripeTrialDaysEQ applies the EQ predicate on the "stripe_trial_days" field.
+func StripeTrialDaysEQ(v int) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEQ(FieldStripeTrialDays, v))
+}
+
+// StripeTrialDaysNEQ applies the NEQ predicate on the "stripe_trial_days" field.
+func StripeTrialDaysNEQ(v int) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNEQ(FieldStripeTrialDays, v))
+}
+
+// StripeTrialDaysIn applies the In predicate on the "stripe_trial_days" field.
+func StripeTrialDaysIn(vs ...int) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldIn(FieldStripeTrialDays, vs...))
+}
+
+// StripeTrialDaysNotIn applies the NotIn predicate on the "stripe_trial_days" field.
+func StripeTrialDaysNotIn(vs ...int) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNotIn(FieldStripeTrialDays, vs...))
+}
+
+// StripeTrialDaysGT applies the GT predicate on the "stripe_trial_days" field.
+func StripeTrialDaysGT(v int) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldGT(FieldStripeTrialDays, v))
+}
+
+// StripeTrialDaysGTE applies the GTE predicate on the "stripe_trial_days" field.
+func StripeTrialDaysGTE(v int) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldGTE(FieldStripeTrialDays, v))
+}
+
+// StripeTrialDaysLT applies the LT predicate on the "stripe_trial_days" field.
+func StripeTrialDaysLT(v int) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldLT(FieldStripeTrialDays, v))
+}
+
+// StripeTrialDaysLTE applies the LTE predicate on the "stripe_trial_days" field.
+func StripeTrialDaysLTE(v int) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldLTE(FieldStripeTrialDays, v))
+}
+
+// BillingProviderEQ applies the EQ predicate on the "billing_provider" field.
+func BillingProviderEQ(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEQ(FieldBillingProvider, v))
+}
+
+// BillingProviderNEQ applies the NEQ predicate on the "billing_provider" field.
+func BillingProviderNEQ(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNEQ(FieldBillingProvider, v))
+}
+
+// BillingProviderIn applies the In predicate on the "billing_provider" field.
+func BillingProviderIn(vs ...string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldIn(FieldBillingProvider, vs...))
+}
+
+// BillingProviderNotIn applies the NotIn predicate on the "billing_provider" field.
+func BillingProviderNotIn(vs ...string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNotIn(FieldBillingProvider, vs...))
+}
+
+// BillingProviderGT applies the GT predicate on the "billing_provider" field.
+func BillingProviderGT(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldGT(FieldBillingProvider, v))
+}
+
+// BillingProviderGTE applies the GTE predicate on the "billing_provider" field.
+func BillingProviderGTE(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldGTE(FieldBillingProvider, v))
+}
+
+// BillingProviderLT applies the LT predicate on the "billing_provider" field.
+func BillingProviderLT(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldLT(FieldBillingProvider, v))
+}
+
+// BillingProviderLTE applies the LTE predicate on the "billing_provider" field.
+func BillingProviderLTE(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldLTE(FieldBillingProvider, v))
+}
+
+// BillingProviderContains applies the Contains predicate on the "billing_provider" field.
+func BillingProviderContains(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldContains(FieldBillingProvider, v))
+}
+
+// BillingProviderHasPrefix applies the HasPrefix predicate on the "billing_provider" field.
+func BillingProviderHasPrefix(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldHasPrefix(FieldBillingProvider, v))
+}
+
+// BillingProviderHasSuffix applies the HasSuffix predicate on the "billing_provider" field.
+func BillingProviderHasSuffix(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldHasSuffix(FieldBillingProvider, v))
+}
+
+// BillingProviderEqualFold applies the EqualFold predicate on the "billing_provider" field.
+func BillingProviderEqualFold(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEqualFold(FieldBillingProvider, v))
+}
+
+// BillingProviderContainsFold applies the ContainsFold predicate on the "billing_provider" field.
+func BillingProviderContainsFold(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldContainsFold(FieldBillingProvider, v))
+}
+
+// BillingModeEQ applies the EQ predicate on the "billing_mode" field.
+func BillingModeEQ(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEQ(FieldBillingMode, v))
+}
+
+// BillingModeNEQ applies the NEQ predicate on the "billing_mode" field.
+func BillingModeNEQ(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNEQ(FieldBillingMode, v))
+}
+
+// BillingModeIn applies the In predicate on the "billing_mode" field.
+func BillingModeIn(vs ...string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldIn(FieldBillingMode, vs...))
+}
+
+// BillingModeNotIn applies the NotIn predicate on the "billing_mode" field.
+func BillingModeNotIn(vs ...string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldNotIn(FieldBillingMode, vs...))
+}
+
+// BillingModeGT applies the GT predicate on the "billing_mode" field.
+func BillingModeGT(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldGT(FieldBillingMode, v))
+}
+
+// BillingModeGTE applies the GTE predicate on the "billing_mode" field.
+func BillingModeGTE(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldGTE(FieldBillingMode, v))
+}
+
+// BillingModeLT applies the LT predicate on the "billing_mode" field.
+func BillingModeLT(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldLT(FieldBillingMode, v))
+}
+
+// BillingModeLTE applies the LTE predicate on the "billing_mode" field.
+func BillingModeLTE(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldLTE(FieldBillingMode, v))
+}
+
+// BillingModeContains applies the Contains predicate on the "billing_mode" field.
+func BillingModeContains(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldContains(FieldBillingMode, v))
+}
+
+// BillingModeHasPrefix applies the HasPrefix predicate on the "billing_mode" field.
+func BillingModeHasPrefix(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldHasPrefix(FieldBillingMode, v))
+}
+
+// BillingModeHasSuffix applies the HasSuffix predicate on the "billing_mode" field.
+func BillingModeHasSuffix(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldHasSuffix(FieldBillingMode, v))
+}
+
+// BillingModeEqualFold applies the EqualFold predicate on the "billing_mode" field.
+func BillingModeEqualFold(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldEqualFold(FieldBillingMode, v))
+}
+
+// BillingModeContainsFold applies the ContainsFold predicate on the "billing_mode" field.
+func BillingModeContainsFold(v string) predicate.SubscriptionPlan {
+	return predicate.SubscriptionPlan(sql.FieldContainsFold(FieldBillingMode, v))
 }
 
 // ForSaleEQ applies the EQ predicate on the "for_sale" field.

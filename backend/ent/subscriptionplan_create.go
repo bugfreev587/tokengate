@@ -124,6 +124,76 @@ func (_c *SubscriptionPlanCreate) SetNillableProductName(v *string) *Subscriptio
 	return _c
 }
 
+// SetStripePriceID sets the "stripe_price_id" field.
+func (_c *SubscriptionPlanCreate) SetStripePriceID(v string) *SubscriptionPlanCreate {
+	_c.mutation.SetStripePriceID(v)
+	return _c
+}
+
+// SetNillableStripePriceID sets the "stripe_price_id" field if the given value is not nil.
+func (_c *SubscriptionPlanCreate) SetNillableStripePriceID(v *string) *SubscriptionPlanCreate {
+	if v != nil {
+		_c.SetStripePriceID(*v)
+	}
+	return _c
+}
+
+// SetStripeSandboxPriceID sets the "stripe_sandbox_price_id" field.
+func (_c *SubscriptionPlanCreate) SetStripeSandboxPriceID(v string) *SubscriptionPlanCreate {
+	_c.mutation.SetStripeSandboxPriceID(v)
+	return _c
+}
+
+// SetNillableStripeSandboxPriceID sets the "stripe_sandbox_price_id" field if the given value is not nil.
+func (_c *SubscriptionPlanCreate) SetNillableStripeSandboxPriceID(v *string) *SubscriptionPlanCreate {
+	if v != nil {
+		_c.SetStripeSandboxPriceID(*v)
+	}
+	return _c
+}
+
+// SetStripeTrialDays sets the "stripe_trial_days" field.
+func (_c *SubscriptionPlanCreate) SetStripeTrialDays(v int) *SubscriptionPlanCreate {
+	_c.mutation.SetStripeTrialDays(v)
+	return _c
+}
+
+// SetNillableStripeTrialDays sets the "stripe_trial_days" field if the given value is not nil.
+func (_c *SubscriptionPlanCreate) SetNillableStripeTrialDays(v *int) *SubscriptionPlanCreate {
+	if v != nil {
+		_c.SetStripeTrialDays(*v)
+	}
+	return _c
+}
+
+// SetBillingProvider sets the "billing_provider" field.
+func (_c *SubscriptionPlanCreate) SetBillingProvider(v string) *SubscriptionPlanCreate {
+	_c.mutation.SetBillingProvider(v)
+	return _c
+}
+
+// SetNillableBillingProvider sets the "billing_provider" field if the given value is not nil.
+func (_c *SubscriptionPlanCreate) SetNillableBillingProvider(v *string) *SubscriptionPlanCreate {
+	if v != nil {
+		_c.SetBillingProvider(*v)
+	}
+	return _c
+}
+
+// SetBillingMode sets the "billing_mode" field.
+func (_c *SubscriptionPlanCreate) SetBillingMode(v string) *SubscriptionPlanCreate {
+	_c.mutation.SetBillingMode(v)
+	return _c
+}
+
+// SetNillableBillingMode sets the "billing_mode" field if the given value is not nil.
+func (_c *SubscriptionPlanCreate) SetNillableBillingMode(v *string) *SubscriptionPlanCreate {
+	if v != nil {
+		_c.SetBillingMode(*v)
+	}
+	return _c
+}
+
 // SetForSale sets the "for_sale" field.
 func (_c *SubscriptionPlanCreate) SetForSale(v bool) *SubscriptionPlanCreate {
 	_c.mutation.SetForSale(v)
@@ -235,6 +305,18 @@ func (_c *SubscriptionPlanCreate) defaults() {
 		v := subscriptionplan.DefaultProductName
 		_c.mutation.SetProductName(v)
 	}
+	if _, ok := _c.mutation.StripeTrialDays(); !ok {
+		v := subscriptionplan.DefaultStripeTrialDays
+		_c.mutation.SetStripeTrialDays(v)
+	}
+	if _, ok := _c.mutation.BillingProvider(); !ok {
+		v := subscriptionplan.DefaultBillingProvider
+		_c.mutation.SetBillingProvider(v)
+	}
+	if _, ok := _c.mutation.BillingMode(); !ok {
+		v := subscriptionplan.DefaultBillingMode
+		_c.mutation.SetBillingMode(v)
+	}
 	if _, ok := _c.mutation.ForSale(); !ok {
 		v := subscriptionplan.DefaultForSale
 		_c.mutation.SetForSale(v)
@@ -292,6 +374,35 @@ func (_c *SubscriptionPlanCreate) check() error {
 	if v, ok := _c.mutation.ProductName(); ok {
 		if err := subscriptionplan.ProductNameValidator(v); err != nil {
 			return &ValidationError{Name: "product_name", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.product_name": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.StripePriceID(); ok {
+		if err := subscriptionplan.StripePriceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_price_id", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.stripe_price_id": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.StripeSandboxPriceID(); ok {
+		if err := subscriptionplan.StripeSandboxPriceIDValidator(v); err != nil {
+			return &ValidationError{Name: "stripe_sandbox_price_id", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.stripe_sandbox_price_id": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.StripeTrialDays(); !ok {
+		return &ValidationError{Name: "stripe_trial_days", err: errors.New(`ent: missing required field "SubscriptionPlan.stripe_trial_days"`)}
+	}
+	if _, ok := _c.mutation.BillingProvider(); !ok {
+		return &ValidationError{Name: "billing_provider", err: errors.New(`ent: missing required field "SubscriptionPlan.billing_provider"`)}
+	}
+	if v, ok := _c.mutation.BillingProvider(); ok {
+		if err := subscriptionplan.BillingProviderValidator(v); err != nil {
+			return &ValidationError{Name: "billing_provider", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.billing_provider": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.BillingMode(); !ok {
+		return &ValidationError{Name: "billing_mode", err: errors.New(`ent: missing required field "SubscriptionPlan.billing_mode"`)}
+	}
+	if v, ok := _c.mutation.BillingMode(); ok {
+		if err := subscriptionplan.BillingModeValidator(v); err != nil {
+			return &ValidationError{Name: "billing_mode", err: fmt.Errorf(`ent: validator failed for field "SubscriptionPlan.billing_mode": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.ForSale(); !ok {
@@ -368,6 +479,26 @@ func (_c *SubscriptionPlanCreate) createSpec() (*SubscriptionPlan, *sqlgraph.Cre
 	if value, ok := _c.mutation.ProductName(); ok {
 		_spec.SetField(subscriptionplan.FieldProductName, field.TypeString, value)
 		_node.ProductName = value
+	}
+	if value, ok := _c.mutation.StripePriceID(); ok {
+		_spec.SetField(subscriptionplan.FieldStripePriceID, field.TypeString, value)
+		_node.StripePriceID = &value
+	}
+	if value, ok := _c.mutation.StripeSandboxPriceID(); ok {
+		_spec.SetField(subscriptionplan.FieldStripeSandboxPriceID, field.TypeString, value)
+		_node.StripeSandboxPriceID = &value
+	}
+	if value, ok := _c.mutation.StripeTrialDays(); ok {
+		_spec.SetField(subscriptionplan.FieldStripeTrialDays, field.TypeInt, value)
+		_node.StripeTrialDays = value
+	}
+	if value, ok := _c.mutation.BillingProvider(); ok {
+		_spec.SetField(subscriptionplan.FieldBillingProvider, field.TypeString, value)
+		_node.BillingProvider = value
+	}
+	if value, ok := _c.mutation.BillingMode(); ok {
+		_spec.SetField(subscriptionplan.FieldBillingMode, field.TypeString, value)
+		_node.BillingMode = value
 	}
 	if value, ok := _c.mutation.ForSale(); ok {
 		_spec.SetField(subscriptionplan.FieldForSale, field.TypeBool, value)
@@ -572,6 +703,84 @@ func (u *SubscriptionPlanUpsert) SetProductName(v string) *SubscriptionPlanUpser
 // UpdateProductName sets the "product_name" field to the value that was provided on create.
 func (u *SubscriptionPlanUpsert) UpdateProductName() *SubscriptionPlanUpsert {
 	u.SetExcluded(subscriptionplan.FieldProductName)
+	return u
+}
+
+// SetStripePriceID sets the "stripe_price_id" field.
+func (u *SubscriptionPlanUpsert) SetStripePriceID(v string) *SubscriptionPlanUpsert {
+	u.Set(subscriptionplan.FieldStripePriceID, v)
+	return u
+}
+
+// UpdateStripePriceID sets the "stripe_price_id" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsert) UpdateStripePriceID() *SubscriptionPlanUpsert {
+	u.SetExcluded(subscriptionplan.FieldStripePriceID)
+	return u
+}
+
+// ClearStripePriceID clears the value of the "stripe_price_id" field.
+func (u *SubscriptionPlanUpsert) ClearStripePriceID() *SubscriptionPlanUpsert {
+	u.SetNull(subscriptionplan.FieldStripePriceID)
+	return u
+}
+
+// SetStripeSandboxPriceID sets the "stripe_sandbox_price_id" field.
+func (u *SubscriptionPlanUpsert) SetStripeSandboxPriceID(v string) *SubscriptionPlanUpsert {
+	u.Set(subscriptionplan.FieldStripeSandboxPriceID, v)
+	return u
+}
+
+// UpdateStripeSandboxPriceID sets the "stripe_sandbox_price_id" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsert) UpdateStripeSandboxPriceID() *SubscriptionPlanUpsert {
+	u.SetExcluded(subscriptionplan.FieldStripeSandboxPriceID)
+	return u
+}
+
+// ClearStripeSandboxPriceID clears the value of the "stripe_sandbox_price_id" field.
+func (u *SubscriptionPlanUpsert) ClearStripeSandboxPriceID() *SubscriptionPlanUpsert {
+	u.SetNull(subscriptionplan.FieldStripeSandboxPriceID)
+	return u
+}
+
+// SetStripeTrialDays sets the "stripe_trial_days" field.
+func (u *SubscriptionPlanUpsert) SetStripeTrialDays(v int) *SubscriptionPlanUpsert {
+	u.Set(subscriptionplan.FieldStripeTrialDays, v)
+	return u
+}
+
+// UpdateStripeTrialDays sets the "stripe_trial_days" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsert) UpdateStripeTrialDays() *SubscriptionPlanUpsert {
+	u.SetExcluded(subscriptionplan.FieldStripeTrialDays)
+	return u
+}
+
+// AddStripeTrialDays adds v to the "stripe_trial_days" field.
+func (u *SubscriptionPlanUpsert) AddStripeTrialDays(v int) *SubscriptionPlanUpsert {
+	u.Add(subscriptionplan.FieldStripeTrialDays, v)
+	return u
+}
+
+// SetBillingProvider sets the "billing_provider" field.
+func (u *SubscriptionPlanUpsert) SetBillingProvider(v string) *SubscriptionPlanUpsert {
+	u.Set(subscriptionplan.FieldBillingProvider, v)
+	return u
+}
+
+// UpdateBillingProvider sets the "billing_provider" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsert) UpdateBillingProvider() *SubscriptionPlanUpsert {
+	u.SetExcluded(subscriptionplan.FieldBillingProvider)
+	return u
+}
+
+// SetBillingMode sets the "billing_mode" field.
+func (u *SubscriptionPlanUpsert) SetBillingMode(v string) *SubscriptionPlanUpsert {
+	u.Set(subscriptionplan.FieldBillingMode, v)
+	return u
+}
+
+// UpdateBillingMode sets the "billing_mode" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsert) UpdateBillingMode() *SubscriptionPlanUpsert {
+	u.SetExcluded(subscriptionplan.FieldBillingMode)
 	return u
 }
 
@@ -820,6 +1029,97 @@ func (u *SubscriptionPlanUpsertOne) SetProductName(v string) *SubscriptionPlanUp
 func (u *SubscriptionPlanUpsertOne) UpdateProductName() *SubscriptionPlanUpsertOne {
 	return u.Update(func(s *SubscriptionPlanUpsert) {
 		s.UpdateProductName()
+	})
+}
+
+// SetStripePriceID sets the "stripe_price_id" field.
+func (u *SubscriptionPlanUpsertOne) SetStripePriceID(v string) *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.SetStripePriceID(v)
+	})
+}
+
+// UpdateStripePriceID sets the "stripe_price_id" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsertOne) UpdateStripePriceID() *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.UpdateStripePriceID()
+	})
+}
+
+// ClearStripePriceID clears the value of the "stripe_price_id" field.
+func (u *SubscriptionPlanUpsertOne) ClearStripePriceID() *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.ClearStripePriceID()
+	})
+}
+
+// SetStripeSandboxPriceID sets the "stripe_sandbox_price_id" field.
+func (u *SubscriptionPlanUpsertOne) SetStripeSandboxPriceID(v string) *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.SetStripeSandboxPriceID(v)
+	})
+}
+
+// UpdateStripeSandboxPriceID sets the "stripe_sandbox_price_id" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsertOne) UpdateStripeSandboxPriceID() *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.UpdateStripeSandboxPriceID()
+	})
+}
+
+// ClearStripeSandboxPriceID clears the value of the "stripe_sandbox_price_id" field.
+func (u *SubscriptionPlanUpsertOne) ClearStripeSandboxPriceID() *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.ClearStripeSandboxPriceID()
+	})
+}
+
+// SetStripeTrialDays sets the "stripe_trial_days" field.
+func (u *SubscriptionPlanUpsertOne) SetStripeTrialDays(v int) *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.SetStripeTrialDays(v)
+	})
+}
+
+// AddStripeTrialDays adds v to the "stripe_trial_days" field.
+func (u *SubscriptionPlanUpsertOne) AddStripeTrialDays(v int) *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.AddStripeTrialDays(v)
+	})
+}
+
+// UpdateStripeTrialDays sets the "stripe_trial_days" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsertOne) UpdateStripeTrialDays() *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.UpdateStripeTrialDays()
+	})
+}
+
+// SetBillingProvider sets the "billing_provider" field.
+func (u *SubscriptionPlanUpsertOne) SetBillingProvider(v string) *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.SetBillingProvider(v)
+	})
+}
+
+// UpdateBillingProvider sets the "billing_provider" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsertOne) UpdateBillingProvider() *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.UpdateBillingProvider()
+	})
+}
+
+// SetBillingMode sets the "billing_mode" field.
+func (u *SubscriptionPlanUpsertOne) SetBillingMode(v string) *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.SetBillingMode(v)
+	})
+}
+
+// UpdateBillingMode sets the "billing_mode" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsertOne) UpdateBillingMode() *SubscriptionPlanUpsertOne {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.UpdateBillingMode()
 	})
 }
 
@@ -1241,6 +1541,97 @@ func (u *SubscriptionPlanUpsertBulk) SetProductName(v string) *SubscriptionPlanU
 func (u *SubscriptionPlanUpsertBulk) UpdateProductName() *SubscriptionPlanUpsertBulk {
 	return u.Update(func(s *SubscriptionPlanUpsert) {
 		s.UpdateProductName()
+	})
+}
+
+// SetStripePriceID sets the "stripe_price_id" field.
+func (u *SubscriptionPlanUpsertBulk) SetStripePriceID(v string) *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.SetStripePriceID(v)
+	})
+}
+
+// UpdateStripePriceID sets the "stripe_price_id" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsertBulk) UpdateStripePriceID() *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.UpdateStripePriceID()
+	})
+}
+
+// ClearStripePriceID clears the value of the "stripe_price_id" field.
+func (u *SubscriptionPlanUpsertBulk) ClearStripePriceID() *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.ClearStripePriceID()
+	})
+}
+
+// SetStripeSandboxPriceID sets the "stripe_sandbox_price_id" field.
+func (u *SubscriptionPlanUpsertBulk) SetStripeSandboxPriceID(v string) *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.SetStripeSandboxPriceID(v)
+	})
+}
+
+// UpdateStripeSandboxPriceID sets the "stripe_sandbox_price_id" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsertBulk) UpdateStripeSandboxPriceID() *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.UpdateStripeSandboxPriceID()
+	})
+}
+
+// ClearStripeSandboxPriceID clears the value of the "stripe_sandbox_price_id" field.
+func (u *SubscriptionPlanUpsertBulk) ClearStripeSandboxPriceID() *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.ClearStripeSandboxPriceID()
+	})
+}
+
+// SetStripeTrialDays sets the "stripe_trial_days" field.
+func (u *SubscriptionPlanUpsertBulk) SetStripeTrialDays(v int) *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.SetStripeTrialDays(v)
+	})
+}
+
+// AddStripeTrialDays adds v to the "stripe_trial_days" field.
+func (u *SubscriptionPlanUpsertBulk) AddStripeTrialDays(v int) *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.AddStripeTrialDays(v)
+	})
+}
+
+// UpdateStripeTrialDays sets the "stripe_trial_days" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsertBulk) UpdateStripeTrialDays() *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.UpdateStripeTrialDays()
+	})
+}
+
+// SetBillingProvider sets the "billing_provider" field.
+func (u *SubscriptionPlanUpsertBulk) SetBillingProvider(v string) *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.SetBillingProvider(v)
+	})
+}
+
+// UpdateBillingProvider sets the "billing_provider" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsertBulk) UpdateBillingProvider() *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.UpdateBillingProvider()
+	})
+}
+
+// SetBillingMode sets the "billing_mode" field.
+func (u *SubscriptionPlanUpsertBulk) SetBillingMode(v string) *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.SetBillingMode(v)
+	})
+}
+
+// UpdateBillingMode sets the "billing_mode" field to the value that was provided on create.
+func (u *SubscriptionPlanUpsertBulk) UpdateBillingMode() *SubscriptionPlanUpsertBulk {
+	return u.Update(func(s *SubscriptionPlanUpsert) {
+		s.UpdateBillingMode()
 	})
 }
 

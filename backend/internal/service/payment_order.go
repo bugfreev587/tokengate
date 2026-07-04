@@ -48,6 +48,7 @@ func (s *PaymentService) CreateOrder(ctx context.Context, req CreateOrderRequest
 	if user.Status != payment.EntityStatusActive {
 		return nil, infraerrors.Forbidden("USER_INACTIVE", "user account is disabled")
 	}
+	req.StripeEnvironment = stripeEnvironmentForUser(user)
 	orderAmount := req.Amount
 	limitAmount := req.Amount
 	if plan != nil {
@@ -59,7 +60,7 @@ func (s *PaymentService) CreateOrder(ctx context.Context, req CreateOrderRequest
 	feeRate := cfg.RechargeFeeRate
 	methodCurrency := payment.DefaultPaymentCurrency
 	if s.configService != nil {
-		methodCurrency, err = s.configService.ValidateMethodCurrencyConsistency(ctx, req.PaymentType)
+		methodCurrency, err = s.configService.ValidateMethodCurrencyConsistencyForEnvironment(ctx, req.PaymentType, req.StripeEnvironment)
 		if err != nil {
 			return nil, err
 		}
@@ -266,6 +267,9 @@ func buildPaymentOrderProviderSnapshot(sel *payment.InstanceSelection, req Creat
 	if providerKey != "" {
 		snapshot["provider_key"] = providerKey
 	}
+	if environment := payment.NormalizeProviderEnvironment(strings.TrimSpace(sel.Environment)); environment != "" {
+		snapshot["environment"] = environment
+	}
 
 	paymentMode := strings.TrimSpace(sel.PaymentMode)
 	if paymentMode != "" {
@@ -358,6 +362,9 @@ func (s *PaymentService) selectCreateOrderInstance(ctx context.Context, req Crea
 }
 
 func (s *PaymentService) prepareCreateOrderSelectionContext(ctx context.Context, req CreateOrderRequest) (context.Context, error) {
+	if strings.TrimSpace(req.StripeEnvironment) != "" {
+		ctx = payment.WithProviderEnvironment(ctx, req.StripeEnvironment)
+	}
 	if !requestNeedsWeChatJSAPICompatibility(req) {
 		return ctx, nil
 	}
@@ -369,6 +376,13 @@ func (s *PaymentService) prepareCreateOrderSelectionContext(ctx context.Context,
 		return nil, err
 	}
 	return payment.WithWxpayJSAPIAppID(ctx, expectedAppID), nil
+}
+
+func stripeEnvironmentForUser(user *User) string {
+	if user != nil && user.IsTestUser {
+		return payment.ProviderEnvironmentSandbox
+	}
+	return payment.ProviderEnvironmentLive
 }
 
 func requestNeedsWeChatJSAPICompatibility(req CreateOrderRequest) bool {

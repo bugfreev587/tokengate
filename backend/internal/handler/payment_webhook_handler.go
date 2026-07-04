@@ -19,8 +19,9 @@ import (
 
 // PaymentWebhookHandler handles payment provider webhook callbacks.
 type PaymentWebhookHandler struct {
-	paymentService *service.PaymentService
-	registry       *payment.Registry
+	paymentService       *service.PaymentService
+	registry             *payment.Registry
+	stripeBillingService stripeBillingService
 }
 
 // maxWebhookBodySize is the maximum allowed webhook request body size (1 MB).
@@ -30,10 +31,11 @@ const maxWebhookBodySize = 1 << 20
 const webhookLogTruncateLen = 200
 
 // NewPaymentWebhookHandler creates a new PaymentWebhookHandler.
-func NewPaymentWebhookHandler(paymentService *service.PaymentService, registry *payment.Registry) *PaymentWebhookHandler {
+func NewPaymentWebhookHandler(paymentService *service.PaymentService, registry *payment.Registry, stripeBillingService stripeBillingService) *PaymentWebhookHandler {
 	return &PaymentWebhookHandler{
-		paymentService: paymentService,
-		registry:       registry,
+		paymentService:       paymentService,
+		registry:             registry,
+		stripeBillingService: stripeBillingService,
 	}
 }
 
@@ -119,6 +121,19 @@ func (h *PaymentWebhookHandler) handleNotify(c *gin.Context, providerKey string)
 	if notification == nil {
 		writeSuccessResponse(c, resolvedProviderKey)
 		return
+	}
+
+	if providerKey == payment.TypeStripe && h.stripeBillingService != nil {
+		handled, err := h.stripeBillingService.HandleNotification(c.Request.Context(), notification)
+		if err != nil {
+			slog.Error("[Payment Webhook] handle Stripe Billing notification failed", "provider", resolvedProviderKey, "error", err)
+			c.String(http.StatusInternalServerError, "handle failed")
+			return
+		}
+		if handled {
+			writeSuccessResponse(c, resolvedProviderKey)
+			return
+		}
 	}
 
 	if err := h.paymentService.HandlePaymentNotification(c.Request.Context(), notification, resolvedProviderKey); err != nil {

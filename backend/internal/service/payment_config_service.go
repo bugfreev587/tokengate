@@ -121,6 +121,7 @@ type MethodLimitsResponse struct {
 type CreateProviderInstanceRequest struct {
 	ProviderKey     string            `json:"provider_key"`
 	Name            string            `json:"name"`
+	Environment     string            `json:"environment"`
 	Config          map[string]string `json:"config"`
 	SupportedTypes  []string          `json:"supported_types"`
 	Enabled         bool              `json:"enabled"`
@@ -133,6 +134,7 @@ type CreateProviderInstanceRequest struct {
 
 type UpdateProviderInstanceRequest struct {
 	Name            *string           `json:"name"`
+	Environment     *string           `json:"environment"`
 	Config          map[string]string `json:"config"`
 	SupportedTypes  []string          `json:"supported_types"`
 	Enabled         *bool             `json:"enabled"`
@@ -143,31 +145,41 @@ type UpdateProviderInstanceRequest struct {
 	AllowUserRefund *bool             `json:"allow_user_refund"`
 }
 type CreatePlanRequest struct {
-	GroupID       int64    `json:"group_id"`
-	Name          string   `json:"name"`
-	Description   string   `json:"description"`
-	Price         float64  `json:"price"`
-	OriginalPrice *float64 `json:"original_price"`
-	ValidityDays  int      `json:"validity_days"`
-	ValidityUnit  string   `json:"validity_unit"`
-	Features      string   `json:"features"`
-	ProductName   string   `json:"product_name"`
-	ForSale       bool     `json:"for_sale"`
-	SortOrder     int      `json:"sort_order"`
+	GroupID              int64    `json:"group_id"`
+	Name                 string   `json:"name"`
+	Description          string   `json:"description"`
+	Price                float64  `json:"price"`
+	OriginalPrice        *float64 `json:"original_price"`
+	ValidityDays         int      `json:"validity_days"`
+	ValidityUnit         string   `json:"validity_unit"`
+	Features             string   `json:"features"`
+	ProductName          string   `json:"product_name"`
+	StripePriceID        string   `json:"stripe_price_id"`
+	StripeSandboxPriceID string   `json:"stripe_sandbox_price_id"`
+	StripeTrialDays      int      `json:"stripe_trial_days"`
+	BillingProvider      string   `json:"billing_provider"`
+	BillingMode          string   `json:"billing_mode"`
+	ForSale              bool     `json:"for_sale"`
+	SortOrder            int      `json:"sort_order"`
 }
 
 type UpdatePlanRequest struct {
-	GroupID       *int64   `json:"group_id"`
-	Name          *string  `json:"name"`
-	Description   *string  `json:"description"`
-	Price         *float64 `json:"price"`
-	OriginalPrice *float64 `json:"original_price"`
-	ValidityDays  *int     `json:"validity_days"`
-	ValidityUnit  *string  `json:"validity_unit"`
-	Features      *string  `json:"features"`
-	ProductName   *string  `json:"product_name"`
-	ForSale       *bool    `json:"for_sale"`
-	SortOrder     *int     `json:"sort_order"`
+	GroupID              *int64   `json:"group_id"`
+	Name                 *string  `json:"name"`
+	Description          *string  `json:"description"`
+	Price                *float64 `json:"price"`
+	OriginalPrice        *float64 `json:"original_price"`
+	ValidityDays         *int     `json:"validity_days"`
+	ValidityUnit         *string  `json:"validity_unit"`
+	Features             *string  `json:"features"`
+	ProductName          *string  `json:"product_name"`
+	StripePriceID        *string  `json:"stripe_price_id"`
+	StripeSandboxPriceID *string  `json:"stripe_sandbox_price_id"`
+	StripeTrialDays      *int     `json:"stripe_trial_days"`
+	BillingProvider      *string  `json:"billing_provider"`
+	BillingMode          *string  `json:"billing_mode"`
+	ForSale              *bool    `json:"for_sale"`
+	SortOrder            *int     `json:"sort_order"`
 }
 
 // PaymentConfigService manages payment configuration and CRUD for
@@ -210,8 +222,8 @@ func (s *PaymentConfigService) GetPaymentConfig(ctx context.Context) (*PaymentCo
 		return nil, fmt.Errorf("get payment config settings: %w", err)
 	}
 	cfg := s.parsePaymentConfig(vals)
-	// Load Stripe publishable key from the first enabled Stripe provider instance
-	cfg.StripePublishableKey = s.getStripePublishableKey(ctx)
+	// Load Stripe publishable key from the first enabled live Stripe provider instance.
+	cfg.StripePublishableKey = s.GetStripePublishableKeyForEnvironment(ctx, payment.ProviderEnvironmentLive)
 	return cfg, nil
 }
 
@@ -254,15 +266,17 @@ func (s *PaymentConfigService) parsePaymentConfig(vals map[string]string) *Payme
 	return cfg
 }
 
-// getStripePublishableKey finds the publishable key from the first enabled Stripe provider instance.
-func (s *PaymentConfigService) getStripePublishableKey(ctx context.Context) string {
+// GetStripePublishableKeyForEnvironment finds the publishable key from the first enabled Stripe provider instance.
+func (s *PaymentConfigService) GetStripePublishableKeyForEnvironment(ctx context.Context, environment string) string {
 	if s.entClient == nil {
 		return ""
 	}
+	environment = payment.NormalizeProviderEnvironment(environment)
 	instances, err := s.entClient.PaymentProviderInstance.Query().
 		Where(
 			paymentproviderinstance.EnabledEQ(true),
 			paymentproviderinstance.ProviderKeyEQ(payment.TypeStripe),
+			paymentproviderinstance.EnvironmentEQ(environment),
 		).Limit(1).All(ctx)
 	if err != nil || len(instances) == 0 {
 		return ""

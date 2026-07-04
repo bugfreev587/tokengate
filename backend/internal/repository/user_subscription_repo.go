@@ -7,6 +7,7 @@ import (
 	dbent "github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/usersubscription"
+	"github.com/Wei-Shaw/sub2api/internal/payment"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 )
@@ -29,6 +30,19 @@ func (r *userSubscriptionRepository) Create(ctx context.Context, sub *service.Us
 		SetUserID(sub.UserID).
 		SetGroupID(sub.GroupID).
 		SetExpiresAt(sub.ExpiresAt).
+		SetNillableStripeCustomerID(stringPtrIfNotEmpty(sub.StripeCustomerID)).
+		SetNillableStripeSubscriptionID(stringPtrIfNotEmpty(sub.StripeSubscriptionID)).
+		SetNillableStripePriceID(stringPtrIfNotEmpty(sub.StripePriceID)).
+		SetStripeEnvironment(payment.NormalizeProviderEnvironment(sub.StripeEnvironment)).
+		SetNillableStripeProviderInstanceID(stringPtrIfNotEmpty(sub.StripeProviderInstanceID)).
+		SetNillableStripeStatus(stringPtrIfNotEmpty(sub.StripeStatus)).
+		SetNillableCurrentPeriodStart(sub.CurrentPeriodStart).
+		SetNillableCurrentPeriodEnd(sub.CurrentPeriodEnd).
+		SetNillableTrialStart(sub.TrialStart).
+		SetNillableTrialEnd(sub.TrialEnd).
+		SetCancelAtPeriodEnd(sub.CancelAtPeriodEnd).
+		SetNillablePastDueSince(sub.PastDueSince).
+		SetTrialUsed(sub.TrialUsed).
 		SetNillableDailyWindowStart(sub.DailyWindowStart).
 		SetNillableWeeklyWindowStart(sub.WeeklyWindowStart).
 		SetNillableMonthlyWindowStart(sub.MonthlyWindowStart).
@@ -101,6 +115,18 @@ func (r *userSubscriptionRepository) GetActiveByUserIDAndGroupID(ctx context.Con
 	return userSubscriptionEntityToService(m), nil
 }
 
+func (r *userSubscriptionRepository) GetByStripeSubscriptionID(ctx context.Context, stripeSubscriptionID string) (*service.UserSubscription, error) {
+	client := clientFromContext(ctx, r.client)
+	m, err := client.UserSubscription.Query().
+		Where(usersubscription.StripeSubscriptionIDEQ(stripeSubscriptionID)).
+		WithGroup().
+		Only(ctx)
+	if err != nil {
+		return nil, translatePersistenceError(err, service.ErrSubscriptionNotFound, nil)
+	}
+	return userSubscriptionEntityToService(m), nil
+}
+
 func (r *userSubscriptionRepository) Update(ctx context.Context, sub *service.UserSubscription) error {
 	if sub == nil {
 		return service.ErrSubscriptionNilInput
@@ -113,6 +139,19 @@ func (r *userSubscriptionRepository) Update(ctx context.Context, sub *service.Us
 		SetStartsAt(sub.StartsAt).
 		SetExpiresAt(sub.ExpiresAt).
 		SetStatus(sub.Status).
+		SetNillableStripeCustomerID(stringPtrIfNotEmpty(sub.StripeCustomerID)).
+		SetNillableStripeSubscriptionID(stringPtrIfNotEmpty(sub.StripeSubscriptionID)).
+		SetNillableStripePriceID(stringPtrIfNotEmpty(sub.StripePriceID)).
+		SetStripeEnvironment(payment.NormalizeProviderEnvironment(sub.StripeEnvironment)).
+		SetNillableStripeProviderInstanceID(stringPtrIfNotEmpty(sub.StripeProviderInstanceID)).
+		SetNillableStripeStatus(stringPtrIfNotEmpty(sub.StripeStatus)).
+		SetNillableCurrentPeriodStart(sub.CurrentPeriodStart).
+		SetNillableCurrentPeriodEnd(sub.CurrentPeriodEnd).
+		SetNillableTrialStart(sub.TrialStart).
+		SetNillableTrialEnd(sub.TrialEnd).
+		SetCancelAtPeriodEnd(sub.CancelAtPeriodEnd).
+		SetNillablePastDueSince(sub.PastDueSince).
+		SetTrialUsed(sub.TrialUsed).
 		SetNillableDailyWindowStart(sub.DailyWindowStart).
 		SetNillableWeeklyWindowStart(sub.WeeklyWindowStart).
 		SetNillableMonthlyWindowStart(sub.MonthlyWindowStart).
@@ -142,6 +181,19 @@ func (r *userSubscriptionRepository) ListByUserID(ctx context.Context, userID in
 	client := clientFromContext(ctx, r.client)
 	subs, err := client.UserSubscription.Query().
 		Where(usersubscription.UserIDEQ(userID)).
+		WithGroup().
+		Order(dbent.Desc(usersubscription.FieldCreatedAt)).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return userSubscriptionEntitiesToService(subs), nil
+}
+
+func (r *userSubscriptionRepository) ListByStripeCustomerID(ctx context.Context, stripeCustomerID string) ([]service.UserSubscription, error) {
+	client := clientFromContext(ctx, r.client)
+	subs, err := client.UserSubscription.Query().
+		Where(usersubscription.StripeCustomerIDEQ(stripeCustomerID)).
 		WithGroup().
 		Order(dbent.Desc(usersubscription.FieldCreatedAt)).
 		All(ctx)
@@ -430,23 +482,36 @@ func userSubscriptionEntityToService(m *dbent.UserSubscription) *service.UserSub
 		return nil
 	}
 	out := &service.UserSubscription{
-		ID:                 m.ID,
-		UserID:             m.UserID,
-		GroupID:            m.GroupID,
-		StartsAt:           m.StartsAt,
-		ExpiresAt:          m.ExpiresAt,
-		Status:             m.Status,
-		DailyWindowStart:   m.DailyWindowStart,
-		WeeklyWindowStart:  m.WeeklyWindowStart,
-		MonthlyWindowStart: m.MonthlyWindowStart,
-		DailyUsageUSD:      m.DailyUsageUsd,
-		WeeklyUsageUSD:     m.WeeklyUsageUsd,
-		MonthlyUsageUSD:    m.MonthlyUsageUsd,
-		AssignedBy:         m.AssignedBy,
-		AssignedAt:         m.AssignedAt,
-		Notes:              derefString(m.Notes),
-		CreatedAt:          m.CreatedAt,
-		UpdatedAt:          m.UpdatedAt,
+		ID:                       m.ID,
+		UserID:                   m.UserID,
+		GroupID:                  m.GroupID,
+		StartsAt:                 m.StartsAt,
+		ExpiresAt:                m.ExpiresAt,
+		Status:                   m.Status,
+		StripeCustomerID:         derefString(m.StripeCustomerID),
+		StripeSubscriptionID:     derefString(m.StripeSubscriptionID),
+		StripePriceID:            derefString(m.StripePriceID),
+		StripeEnvironment:        payment.NormalizeProviderEnvironment(m.StripeEnvironment),
+		StripeProviderInstanceID: derefString(m.StripeProviderInstanceID),
+		StripeStatus:             derefString(m.StripeStatus),
+		CurrentPeriodStart:       m.CurrentPeriodStart,
+		CurrentPeriodEnd:         m.CurrentPeriodEnd,
+		TrialStart:               m.TrialStart,
+		TrialEnd:                 m.TrialEnd,
+		CancelAtPeriodEnd:        m.CancelAtPeriodEnd,
+		PastDueSince:             m.PastDueSince,
+		TrialUsed:                m.TrialUsed,
+		DailyWindowStart:         m.DailyWindowStart,
+		WeeklyWindowStart:        m.WeeklyWindowStart,
+		MonthlyWindowStart:       m.MonthlyWindowStart,
+		DailyUsageUSD:            m.DailyUsageUsd,
+		WeeklyUsageUSD:           m.WeeklyUsageUsd,
+		MonthlyUsageUSD:          m.MonthlyUsageUsd,
+		AssignedBy:               m.AssignedBy,
+		AssignedAt:               m.AssignedAt,
+		Notes:                    derefString(m.Notes),
+		CreatedAt:                m.CreatedAt,
+		UpdatedAt:                m.UpdatedAt,
 	}
 	if m.Edges.User != nil {
 		out.User = userEntityToService(m.Edges.User)
@@ -458,6 +523,13 @@ func userSubscriptionEntityToService(m *dbent.UserSubscription) *service.UserSub
 		out.AssignedByUser = userEntityToService(m.Edges.AssignedByUser)
 	}
 	return out
+}
+
+func stringPtrIfNotEmpty(v string) *string {
+	if v == "" {
+		return nil
+	}
+	return &v
 }
 
 func userSubscriptionEntitiesToService(models []*dbent.UserSubscription) []service.UserSubscription {
