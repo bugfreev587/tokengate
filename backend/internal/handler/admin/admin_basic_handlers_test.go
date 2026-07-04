@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Wei-Shaw/sub2api/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )
@@ -157,6 +158,27 @@ func TestUserHandlerBindAuthIdentityMapsRequest(t *testing.T) {
 	require.Equal(t, "subject-123", adminSvc.boundAuthIdentity.ProviderSubject)
 	require.Nil(t, adminSvc.boundAuthIdentity.Channel)
 	require.Equal(t, float64(12), adminSvc.boundAuthIdentity.Metadata["report_id"])
+}
+
+func TestUserHandlerUpdateMapsRole(t *testing.T) {
+	router, adminSvc := setupAdminRouter()
+
+	body, err := json.Marshal(map[string]any{
+		"email": "promote@example.com",
+		"role":  "admin",
+	})
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/admin/users/9", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	require.Equal(t, int64(9), adminSvc.lastUpdateUser.id)
+	require.Equal(t, 1, adminSvc.lastUpdateUser.calls)
+	require.NotNil(t, adminSvc.lastUpdateUser.input)
+	require.Equal(t, service.RoleAdmin, adminSvc.lastUpdateUser.input.Role)
 }
 
 func TestGroupHandlerEndpoints(t *testing.T) {

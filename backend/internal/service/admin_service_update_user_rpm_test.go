@@ -67,3 +67,25 @@ func TestAdminService_UpdateUser_NoInvalidateWhenRPMLimitUnchanged(t *testing.T)
 	require.NoError(t, err)
 	require.Empty(t, invalidator.userIDs, "只改 username 不应触发认证缓存失效")
 }
+
+func TestAdminService_UpdateUser_ChangesRoleAndInvalidatesAuthCache(t *testing.T) {
+	base := &userRepoStub{user: &User{ID: 42, Email: "u@example.com", Role: RoleUser, Status: StatusActive, RPMLimit: 10}}
+	repo := &rpmUserRepoStub{userRepoStub: base}
+	invalidator := &authCacheInvalidatorStub{}
+	svc := &adminServiceImpl{
+		userRepo:             repo,
+		redeemCodeRepo:       &redeemRepoStub{},
+		authCacheInvalidator: invalidator,
+	}
+
+	updated, err := svc.UpdateUser(context.Background(), 42, &UpdateUserInput{
+		Role: RoleAdmin,
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, updated)
+	require.Equal(t, RoleAdmin, updated.Role)
+	require.NotNil(t, repo.lastUpdated)
+	require.Equal(t, RoleAdmin, repo.lastUpdated.Role)
+	require.Equal(t, []int64{42}, invalidator.userIDs, "修改 role 应失效 API Key 认证缓存")
+}

@@ -53,6 +53,11 @@ type stubAdminService struct {
 		sortOrder string
 		calls     int
 	}
+	lastUpdateUser struct {
+		id    int64
+		input *service.UpdateUserInput
+		calls int
+	}
 	lastListProxies struct {
 		protocol  string
 		status    string
@@ -163,7 +168,15 @@ func (s *stubAdminService) CreateUser(ctx context.Context, input *service.Create
 }
 
 func (s *stubAdminService) UpdateUser(ctx context.Context, id int64, input *service.UpdateUserInput) (*service.User, error) {
-	user := service.User{ID: id, Email: "updated@example.com", Status: service.StatusActive}
+	copied := *input
+	s.lastUpdateUser.id = id
+	s.lastUpdateUser.input = &copied
+	s.lastUpdateUser.calls++
+	role := copied.Role
+	if role == "" {
+		role = service.RoleUser
+	}
+	user := service.User{ID: id, Email: "updated@example.com", Role: role, Status: service.StatusActive}
 	return &user, nil
 }
 

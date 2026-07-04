@@ -136,6 +136,7 @@ type UpdateUserInput struct {
 	Balance       *float64 // 使用指针区分"未提供"和"设置为0"
 	Concurrency   *int     // 使用指针区分"未提供"和"设置为0"
 	RPMLimit      *int     // 使用指针区分"未提供"和"设置为0"
+	Role          string
 	Status        string
 	AllowedGroups *[]int64 // 使用指针区分"未提供"和"设置为空数组"
 	// GroupRates 用户专属分组倍率配置
@@ -744,6 +745,15 @@ func (s *adminServiceImpl) UpdateUser(ctx context.Context, id int64, input *Upda
 
 	if input.Status != "" {
 		user.Status = input.Status
+	}
+
+	if input.Role != "" {
+		switch input.Role {
+		case RoleAdmin, RoleUser:
+			user.Role = input.Role
+		default:
+			return nil, fmt.Errorf("invalid role: %s", input.Role)
+		}
 	}
 
 	if input.Concurrency != nil {
