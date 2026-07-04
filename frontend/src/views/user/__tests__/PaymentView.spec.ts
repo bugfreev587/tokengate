@@ -204,6 +204,37 @@ describe('PaymentView WeChat JSAPI flow', () => {
     }
   })
 
+  it('separates usage-based billing from BYO subscription mode', async () => {
+    routeState.query = {}
+    getCheckoutInfo.mockResolvedValue(checkoutInfoWithPlansFixture())
+
+    const wrapper = shallowMount(PaymentView, {
+      global: {
+        stubs: {
+          AppLayout: { template: '<div><slot /></div>' },
+          Teleport: true,
+          Transition: false,
+        },
+      },
+    })
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('payment.modeTabs.usageBased.label')
+    expect(wrapper.text()).toContain('payment.modeTabs.byoSubscription.label')
+    expect(wrapper.text()).toContain('payment.modeDescriptions.usageBased.title')
+    expect(wrapper.text()).toContain('payment.modeDescriptions.usageBased.desc')
+    expect(wrapper.find('amount-input-stub').exists()).toBe(true)
+
+    await wrapper.find('[data-testid="mode-tab-subscription"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('payment.modeDescriptions.byoSubscription.title')
+    expect(wrapper.text()).toContain('payment.modeDescriptions.byoSubscription.desc')
+    expect(wrapper.find('amount-input-stub').exists()).toBe(false)
+    expect(wrapper.find('subscription-plan-card-stub').exists()).toBe(true)
+  })
+
   it('resets payment state and redirects to /payment/result after JSAPI reports success', async () => {
     createOrder.mockResolvedValue(jsapiOrderFixture('resume-token-123'))
     bridgeInvoke.mockImplementation((_action, _payload, callback) => {

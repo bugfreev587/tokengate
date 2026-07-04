@@ -1,41 +1,41 @@
 <template>
   <AppLayout>
     <div class="mx-auto max-w-4xl space-y-6">
-      <div class="grid gap-4 md:grid-cols-3">
-        <div class="card p-5 md:col-span-1">
-          <p class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">{{ t('payment.summary.balanceLabel') }}</p>
-          <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">${{ (user?.balance || 0).toFixed(2) }}</p>
-          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.summary.balanceHint') }}</p>
-        </div>
-        <div class="card p-5 md:col-span-2">
-          <p class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">{{ t('payment.summary.howBillingWorksLabel') }}</p>
-          <div class="mt-2 grid gap-3 sm:grid-cols-3">
-            <div>
-              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('payment.summary.stepOneTitle') }}</p>
-              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.summary.stepOneDesc') }}</p>
-            </div>
-            <div>
-              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('payment.summary.stepTwoTitle') }}</p>
-              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.summary.stepTwoDesc') }}</p>
-            </div>
-            <div>
-              <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('payment.summary.stepThreeTitle') }}</p>
-              <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('payment.summary.stepThreeDesc') }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div v-if="loading" class="flex items-center justify-center py-20">
         <div class="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
       </div>
       <template v-else>
-        <!-- Tab Switcher (hide during payment and subscription confirm) -->
-        <div v-if="tabs.length > 1 && paymentPhase === 'select' && !selectedPlan" class="flex space-x-1 rounded-xl bg-gray-100 p-1 dark:bg-dark-800">
+        <div v-if="tabs.length > 1 && paymentPhase === 'select' && !selectedPlan" class="grid gap-2 rounded-xl bg-gray-100 p-1 dark:bg-dark-800 sm:grid-cols-2">
           <button v-for="tab in tabs" :key="tab.key"
-            class="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-all"
+            :data-testid="`mode-tab-${tab.key}`"
+            class="rounded-lg px-4 py-3 text-left transition-all active:scale-[0.99]"
             :class="activeTab === tab.key ? 'bg-white text-gray-900 shadow dark:bg-dark-700 dark:text-white' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
-            @click="activeTab = tab.key">{{ tab.label }}</button>
+            @click="activeTab = tab.key">
+            <span class="block text-sm font-semibold">{{ tab.label }}</span>
+            <span class="mt-0.5 block text-xs opacity-75">{{ tab.description }}</span>
+          </button>
+        </div>
+
+        <div v-if="paymentPhase === 'select' && !selectedPlan" class="card p-5">
+          <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ modeDescription.title }}</p>
+          <p class="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{{ modeDescription.desc }}</p>
+        </div>
+
+        <div v-if="paymentPhase === 'select' && !selectedPlan" class="grid gap-4 md:grid-cols-3">
+          <div class="card p-5 md:col-span-1">
+            <p class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">{{ modeSummary.label }}</p>
+            <p :class="['mt-2 font-bold text-gray-900 dark:text-white', modeSummary.valueClass]">{{ modeSummary.value }}</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ modeSummary.hint }}</p>
+          </div>
+          <div class="card p-5 md:col-span-2">
+            <p class="text-xs font-medium uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">{{ t('payment.summary.howBillingWorksLabel') }}</p>
+            <div class="mt-2 grid gap-3 sm:grid-cols-3">
+              <div v-for="step in modeSteps" :key="step.title">
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ step.title }}</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ step.desc }}</p>
+              </div>
+            </div>
+          </div>
         </div>
         <!-- Payment in progress (shared by recharge and subscription) -->
         <template v-if="paymentPhase === 'paying'">
@@ -528,10 +528,65 @@ const checkout = ref<CheckoutInfoResponse>({
 })
 
 const tabs = computed(() => {
-  const result: { key: 'recharge' | 'subscription'; label: string }[] = []
-  if (!checkout.value.balance_disabled) result.push({ key: 'recharge', label: t('payment.tabTopUp') })
-  result.push({ key: 'subscription', label: t('payment.tabSubscribe') })
+  const result: { key: 'recharge' | 'subscription'; label: string; description: string }[] = []
+  if (!checkout.value.balance_disabled) {
+    result.push({
+      key: 'recharge',
+      label: t('payment.modeTabs.usageBased.label'),
+      description: t('payment.modeTabs.usageBased.description'),
+    })
+  }
+  result.push({
+    key: 'subscription',
+    label: t('payment.modeTabs.byoSubscription.label'),
+    description: t('payment.modeTabs.byoSubscription.description'),
+  })
   return result
+})
+
+const modeDescription = computed(() => {
+  if (activeTab.value === 'subscription') {
+    return {
+      title: t('payment.modeDescriptions.byoSubscription.title'),
+      desc: t('payment.modeDescriptions.byoSubscription.desc'),
+    }
+  }
+  return {
+    title: t('payment.modeDescriptions.usageBased.title'),
+    desc: t('payment.modeDescriptions.usageBased.desc'),
+  }
+})
+
+const modeSummary = computed(() => {
+  if (activeTab.value === 'subscription') {
+    return {
+      label: t('payment.summary.byoLabel'),
+      value: t('payment.summary.byoValue'),
+      valueClass: 'text-2xl',
+      hint: t('payment.summary.byoHint'),
+    }
+  }
+  return {
+    label: t('payment.summary.balanceLabel'),
+    value: `$${(user.value?.balance || 0).toFixed(2)}`,
+    valueClass: 'text-3xl',
+    hint: t('payment.summary.balanceHint'),
+  }
+})
+
+const modeSteps = computed(() => {
+  if (activeTab.value === 'subscription') {
+    return [
+      { title: t('payment.summary.byoStepOneTitle'), desc: t('payment.summary.byoStepOneDesc') },
+      { title: t('payment.summary.byoStepTwoTitle'), desc: t('payment.summary.byoStepTwoDesc') },
+      { title: t('payment.summary.byoStepThreeTitle'), desc: t('payment.summary.byoStepThreeDesc') },
+    ]
+  }
+  return [
+    { title: t('payment.summary.stepOneTitle'), desc: t('payment.summary.stepOneDesc') },
+    { title: t('payment.summary.stepTwoTitle'), desc: t('payment.summary.stepTwoDesc') },
+    { title: t('payment.summary.stepThreeTitle'), desc: t('payment.summary.stepThreeDesc') },
+  ]
 })
 
 const visibleMethods = computed(() => getVisibleMethods(checkout.value.methods))
