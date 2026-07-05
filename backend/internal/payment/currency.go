@@ -10,6 +10,7 @@ import (
 const (
 	DefaultPaymentCurrency = "CNY"
 	DefaultPricingCurrency = "USD"
+	StripePaymentCurrency  = "USD"
 )
 
 type paymentCurrencyAmountUnit struct {

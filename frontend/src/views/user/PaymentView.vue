@@ -658,7 +658,10 @@ const globalMaxAmount = computed(() => {
 
 // Selected method's limits (for validation and error messages)
 const selectedLimit = computed(() => visibleMethods.value[selectedMethod.value])
-const selectedCurrency = computed(() => normalizePaymentCurrency(selectedLimit.value?.currency))
+const selectedCurrency = computed(() => {
+  if (normalizeVisibleMethod(selectedMethod.value) === 'stripe') return 'USD'
+  return normalizePaymentCurrency(selectedLimit.value?.currency)
+})
 const localeCode = computed(() => {
   const raw = i18n.locale as unknown
   if (typeof raw === 'string') return raw

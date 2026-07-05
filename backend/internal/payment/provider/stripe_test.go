@@ -16,6 +16,37 @@ func TestStripeImplementsSubscriptionBillingProvider(t *testing.T) {
 	var _ payment.SubscriptionBillingProvider = (*Stripe)(nil)
 }
 
+func TestStripeCurrencyIsAlwaysUSDForDirectPayments(t *testing.T) {
+	p, err := NewStripe("stripe-test", map[string]string{
+		"secretKey":      "sk_test_tokengate",
+		"publishableKey": "pk_test_tokengate",
+		"webhookSecret":  stripeTestWebhookSecret,
+		"currency":       "CNY",
+	})
+	require.NoError(t, err)
+	require.Equal(t, payment.StripePaymentCurrency, p.config["currency"])
+	require.Equal(t, payment.StripePaymentCurrency, p.currency())
+
+	raw := `{
+		"id":"evt_payment_intent_succeeded",
+		"object":"event",
+		"api_version":"2026-03-25.dahlia",
+		"type":"payment_intent.succeeded",
+		"data":{
+			"object":{
+				"id":"pi_test_123",
+				"object":"payment_intent",
+				"amount":1000,
+				"metadata":{"orderId":"sub2_123"}
+			}
+		}
+	}`
+	n := verifySignedStripeNotification(t, p, raw)
+	require.NotNil(t, n)
+	require.Equal(t, payment.StripePaymentCurrency, n.Metadata["currency"])
+	require.Equal(t, float64(10), n.Amount)
+}
+
 func TestStripeVerifyNotificationParsesCheckoutSessionCompleted(t *testing.T) {
 	p := newTestStripeProvider(t)
 

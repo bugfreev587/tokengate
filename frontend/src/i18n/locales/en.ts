@@ -5716,7 +5716,7 @@ export default {
         field_currency: 'Payment currency',
         field_accountId: 'Airwallex Account ID',
         field_airwallexApiBaseHint: 'Must match the API key environment: use https://api-demo.airwallex.com/api/v1 for sandbox/demo keys, and https://api.airwallex.com/api/v1 for production keys. Mixed environments return credentials_invalid / Access Denied.',
-        field_paymentCurrencyHint: 'Default is USD. Stripe and Airwallex can choose CNY, HKD, or another listed currency supported by the account; WeChat Pay, Alipay, and EasyPay remain CNY.',
+        field_paymentCurrencyHint: 'Airwallex can choose a listed currency supported by the account. Stripe payments are always USD; WeChat Pay, Alipay, and EasyPay remain CNY.',
         field_accountIdHint: 'Leave this empty unless you use multiple accounts, an organization-level key, or connected-account payments. A single-account scoped API key uses the selected account by default.',
         field_cid: 'Channel ID',
         field_cidAlipay: 'Alipay Channel ID',

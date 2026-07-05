@@ -131,4 +131,16 @@ describe('StripePaymentView', () => {
     expect(loadStripe).toHaveBeenCalledWith('pk_test')
     expect(wrapper.text()).toContain(formatPaymentAmount(103, 'HKD', 'zh-CN'))
   })
+
+  it('defaults Stripe display amounts to USD when the order response omits currency', async () => {
+    getOrder.mockResolvedValue({
+      data: orderFactory({ currency: '', pay_amount: 10 }),
+    })
+
+    const wrapper = mountView()
+    await flushPromises()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain(formatPaymentAmount(10, 'USD', 'zh-CN'))
+  })
 })

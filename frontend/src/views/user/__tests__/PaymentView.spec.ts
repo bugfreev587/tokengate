@@ -90,15 +90,7 @@ function checkoutInfoFixture() {
   return {
     data: {
       methods: {
-        wxpay: {
-          daily_limit: 0,
-          daily_used: 0,
-          daily_remaining: 0,
-          single_min: 0,
-          single_max: 0,
-          fee_rate: 0,
-          available: true,
-        },
+        wxpay: methodLimitFixture('CNY'),
       },
       global_min: 0,
       global_max: 0,
@@ -110,6 +102,31 @@ function checkoutInfoFixture() {
       help_text: '',
       help_image_url: '',
       stripe_publishable_key: '',
+    },
+  }
+}
+
+function methodLimitFixture(currency: string) {
+  return {
+    daily_limit: 0,
+    daily_used: 0,
+    daily_remaining: 0,
+    single_min: 0,
+    single_max: 0,
+    fee_rate: 0,
+    available: true,
+    currency,
+  }
+}
+
+function checkoutInfoWithMethodFixture(method: string, currency: string) {
+  return {
+    data: {
+      ...checkoutInfoFixture().data,
+      methods: {
+        [method]: methodLimitFixture(currency),
+      },
+      stripe_publishable_key: method === 'stripe' ? 'pk_test_tokengate' : '',
     },
   }
 }
@@ -239,6 +256,55 @@ describe('PaymentView WeChat JSAPI flow', () => {
     ;(window as Window & { WeixinJSBridge?: { invoke: typeof bridgeInvoke } }).WeixinJSBridge = {
       invoke: bridgeInvoke,
     }
+  })
+
+  it('shows Stripe balance payment amounts in USD even when checkout metadata says CNY', async () => {
+    routeState.query = {}
+    getCheckoutInfo.mockResolvedValue(checkoutInfoWithMethodFixture('stripe', 'CNY'))
+
+    const wrapper = shallowMount(PaymentView, {
+      global: {
+        stubs: {
+          AppLayout: { template: '<div><slot /></div>' },
+          Teleport: true,
+          Transition: false,
+        },
+      },
+    })
+    await flushPromises()
+
+    const amountInput = wrapper.findComponent({ name: 'AmountInput' })
+    expect(amountInput.exists()).toBe(true)
+    amountInput.vm.$emit('update:modelValue', 10)
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('payment.createOrder $10.00')
+    expect(wrapper.text()).toContain('payment.paymentAmount$10.00')
+    expect(wrapper.text()).not.toContain('¥10.00')
+  })
+
+  it('keeps WeChat balance payment amounts in CNY', async () => {
+    routeState.query = {}
+    getCheckoutInfo.mockResolvedValue(checkoutInfoWithMethodFixture('wxpay', 'CNY'))
+
+    const wrapper = shallowMount(PaymentView, {
+      global: {
+        stubs: {
+          AppLayout: { template: '<div><slot /></div>' },
+          Teleport: true,
+          Transition: false,
+        },
+      },
+    })
+    await flushPromises()
+
+    const amountInput = wrapper.findComponent({ name: 'AmountInput' })
+    expect(amountInput.exists()).toBe(true)
+    amountInput.vm.$emit('update:modelValue', 10)
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('payment.createOrder ¥72.00')
+    expect(wrapper.text()).toContain('payment.paymentAmount¥72.00')
   })
 
   it('separates usage-based billing from BYO subscription mode', async () => {

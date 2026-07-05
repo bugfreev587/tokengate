@@ -6,7 +6,6 @@ import (
 
 	dbent "github.com/Wei-Shaw/sub2api/ent"
 	"github.com/Wei-Shaw/sub2api/internal/payment"
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -208,13 +207,13 @@ func TestPcAggregateMethodCurrency(t *testing.T) {
 	stripe.Config = `{"currency":"hkd"}`
 	currency, ok := svc.pcAggregateMethodCurrency([]*dbent.PaymentProviderInstance{stripe})
 	require.True(t, ok)
-	require.Equal(t, "HKD", currency)
+	require.Equal(t, payment.StripePaymentCurrency, currency)
 
 	airwallex := makeInstance(2, payment.TypeAirwallex, payment.TypeAirwallex, "")
 	airwallex.Config = `{"currency":"usd"}`
 	currency, ok = svc.pcAggregateMethodCurrency([]*dbent.PaymentProviderInstance{stripe, airwallex})
-	require.False(t, ok)
-	require.Empty(t, currency)
+	require.True(t, ok)
+	require.Equal(t, payment.StripePaymentCurrency, currency)
 
 	easypay := makeInstance(3, payment.TypeEasyPay, payment.TypeAlipay, "")
 	currency, ok = svc.pcAggregateMethodCurrency([]*dbent.PaymentProviderInstance{easypay})
@@ -222,7 +221,7 @@ func TestPcAggregateMethodCurrency(t *testing.T) {
 	require.Equal(t, payment.DefaultPaymentCurrency, currency)
 }
 
-func TestGetAvailableMethodLimitsOmitsMixedCurrencyMethod(t *testing.T) {
+func TestGetAvailableMethodLimitsNormalizesStripeConfiguredCurrenciesToUSD(t *testing.T) {
 	ctx := context.Background()
 	client := newPaymentConfigServiceTestClient(t)
 
@@ -247,12 +246,12 @@ func TestGetAvailableMethodLimitsOmitsMixedCurrencyMethod(t *testing.T) {
 	svc := &PaymentConfigService{entClient: client}
 	resp, err := svc.GetAvailableMethodLimits(ctx)
 	require.NoError(t, err)
-	require.NotContains(t, resp.Methods, payment.TypeStripe)
+	stripeLimits, ok := resp.Methods[payment.TypeStripe]
+	require.True(t, ok)
+	require.Equal(t, payment.StripePaymentCurrency, stripeLimits.Currency)
 
 	_, err = svc.ValidateMethodCurrencyConsistency(ctx, payment.TypeStripe)
-	require.Error(t, err)
-	appErr := infraerrors.FromError(err)
-	require.Equal(t, "PAYMENT_METHOD_CURRENCY_CONFLICT", appErr.Reason)
+	require.NoError(t, err)
 }
 
 func TestPcComputeGlobalRange(t *testing.T) {

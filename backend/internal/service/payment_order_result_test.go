@@ -95,7 +95,7 @@ func TestValidateSelectedCreateOrderAmountCurrencyRejectsFractionalZeroDecimal(t
 	t.Parallel()
 
 	err := validateSelectedCreateOrderAmountCurrency("100.50", &payment.InstanceSelection{
-		ProviderKey: payment.TypeStripe,
+		ProviderKey: payment.TypeAirwallex,
 		Config:      map[string]string{"currency": "JPY"},
 	})
 	if err == nil {
@@ -103,6 +103,20 @@ func TestValidateSelectedCreateOrderAmountCurrencyRejectsFractionalZeroDecimal(t
 	}
 	if appErr := infraerrors.FromError(err); appErr.Reason != "INVALID_AMOUNT" {
 		t.Fatalf("reason = %q, want INVALID_AMOUNT", appErr.Reason)
+	}
+}
+
+func TestPaymentProviderConfigCurrencyForcesStripeUSD(t *testing.T) {
+	t.Parallel()
+
+	currency := paymentProviderConfigCurrency(payment.TypeStripe, map[string]string{"currency": "CNY"})
+	if currency != payment.StripePaymentCurrency {
+		t.Fatalf("stripe currency = %q, want %s", currency, payment.StripePaymentCurrency)
+	}
+
+	currency = paymentProviderConfigCurrency(payment.TypeWxpay, nil)
+	if currency != payment.DefaultPaymentCurrency {
+		t.Fatalf("wxpay currency = %q, want %s", currency, payment.DefaultPaymentCurrency)
 	}
 }
 

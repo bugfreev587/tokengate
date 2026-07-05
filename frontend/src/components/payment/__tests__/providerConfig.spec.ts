@@ -42,12 +42,8 @@ describe('PROVIDER_CONFIG_FIELDS.airwallex', () => {
 })
 
 describe('PROVIDER_CONFIG_FIELDS.stripe', () => {
-	  it('adds currency config with USD as the default', () => {
-    const currency = findField('stripe', 'currency')
-
-	    expect(currency?.defaultValue).toBe('USD')
-    expect(currency?.hintKey).toBe('admin.settings.payment.field_paymentCurrencyHint')
-    expect(currency?.options).toBe(PAYMENT_CURRENCY_OPTIONS)
+  it('does not expose a currency field because Stripe direct payments are always USD', () => {
+    expect(findField('stripe', 'currency')).toBeUndefined()
   })
 })
 

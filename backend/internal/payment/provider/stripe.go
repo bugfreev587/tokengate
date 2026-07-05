@@ -41,11 +41,7 @@ func NewStripe(instanceID string, config map[string]string) (*Stripe, error) {
 		return nil, fmt.Errorf("stripe config missing required key: secretKey")
 	}
 	cfg := cloneStringMap(config)
-	currency, err := payment.NormalizePaymentCurrencyOrDefault(cfg["currency"], payment.DefaultPricingCurrency)
-	if err != nil {
-		return nil, fmt.Errorf("stripe config currency: %w", err)
-	}
-	cfg["currency"] = currency
+	cfg["currency"] = payment.StripePaymentCurrency
 	return &Stripe{
 		instanceID: instanceID,
 		config:     cfg,
@@ -80,14 +76,7 @@ func (s *Stripe) MerchantIdentityMetadata() map[string]string {
 }
 
 func (s *Stripe) currency() string {
-	if s == nil {
-		return payment.DefaultPricingCurrency
-	}
-	currency, err := payment.NormalizePaymentCurrencyOrDefault(s.config["currency"], payment.DefaultPricingCurrency)
-	if err != nil {
-		return payment.DefaultPricingCurrency
-	}
-	return currency
+	return payment.StripePaymentCurrency
 }
 
 // stripePaymentMethodTypes maps our PaymentType to Stripe payment_method_types.
@@ -307,7 +296,7 @@ func parseStripePaymentIntent(event *stripe.Event, status string, rawBody string
 	if err := json.Unmarshal(event.Data.Raw, &pi); err != nil {
 		return nil, fmt.Errorf("stripe parse payment_intent: %w", err)
 	}
-	currency := stripeIntentCurrency(pi.Currency, payment.DefaultPaymentCurrency)
+	currency := stripeIntentCurrency(pi.Currency, payment.StripePaymentCurrency)
 	return &payment.PaymentNotification{
 		TradeNo: pi.ID,
 		OrderID: pi.Metadata["orderId"],
