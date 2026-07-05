@@ -46,7 +46,8 @@ func TestPaymentHandlerCreateStripeSubscriptionCheckout(t *testing.T) {
 
 	var payload map[string]any
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &payload))
-	data := payload["data"].(map[string]any)
+	data, ok := payload["data"].(map[string]any)
+	require.True(t, ok)
 	require.Equal(t, "cs_test_123", data["session_id"])
 	require.Equal(t, "https://checkout.stripe.test/session", data["url"])
 	require.Equal(t, "cus_test_123", data["customer_id"])
