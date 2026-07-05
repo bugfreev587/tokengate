@@ -88,10 +88,14 @@
             </div>
             <div v-if="validAmount > 0" class="card p-6">
               <div class="space-y-2 text-sm">
-                <div class="flex justify-between">
-                  <span class="text-gray-500 dark:text-gray-400">{{ t('payment.paymentAmount') }}</span>
-                  <span class="text-gray-900 dark:text-white">{{ formatSelectedPaymentAmount(validAmount) }}</span>
-                </div>
+	                <div class="flex justify-between">
+	                  <span class="text-gray-500 dark:text-gray-400">{{ t('payment.usdAmount') }}</span>
+	                  <span class="text-gray-900 dark:text-white">{{ formatPricingAmount(validAmount) }}</span>
+	                </div>
+	                <div class="flex justify-between">
+	                  <span class="text-gray-500 dark:text-gray-400">{{ t('payment.paymentAmount') }}</span>
+	                  <span class="text-gray-900 dark:text-white">{{ formatSelectedPaymentAmount(paymentBaseAmount) }}</span>
+	                </div>
                 <div v-if="feeRate > 0" class="flex justify-between">
                   <span class="text-gray-500 dark:text-gray-400">{{ t('payment.fee') }} ({{ feeRate }}%)</span>
                   <span class="text-gray-900 dark:text-white">{{ formatSelectedPaymentAmount(feeAmount) }}</span>
@@ -100,13 +104,13 @@
                   <span class="font-medium text-gray-700 dark:text-gray-300">{{ t('payment.actualPay') }}</span>
                   <span class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ formatSelectedPaymentAmount(totalAmount) }}</span>
                 </div>
-                <div v-if="balanceRechargeMultiplier !== 1" class="flex justify-between" :class="{ 'border-t border-gray-200 pt-2 dark:border-dark-600': feeRate <= 0 }">
-                  <span class="text-gray-500 dark:text-gray-400">{{ t('payment.creditedBalance') }}</span>
-                  <span class="text-gray-900 dark:text-white">${{ creditedAmount.toFixed(2) }}</span>
-                </div>
-                <p v-if="balanceRechargeMultiplier !== 1" class="border-t border-gray-200 pt-2 text-xs text-gray-500 dark:border-dark-600 dark:text-gray-400">
-                  {{ t('payment.rechargeRatePreview', { usd: balanceRechargeMultiplier.toFixed(2) }) }}
-                </p>
+	                <div class="flex justify-between" :class="{ 'border-t border-gray-200 pt-2 dark:border-dark-600': feeRate <= 0 }">
+	                  <span class="text-gray-500 dark:text-gray-400">{{ t('payment.creditedBalance') }}</span>
+	                  <span class="text-gray-900 dark:text-white">{{ formatPricingAmount(creditedAmount) }}</span>
+	                </div>
+	                <p v-if="selectedCurrency === 'CNY'" class="border-t border-gray-200 pt-2 text-xs text-gray-500 dark:border-dark-600 dark:text-gray-400">
+	                  {{ t('payment.usdCnyRatePreview', { rate: usdCnyRate.toFixed(4) }) }}
+	                </p>
               </div>
             </div>
             <button :class="['btn w-full py-3 text-base font-medium', paymentButtonClass]" :disabled="!canSubmit || submitting" @click="handleSubmitRecharge">
@@ -149,10 +153,10 @@
                 </div>
                 <!-- Price -->
                 <div class="flex items-baseline gap-2">
-                  <span v-if="selectedPlan.original_price" class="text-sm text-gray-400 line-through dark:text-gray-500">
-                    {{ formatSelectedPaymentAmount(selectedPlan.original_price) }}
-                  </span>
-                  <span :class="['text-3xl font-bold', planTextClass]">{{ formatSelectedPaymentAmount(selectedPlan.price) }}</span>
+	                  <span v-if="selectedPlan.original_price" class="text-sm text-gray-400 line-through dark:text-gray-500">
+	                    {{ formatPricingAmount(selectedPlan.original_price) }}
+	                  </span>
+	                  <span :class="['text-3xl font-bold', planTextClass]">{{ formatPricingAmount(selectedPlan.price) }}</span>
                   <span class="text-sm text-gray-500 dark:text-gray-400">/ {{ planValiditySuffix }}</span>
                 </div>
                 <!-- Description -->
@@ -192,29 +196,36 @@
                   @select="selectedMethod = $event"
                 />
               </div>
-              <div v-if="!isSelectedStripeBillingPlan && feeRate > 0 && selectedPlan.price > 0" class="card p-6">
-                <div class="space-y-2 text-sm">
-                  <div class="flex justify-between">
-                    <span class="text-gray-500 dark:text-gray-400">{{ t('payment.amountLabel') }}</span>
-                    <span class="text-gray-900 dark:text-white">{{ formatSelectedPaymentAmount(selectedPlan.price) }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span class="text-gray-500 dark:text-gray-400">{{ t('payment.fee') }} ({{ feeRate }}%)</span>
-                    <span class="text-gray-900 dark:text-white">{{ formatSelectedPaymentAmount(subFeeAmount) }}</span>
-                  </div>
-                  <div class="flex justify-between border-t border-gray-200 pt-2 dark:border-dark-600">
-                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ t('payment.actualPay') }}</span>
-                    <span class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ formatSelectedPaymentAmount(subTotalAmount) }}</span>
-                  </div>
-                </div>
-              </div>
+	              <div v-if="!isSelectedStripeBillingPlan && selectedPlan.price > 0 && (feeRate > 0 || selectedCurrency !== PRICING_CURRENCY)" class="card p-6">
+	                <div class="space-y-2 text-sm">
+	                  <div class="flex justify-between">
+	                    <span class="text-gray-500 dark:text-gray-400">{{ t('payment.amountLabel') }}</span>
+	                    <span class="text-gray-900 dark:text-white">{{ formatPricingAmount(selectedPlan.price) }}</span>
+	                  </div>
+	                  <div class="flex justify-between">
+	                    <span class="text-gray-500 dark:text-gray-400">{{ t('payment.paymentAmount') }}</span>
+	                    <span class="text-gray-900 dark:text-white">{{ formatSelectedPaymentAmount(subPaymentBaseAmount) }}</span>
+	                  </div>
+	                  <div v-if="feeRate > 0" class="flex justify-between">
+	                    <span class="text-gray-500 dark:text-gray-400">{{ t('payment.fee') }} ({{ feeRate }}%)</span>
+	                    <span class="text-gray-900 dark:text-white">{{ formatSelectedPaymentAmount(subFeeAmount) }}</span>
+	                  </div>
+	                  <div v-if="feeRate > 0" class="flex justify-between border-t border-gray-200 pt-2 dark:border-dark-600">
+	                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ t('payment.actualPay') }}</span>
+	                    <span class="text-lg font-bold text-primary-600 dark:text-primary-400">{{ formatSelectedPaymentAmount(subTotalAmount) }}</span>
+	                  </div>
+	                  <p v-if="selectedCurrency === 'CNY'" class="border-t border-gray-200 pt-2 text-xs text-gray-500 dark:border-dark-600 dark:text-gray-400">
+	                    {{ t('payment.usdCnyRatePreview', { rate: usdCnyRate.toFixed(4) }) }}
+	                  </p>
+	                </div>
+	              </div>
               <button data-testid="subscription-confirm-button" :class="['btn w-full py-3 text-base font-medium', paymentButtonClass]" :disabled="!canSubmitSubscription || submitting" @click="confirmSubscribe">
                 <span v-if="submitting" class="flex items-center justify-center gap-2">
                   <span class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
                   {{ t('common.processing') }}
                 </span>
                 <span v-else>
-                  {{ isSelectedStripeBillingPlan ? t('payment.subscribeWithStripe') : `${t('payment.createOrder')} ${formatSelectedPaymentAmount(feeRate > 0 ? subTotalAmount : selectedPlan.price)}` }}
+	                  {{ isSelectedStripeBillingPlan ? t('payment.subscribeWithStripe') : `${t('payment.createOrder')} ${formatSelectedPaymentAmount(subTotalAmount)}` }}
                 </span>
               </button>
               <button class="btn btn-secondary w-full" @click="selectedPlan = null">{{ t('common.cancel') }}</button>
@@ -323,7 +334,12 @@ import { platformAccentBarClass, platformBadgeLightClass, platformBadgeClass, pl
 import SubscriptionPlanCard from '@/components/payment/SubscriptionPlanCard.vue'
 import PaymentStatusPanel from '@/components/payment/PaymentStatusPanel.vue'
 import Icon from '@/components/icons/Icon.vue'
-import { formatPaymentAmount, normalizePaymentCurrency } from '@/components/payment/currency'
+import {
+  PRICING_CURRENCY,
+  convertPricingAmountToPaymentCurrency,
+  formatPaymentAmount,
+  normalizePaymentCurrency,
+} from '@/components/payment/currency'
 import type { PaymentMethodOption } from '@/components/payment/PaymentMethodSelector.vue'
 import { buildPaymentErrorToastMessage, describePaymentScenarioError } from './paymentUx'
 import { hasWechatResumeQuery, parseWechatResumeRoute, stripWechatResumeQuery } from './paymentWechatResume'
@@ -525,9 +541,9 @@ function onPaymentSettled() {
 
 // All checkout data from single API call
 const checkout = ref<CheckoutInfoResponse>({
-  methods: {}, global_min: 0, global_max: 0,
-  plans: [], balance_disabled: false, balance_recharge_multiplier: 1, recharge_fee_rate: 0, help_text: '', help_image_url: '', stripe_publishable_key: '',
-})
+	  methods: {}, global_min: 0, global_max: 0,
+	  plans: [], balance_disabled: false, balance_recharge_multiplier: 1, usd_cny_rate: 7.2, recharge_fee_rate: 0, help_text: '', help_image_url: '', stripe_publishable_key: '',
+	})
 
 const tabs = computed(() => {
   const result: { key: 'recharge' | 'subscription'; label: string; description: string }[] = []
@@ -594,11 +610,20 @@ const modeSteps = computed(() => {
 const visibleMethods = computed(() => getVisibleMethods(checkout.value.methods))
 const enabledMethods = computed(() => Object.keys(visibleMethods.value))
 const validAmount = computed(() => amount.value ?? 0)
-const balanceRechargeMultiplier = computed(() => {
-  const multiplier = checkout.value.balance_recharge_multiplier
-  return multiplier > 0 ? multiplier : 1
+const usdCnyRate = computed(() => {
+  const rate = checkout.value.usd_cny_rate
+  return Number.isFinite(rate) && rate > 0 ? rate : 7.2
 })
-const creditedAmount = computed(() => Math.round((validAmount.value * balanceRechargeMultiplier.value) * 100) / 100)
+
+function roundPaymentAmount(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100
+}
+
+function roundPaymentFee(baseAmount: number, rate: number): number {
+  return Math.ceil(((baseAmount * rate) / 100) * 100) / 100
+}
+
+const creditedAmount = computed(() => roundPaymentAmount(validAmount.value))
 
 // Adaptive grid: center single card, 2-col for 2 plans, 3-col for 3+
 const planGridClass = computed(() => {
@@ -647,6 +672,10 @@ function formatSelectedPaymentAmount(value: number): string {
   return formatPaymentAmount(value, selectedCurrency.value, localeCode.value)
 }
 
+function formatPricingAmount(value: number): string {
+  return formatPaymentAmount(value, PRICING_CURRENCY, localeCode.value)
+}
+
 const methodOptions = computed<PaymentMethodOption[]>(() =>
   enabledMethods.value.map((type) => {
     const ml = visibleMethods.value[type]
@@ -659,15 +688,18 @@ const methodOptions = computed<PaymentMethodOption[]>(() =>
 )
 
 const feeRate = computed(() => checkout.value?.recharge_fee_rate ?? 0)
-const feeAmount = computed(() =>
-  feeRate.value > 0 && validAmount.value > 0
-    ? Math.ceil(((validAmount.value * feeRate.value) / 100) * 100) / 100
-    : 0
+const paymentBaseAmount = computed(() =>
+  convertPricingAmountToPaymentCurrency(validAmount.value, selectedCurrency.value, usdCnyRate.value)
 )
+const feeAmount = computed(() =>
+  feeRate.value > 0 && paymentBaseAmount.value > 0
+    ? roundPaymentFee(paymentBaseAmount.value, feeRate.value)
+	    : 0
+	)
 const totalAmount = computed(() =>
-  feeRate.value > 0 && validAmount.value > 0
-    ? Math.round((validAmount.value + feeAmount.value) * 100) / 100
-    : validAmount.value
+  feeRate.value > 0 && paymentBaseAmount.value > 0
+    ? roundPaymentAmount(paymentBaseAmount.value + feeAmount.value)
+    : paymentBaseAmount.value
 )
 
 const amountError = computed(() => {
@@ -710,16 +742,19 @@ const subMethodOptions = computed<PaymentMethodOption[]>(() => {
   })
 })
 
-const subFeeAmount = computed(() => {
+const subPaymentBaseAmount = computed(() => {
   const price = selectedPlan.value?.price ?? 0
-  if (feeRate.value <= 0 || price <= 0) return 0
-  return Math.ceil(((price * feeRate.value) / 100) * 100) / 100
+  return convertPricingAmountToPaymentCurrency(price, selectedCurrency.value, usdCnyRate.value)
+})
+
+const subFeeAmount = computed(() => {
+  if (feeRate.value <= 0 || subPaymentBaseAmount.value <= 0) return 0
+  return roundPaymentFee(subPaymentBaseAmount.value, feeRate.value)
 })
 
 const subTotalAmount = computed(() => {
-  const price = selectedPlan.value?.price ?? 0
-  if (feeRate.value <= 0 || price <= 0) return price
-  return Math.round((price + subFeeAmount.value) * 100) / 100
+  if (feeRate.value <= 0 || subPaymentBaseAmount.value <= 0) return subPaymentBaseAmount.value
+  return roundPaymentAmount(subPaymentBaseAmount.value + subFeeAmount.value)
 })
 
 const canSubmitSubscription = computed(() =>

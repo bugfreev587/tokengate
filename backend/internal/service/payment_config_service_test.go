@@ -99,6 +99,9 @@ func TestParsePaymentConfig(t *testing.T) {
 		if cfg.LoadBalanceStrategy != payment.DefaultLoadBalanceStrategy {
 			t.Fatalf("expected LoadBalanceStrategy=%s, got %q", payment.DefaultLoadBalanceStrategy, cfg.LoadBalanceStrategy)
 		}
+		if cfg.USDCNYRate != defaultUSDCNYRate {
+			t.Fatalf("expected USDCNYRate=%v, got %v", defaultUSDCNYRate, cfg.USDCNYRate)
+		}
 		if len(cfg.EnabledTypes) != 0 {
 			t.Fatalf("expected empty EnabledTypes, got %v", cfg.EnabledTypes)
 		}
@@ -115,6 +118,7 @@ func TestParsePaymentConfig(t *testing.T) {
 			SettingMaxPendingOrders:    "5",
 			SettingEnabledPaymentTypes: "alipay,wxpay,stripe",
 			SettingBalancePayDisabled:  "true",
+			SettingUSDCNYRate:          "7.25",
 			SettingLoadBalanceStrategy: "least_amount",
 			SettingProductNamePrefix:   "PRE",
 			SettingProductNameSuffix:   "SUF",
@@ -147,6 +151,9 @@ func TestParsePaymentConfig(t *testing.T) {
 		}
 		if !cfg.BalanceDisabled {
 			t.Fatal("expected BalanceDisabled=true")
+		}
+		if cfg.USDCNYRate != 7.25 {
+			t.Fatalf("USDCNYRate = %v, want 7.25", cfg.USDCNYRate)
 		}
 		if cfg.LoadBalanceStrategy != "least_amount" {
 			t.Fatalf("LoadBalanceStrategy = %q, want %q", cfg.LoadBalanceStrategy, "least_amount")

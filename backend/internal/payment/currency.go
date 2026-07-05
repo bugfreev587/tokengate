@@ -7,7 +7,10 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-const DefaultPaymentCurrency = "CNY"
+const (
+	DefaultPaymentCurrency = "CNY"
+	DefaultPricingCurrency = "USD"
+)
 
 type paymentCurrencyAmountUnit struct {
 	apiMinorUnit      int
@@ -62,6 +65,14 @@ func NormalizePaymentCurrency(raw string) (string, error) {
 		}
 	}
 	return currency, nil
+}
+
+func NormalizePaymentCurrencyOrDefault(raw, fallback string) (string, error) {
+	currency := strings.ToUpper(strings.TrimSpace(raw))
+	if currency == "" {
+		return NormalizePaymentCurrency(fallback)
+	}
+	return NormalizePaymentCurrency(currency)
 }
 
 func CurrencyMinorUnit(currency string) int {

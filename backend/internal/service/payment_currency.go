@@ -10,7 +10,7 @@ import (
 func paymentProviderConfigCurrency(providerKey string, cfg map[string]string) string {
 	switch strings.TrimSpace(providerKey) {
 	case payment.TypeStripe, payment.TypeAirwallex:
-		currency, err := payment.NormalizePaymentCurrency(cfg["currency"])
+		currency, err := payment.NormalizePaymentCurrencyOrDefault(cfg["currency"], payment.DefaultPricingCurrency)
 		if err == nil {
 			return currency
 		}

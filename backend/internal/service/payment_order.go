@@ -49,14 +49,7 @@ func (s *PaymentService) CreateOrder(ctx context.Context, req CreateOrderRequest
 		return nil, infraerrors.Forbidden("USER_INACTIVE", "user account is disabled")
 	}
 	req.StripeEnvironment = stripeEnvironmentForUser(user)
-	orderAmount := req.Amount
-	limitAmount := req.Amount
-	if plan != nil {
-		orderAmount = plan.Price
-		limitAmount = plan.Price
-	} else if req.OrderType == payment.OrderTypeBalance {
-		orderAmount = calculateCreditedBalance(req.Amount, cfg.BalanceRechargeMultiplier)
-	}
+	orderAmount, limitAmount := calculateCreateOrderAmounts(req, plan, cfg)
 	feeRate := cfg.RechargeFeeRate
 	methodCurrency := payment.DefaultPaymentCurrency
 	if s.configService != nil {
@@ -65,7 +58,7 @@ func (s *PaymentService) CreateOrder(ctx context.Context, req CreateOrderRequest
 			return nil, err
 		}
 	}
-	payAmountStr, payAmount, err := calculateCreateOrderPayAmount(limitAmount, feeRate, methodCurrency)
+	payAmountStr, payAmount, err := calculateCreateOrderPayAmount(limitAmount, feeRate, methodCurrency, cfg.USDCNYRate)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +74,7 @@ func (s *PaymentService) CreateOrder(ctx context.Context, req CreateOrderRequest
 		selectedCurrency = paymentProviderConfigCurrency(sel.ProviderKey, sel.Config)
 	}
 	if selectedCurrency != methodCurrency {
-		payAmountStr, payAmount, err = calculateCreateOrderPayAmount(limitAmount, feeRate, selectedCurrency)
+		payAmountStr, payAmount, err = calculateCreateOrderPayAmount(limitAmount, feeRate, selectedCurrency, cfg.USDCNYRate)
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +159,7 @@ func (s *PaymentService) createOrderInTx(ctx context.Context, req CreateOrderReq
 	if err != nil {
 		return nil, err
 	}
-	providerSnapshot := buildPaymentOrderProviderSnapshot(sel, req)
+	providerSnapshot := buildPaymentOrderProviderSnapshot(sel, req, cfg)
 	selectedInstanceID := ""
 	selectedProviderKey := ""
 	if sel != nil {
@@ -250,7 +243,7 @@ func (s *PaymentService) checkPendingLimit(ctx context.Context, tx *dbent.Tx, us
 	return nil
 }
 
-func buildPaymentOrderProviderSnapshot(sel *payment.InstanceSelection, req CreateOrderRequest) map[string]any {
+func buildPaymentOrderProviderSnapshot(sel *payment.InstanceSelection, req CreateOrderRequest, cfg *PaymentConfig) map[string]any {
 	if sel == nil {
 		return nil
 	}
@@ -266,6 +259,19 @@ func buildPaymentOrderProviderSnapshot(sel *payment.InstanceSelection, req Creat
 	providerKey := strings.TrimSpace(sel.ProviderKey)
 	if providerKey != "" {
 		snapshot["provider_key"] = providerKey
+	}
+	paymentCurrency := paymentProviderConfigCurrency(providerKey, sel.Config)
+	snapshot["pricing_currency"] = payment.DefaultPricingCurrency
+	snapshot["currency"] = paymentCurrency
+	if paymentCurrency == "CNY" {
+		rate := defaultUSDCNYRate
+		if cfg != nil {
+			rate = normalizeUSDCNYRate(cfg.USDCNYRate)
+		}
+		snapshot["fx_from"] = payment.DefaultPricingCurrency
+		snapshot["fx_to"] = "CNY"
+		snapshot["fx_rate"] = rate
+		snapshot["fx_source"] = "admin_config"
 	}
 	if environment := payment.NormalizeProviderEnvironment(strings.TrimSpace(sel.Environment)); environment != "" {
 		snapshot["environment"] = environment
@@ -283,7 +289,6 @@ func buildPaymentOrderProviderSnapshot(sel *payment.InstanceSelection, req Creat
 		if merchantID := strings.TrimSpace(sel.Config["mchId"]); merchantID != "" {
 			snapshot["merchant_id"] = merchantID
 		}
-		snapshot["currency"] = payment.DefaultPaymentCurrency
 	}
 	if providerKey == payment.TypeAlipay {
 		if merchantAppID := strings.TrimSpace(sel.Config["appId"]); merchantAppID != "" {
@@ -296,13 +301,13 @@ func buildPaymentOrderProviderSnapshot(sel *payment.InstanceSelection, req Creat
 		}
 	}
 	if providerKey == payment.TypeStripe {
-		snapshot["currency"] = paymentProviderConfigCurrency(providerKey, sel.Config)
+		snapshot["currency"] = paymentCurrency
 	}
 	if providerKey == payment.TypeAirwallex {
 		if accountID := strings.TrimSpace(sel.Config["accountId"]); accountID != "" {
 			snapshot["merchant_id"] = accountID
 		}
-		snapshot["currency"] = paymentProviderConfigCurrency(providerKey, sel.Config)
+		snapshot["currency"] = paymentCurrency
 	}
 
 	if len(snapshot) == 1 {
@@ -332,10 +337,6 @@ func (s *PaymentService) checkDailyLimit(ctx context.Context, tx *dbent.Tx, user
 	}
 	var used float64
 	for _, o := range orders {
-		if o.OrderType == payment.OrderTypeBalance {
-			used += o.PayAmount
-			continue
-		}
 		used += o.Amount
 	}
 	if used+amount > limit {
@@ -518,17 +519,13 @@ func (s *PaymentService) buildPaymentSubject(plan *dbent.SubscriptionPlan, limit
 		}
 		return "TokenGate Subscription " + plan.Name
 	}
-	currency := payment.DefaultPaymentCurrency
-	if sel != nil {
-		currency = paymentProviderConfigCurrency(sel.ProviderKey, sel.Config)
-	}
-	amountStr := payment.FormatAmountForCurrency(limitAmount, currency)
+	amountStr := payment.FormatAmountForCurrency(limitAmount, payment.DefaultPricingCurrency)
 	pf := strings.TrimSpace(cfg.ProductNamePrefix)
 	sf := strings.TrimSpace(cfg.ProductNameSuffix)
 	if pf != "" || sf != "" {
 		return strings.TrimSpace(pf + " " + amountStr + " " + sf)
 	}
-	return "TokenGate " + amountStr + " " + currency
+	return "TokenGate " + amountStr + " " + payment.DefaultPricingCurrency
 }
 
 func (s *PaymentService) maybeBuildWeChatOAuthRequiredResponse(ctx context.Context, req CreateOrderRequest, amount, payAmount, feeRate float64) (*CreateOrderResponse, error) {
@@ -589,11 +586,22 @@ func (s *PaymentService) validateSelectedCreateOrderInstance(ctx context.Context
 	return nil
 }
 
-func calculateCreateOrderPayAmount(limitAmount, feeRate float64, currency string) (string, float64, error) {
-	if err := validateCreateOrderAmountCurrency(limitAmount, currency); err != nil {
+func calculateCreateOrderAmounts(req CreateOrderRequest, plan *dbent.SubscriptionPlan, _ *PaymentConfig) (float64, float64) {
+	if plan != nil {
+		return plan.Price, plan.Price
+	}
+	return req.Amount, req.Amount
+}
+
+func calculateCreateOrderPayAmount(limitAmount, feeRate float64, currency string, usdCNYRate float64) (string, float64, error) {
+	if err := validateCreateOrderAmountCurrency(limitAmount, payment.DefaultPricingCurrency); err != nil {
 		return "", 0, err
 	}
-	payAmountStr := payment.CalculatePayAmountForCurrency(limitAmount, feeRate, currency)
+	paymentBaseAmount := calculatePaymentBaseAmount(limitAmount, currency, usdCNYRate)
+	if err := validateCreateOrderAmountCurrency(paymentBaseAmount, currency); err != nil {
+		return "", 0, err
+	}
+	payAmountStr := payment.CalculatePayAmountForCurrency(paymentBaseAmount, feeRate, currency)
 	if _, err := payment.AmountToMinorUnit(payAmountStr, currency); err != nil {
 		return "", 0, infraerrors.BadRequest("INVALID_AMOUNT", err.Error()).
 			WithMetadata(map[string]string{"currency": currency})

@@ -32,9 +32,10 @@ export interface PaymentConfig {
   daily_limit: number
   max_pending_orders: number
   order_timeout_minutes: number
-  balance_disabled: boolean
-  balance_recharge_multiplier: number
-  enabled_payment_types: PaymentType[]
+	  balance_disabled: boolean
+	  balance_recharge_multiplier: number
+	  usd_cny_rate: number
+	  enabled_payment_types: PaymentType[]
   help_image_url: string
   help_text: string
   stripe_publishable_key: string
@@ -64,9 +65,10 @@ export interface CheckoutInfoResponse {
   global_min: number
   global_max: number
   plans: SubscriptionPlan[]
-  balance_disabled: boolean
-  balance_recharge_multiplier: number
-  recharge_fee_rate: number
+	  balance_disabled: boolean
+	  balance_recharge_multiplier: number
+	  usd_cny_rate: number
+	  recharge_fee_rate: number
   help_text: string
   help_image_url: string
   stripe_publishable_key: string

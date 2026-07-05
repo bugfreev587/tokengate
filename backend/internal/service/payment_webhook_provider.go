@@ -151,7 +151,31 @@ func (s *PaymentService) getEnabledWebhookProvidersByKey(ctx context.Context, pr
 		providers = append(providers, prov)
 	}
 	if len(providers) == 0 {
+		if prov, ok := s.trySingleWebhookRegistryFallback(ctx, providerKey, instances); ok {
+			return []payment.Provider{prov}, nil
+		}
 		return nil, payment.ErrProviderNotFound
 	}
 	return providers, nil
+}
+
+func (s *PaymentService) trySingleWebhookRegistryFallback(ctx context.Context, providerKey string, instances []*dbent.PaymentProviderInstance) (payment.Provider, bool) {
+	if s == nil || s.registry == nil {
+		return nil, false
+	}
+	if len(instances) != 1 || !s.webhookRegistryFallbackAllowed(ctx, providerKey) {
+		return nil, false
+	}
+	if !s.providersLoaded {
+		if s.loadBalancer == nil {
+			return nil, false
+		}
+		s.EnsureProviders(ctx)
+	}
+	prov, err := s.registry.GetProviderByKey(providerKey)
+	if err != nil {
+		slog.Warn("webhook registry fallback failed", "provider", providerKey, "error", err)
+		return nil, false
+	}
+	return prov, true
 }

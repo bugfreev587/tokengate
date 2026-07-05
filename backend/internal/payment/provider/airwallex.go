@@ -67,7 +67,7 @@ func NewAirwallex(instanceID string, config map[string]string) (*Airwallex, erro
 		return nil, err
 	}
 	cfg["apiBase"] = apiBase
-	currency, err := payment.NormalizePaymentCurrency(cfg["currency"])
+	currency, err := payment.NormalizePaymentCurrencyOrDefault(cfg["currency"], payment.DefaultPricingCurrency)
 	if err != nil {
 		return nil, fmt.Errorf("airwallex config currency: %w", err)
 	}
@@ -145,11 +145,11 @@ func (a *Airwallex) MerchantIdentityMetadata() map[string]string {
 
 func (a *Airwallex) currency() string {
 	if a == nil {
-		return payment.DefaultPaymentCurrency
+		return payment.DefaultPricingCurrency
 	}
-	currency, err := payment.NormalizePaymentCurrency(a.config["currency"])
+	currency, err := payment.NormalizePaymentCurrencyOrDefault(a.config["currency"], payment.DefaultPricingCurrency)
 	if err != nil {
-		return payment.DefaultPaymentCurrency
+		return payment.DefaultPricingCurrency
 	}
 	return currency
 }

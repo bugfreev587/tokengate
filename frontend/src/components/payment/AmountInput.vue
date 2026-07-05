@@ -3,7 +3,7 @@
     <!-- Quick Amount Buttons -->
     <div>
       <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-        {{ t('payment.quickAmounts') }}
+        {{ t('payment.quickAmounts') }} (USD)
       </label>
       <div class="grid grid-cols-3 gap-2">
         <button
@@ -18,7 +18,7 @@
           ]"
           @click="selectAmount(amt)"
         >
-          {{ amt }}
+          ${{ amt }}
         </button>
       </div>
     </div>
@@ -26,7 +26,7 @@
     <!-- Custom Amount Input -->
     <div>
       <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-        {{ t('payment.customAmount') }}
+        {{ t('payment.customAmount') }} (USD)
       </label>
       <div class="relative">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dark-500">

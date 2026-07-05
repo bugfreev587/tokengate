@@ -5428,41 +5428,41 @@
                       :placeholder="t('admin.settings.payment.noLimit')"
                     />
                   </div>
-                  <div>
-                    <label class="input-label">{{
-                      t("admin.settings.payment.balanceRechargeMultiplier")
-                    }}</label>
-                    <input
-                      :value="form.payment_balance_recharge_multiplier || ''"
-                      @input="
-                        form.payment_balance_recharge_multiplier =
-                          parseFloat(
-                            ($event.target as HTMLInputElement).value,
-                          ) || 1
-                      "
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      class="input"
-                    />
+	                  <div>
+	                    <label class="input-label">{{
+	                      t("admin.settings.payment.usdCnyRate")
+	                    }}</label>
+	                    <input
+	                      :value="form.payment_usd_cny_rate || ''"
+	                      @input="
+	                        form.payment_usd_cny_rate =
+	                          parseFloat(
+	                            ($event.target as HTMLInputElement).value,
+	                          ) || 7.2
+	                      "
+	                      type="number"
+	                      step="0.0001"
+	                      min="0.01"
+	                      class="input"
+	                    />
                     <p class="mt-0.5 text-xs text-gray-400">
-                      {{
-                        t(
-                          "admin.settings.payment.balanceRechargeMultiplierHint",
-                        )
-                      }}
-                    </p>
+	                      {{
+	                        t(
+	                          "admin.settings.payment.usdCnyRateHint",
+	                        )
+	                      }}
+	                    </p>
                     <p
                       class="mt-1 text-xs font-medium text-primary-600 dark:text-primary-400"
                     >
-                      {{
-                        t("admin.settings.payment.balanceRechargePreview", {
-                          usd: (
-                            Number(form.payment_balance_recharge_multiplier) ||
-                            1
-                          ).toFixed(2),
-                        })
-                      }}
+	                      {{
+	                        t("admin.settings.payment.usdCnyRatePreview", {
+	                          rate: (
+	                            Number(form.payment_usd_cny_rate) ||
+	                            7.2
+	                          ).toFixed(4),
+	                        })
+	                      }}
                     </p>
                   </div>
                   <div>
@@ -6558,6 +6558,7 @@ const form = reactive<SettingsForm>({
   payment_order_timeout_minutes: 30,
   payment_balance_disabled: false,
   payment_balance_recharge_multiplier: 1,
+  payment_usd_cny_rate: 7.2,
   payment_recharge_fee_rate: 0,
   payment_enabled_types: [],
   payment_help_image_url: "",
@@ -7774,6 +7775,7 @@ async function saveSettings() {
       payment_balance_disabled: form.payment_balance_disabled,
       payment_balance_recharge_multiplier:
         Number(form.payment_balance_recharge_multiplier) || 1,
+      payment_usd_cny_rate: Number(form.payment_usd_cny_rate) || 7.2,
       payment_recharge_fee_rate: Number(form.payment_recharge_fee_rate) || 0,
       payment_enabled_types: form.payment_enabled_types,
       payment_load_balance_strategy: form.payment_load_balance_strategy,

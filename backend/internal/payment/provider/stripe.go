@@ -41,7 +41,7 @@ func NewStripe(instanceID string, config map[string]string) (*Stripe, error) {
 		return nil, fmt.Errorf("stripe config missing required key: secretKey")
 	}
 	cfg := cloneStringMap(config)
-	currency, err := payment.NormalizePaymentCurrency(cfg["currency"])
+	currency, err := payment.NormalizePaymentCurrencyOrDefault(cfg["currency"], payment.DefaultPricingCurrency)
 	if err != nil {
 		return nil, fmt.Errorf("stripe config currency: %w", err)
 	}
@@ -81,11 +81,11 @@ func (s *Stripe) MerchantIdentityMetadata() map[string]string {
 
 func (s *Stripe) currency() string {
 	if s == nil {
-		return payment.DefaultPaymentCurrency
+		return payment.DefaultPricingCurrency
 	}
-	currency, err := payment.NormalizePaymentCurrency(s.config["currency"])
+	currency, err := payment.NormalizePaymentCurrencyOrDefault(s.config["currency"], payment.DefaultPricingCurrency)
 	if err != nil {
-		return payment.DefaultPaymentCurrency
+		return payment.DefaultPricingCurrency
 	}
 	return currency
 }

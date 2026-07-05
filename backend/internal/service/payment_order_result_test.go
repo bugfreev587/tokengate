@@ -109,7 +109,7 @@ func TestValidateSelectedCreateOrderAmountCurrencyRejectsFractionalZeroDecimal(t
 func TestCalculateCreateOrderPayAmountUsesCurrencyPrecision(t *testing.T) {
 	t.Parallel()
 
-	amountStr, amount, err := calculateCreateOrderPayAmount(100, 2.5, "JPY")
+	amountStr, amount, err := calculateCreateOrderPayAmount(100, 2.5, "JPY", defaultUSDCNYRate)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -117,19 +117,64 @@ func TestCalculateCreateOrderPayAmountUsesCurrencyPrecision(t *testing.T) {
 		t.Fatalf("JPY pay amount = (%q, %v), want (103, 103)", amountStr, amount)
 	}
 
-	amountStr, amount, err = calculateCreateOrderPayAmount(12.345, 1, "KWD")
+	amountStr, amount, err = calculateCreateOrderPayAmount(12.34, 1, "KWD", defaultUSDCNYRate)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if amountStr != "12.469" || amount != 12.469 {
-		t.Fatalf("KWD pay amount = (%q, %v), want (12.469, 12.469)", amountStr, amount)
+	if amountStr != "12.464" || amount != 12.464 {
+		t.Fatalf("KWD pay amount = (%q, %v), want (12.464, 12.464)", amountStr, amount)
+	}
+}
+
+func TestCalculateCreateOrderPayAmountConvertsUSDToCNY(t *testing.T) {
+	t.Parallel()
+
+	amountStr, amount, err := calculateCreateOrderPayAmount(10, 0, "CNY", 7.2)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if amountStr != "72.00" || amount != 72 {
+		t.Fatalf("CNY pay amount = (%q, %v), want (72.00, 72)", amountStr, amount)
+	}
+
+	amountStr, amount, err = calculateCreateOrderPayAmount(10, 3, "CNY", 7.2)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if amountStr != "74.16" || amount != 74.16 {
+		t.Fatalf("CNY pay amount with fee = (%q, %v), want (74.16, 74.16)", amountStr, amount)
+	}
+
+	amountStr, amount, err = calculateCreateOrderPayAmount(10, 3, "USD", 7.2)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if amountStr != "10.30" || amount != 10.3 {
+		t.Fatalf("USD pay amount with fee = (%q, %v), want (10.30, 10.3)", amountStr, amount)
+	}
+}
+
+func TestCalculateCreateOrderAmountsKeepsBalanceCreditInUSD(t *testing.T) {
+	t.Parallel()
+
+	orderAmount, limitAmount := calculateCreateOrderAmounts(
+		CreateOrderRequest{
+			Amount:    10,
+			OrderType: payment.OrderTypeBalance,
+		},
+		nil,
+		&PaymentConfig{BalanceRechargeMultiplier: 3},
+	)
+
+	if orderAmount != 10 || limitAmount != 10 {
+		t.Fatalf("balance order amounts = (%v, %v), want (10, 10)", orderAmount, limitAmount)
 	}
 }
 
 func TestCalculateCreateOrderPayAmountRejectsFractionalZeroDecimal(t *testing.T) {
 	t.Parallel()
 
-	_, _, err := calculateCreateOrderPayAmount(100.5, 0, "JPY")
+	_, _, err := calculateCreateOrderPayAmount(100.5, 0, "JPY", defaultUSDCNYRate)
 	if err == nil {
 		t.Fatal("expected fractional JPY amount to fail")
 	}
