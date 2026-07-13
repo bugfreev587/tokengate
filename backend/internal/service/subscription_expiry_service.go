@@ -63,6 +63,9 @@ func (s *SubscriptionExpiryService) Stop() {
 }
 
 func (s *SubscriptionExpiryService) runOnce() {
+	if s == nil || s.userSubRepo == nil {
+		return
+	}
 	statusCtx, statusCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	updated, err := s.userSubRepo.BatchUpdateExpiredStatus(statusCtx)
 	statusCancel()
@@ -72,7 +75,7 @@ func (s *SubscriptionExpiryService) runOnce() {
 		log.Printf("[SubscriptionExpiry] Updated %d expired subscriptions", updated)
 	}
 
-	if s == nil || s.byoAccountUpdater == nil {
+	if s.byoAccountUpdater == nil {
 		return
 	}
 	reconcileCtx, reconcileCancel := context.WithTimeout(context.Background(), 10*time.Second)

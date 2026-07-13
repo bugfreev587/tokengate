@@ -32,7 +32,11 @@ func ProvideGitHubReleaseClient(cfg *config.Config) service.GitHubReleaseClient 
 }
 
 func ProvideBYOSubscriptionEntitlementChecker(repo service.UserSubscriptionRepository) service.BYOSubscriptionEntitlementChecker {
-	return repo.(service.BYOSubscriptionEntitlementChecker)
+	checker, ok := repo.(service.BYOSubscriptionEntitlementChecker)
+	if !ok {
+		panic("user subscription repository does not implement BYO entitlement checks")
+	}
+	return checker
 }
 
 // ProvidePricingRemoteClient 创建定价数据远程客户端

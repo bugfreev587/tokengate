@@ -36,6 +36,11 @@ func TestSubscriptionExpiryServiceRetriesReconciliationAfterFailure(t *testing.T
 	require.Equal(t, 2, updater.reconcileCalls)
 }
 
+func TestSubscriptionExpiryServiceNilRunOnceIsSafe(t *testing.T) {
+	var svc *SubscriptionExpiryService
+	require.NotPanics(t, svc.runOnce)
+}
+
 type subscriptionExpiryRepoStub struct {
 	UserSubscriptionRepository
 	batchUpdated int64
