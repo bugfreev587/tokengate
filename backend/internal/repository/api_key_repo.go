@@ -8,6 +8,7 @@ import (
 	"time"
 
 	dbent "github.com/Wei-Shaw/sub2api/ent"
+	dbaccount "github.com/Wei-Shaw/sub2api/ent/account"
 	"github.com/Wei-Shaw/sub2api/ent/apikey"
 	"github.com/Wei-Shaw/sub2api/ent/group"
 	"github.com/Wei-Shaw/sub2api/ent/schema/mixins"
@@ -162,6 +163,8 @@ func (r *apiKeyRepository) GetByKeyForAuth(ctx context.Context, key string) (*se
 				group.FieldName,
 				group.FieldPlatform,
 				group.FieldStatus,
+				group.FieldOwnerUserID,
+				group.FieldCapacitySource,
 				group.FieldSubscriptionType,
 				group.FieldRateMultiplier,
 				group.FieldDailyLimitUsd,
@@ -193,7 +196,55 @@ func (r *apiKeyRepository) GetByKeyForAuth(ctx context.Context, key string) (*se
 		}
 		return nil, err
 	}
-	return apiKeyEntityToService(m), nil
+	out := apiKeyEntityToService(m)
+	if out != nil && out.Group != nil && out.Group.IsUserOwnedConnectedAccount() {
+		byoGroup, err := r.client.Group.Query().
+			Where(group.IDEQ(out.Group.ID)).
+			WithAccountGroups(func(q *dbent.AccountGroupQuery) {
+				q.WithAccount(func(q *dbent.AccountQuery) {
+					q.Where(dbaccount.DeletedAtIsNil()).
+						Select(
+							dbaccount.FieldID,
+							dbaccount.FieldStatus,
+							dbaccount.FieldSchedulable,
+							dbaccount.FieldExtra,
+							dbaccount.FieldDeletedAt,
+						)
+				})
+			}).
+			Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		applyAPIKeyAuthBYOAvailability(out, byoGroup)
+	}
+	return out, nil
+}
+
+func applyAPIKeyAuthBYOAvailability(key *service.APIKey, entity *dbent.Group) {
+	if key == nil || key.Group == nil || !key.Group.IsUserOwnedConnectedAccount() || entity == nil {
+		return
+	}
+
+	counts := groupAccountCounts{}
+	for _, link := range entity.Edges.AccountGroups {
+		if link == nil || link.Edges.Account == nil {
+			continue
+		}
+		account := link.Edges.Account
+		if account.DeletedAt != nil {
+			continue
+		}
+		counts.Total++
+		if account.Status == service.StatusActive && account.Schedulable {
+			counts.Active++
+		}
+		reason, _ := account.Extra[service.BYOAccountDisabledReasonKey].(string)
+		if reason == service.BYOAccountDisabledReasonSubscriptionInactive {
+			counts.SubscriptionInactive = true
+		}
+	}
+	applyBYOAccountAvailability(key.Group, counts)
 }
 
 func (r *apiKeyRepository) Update(ctx context.Context, key *service.APIKey) error {

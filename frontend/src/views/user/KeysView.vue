@@ -113,6 +113,8 @@
                   :rate-multiplier="row.group.rate_multiplier"
                   :user-rate-multiplier="userGroupRates[row.group.id]"
                   :capacity-source="row.group.capacity_source"
+                  :byo-enabled="getEffectiveGroupBYOEnabled(row.group)"
+                  :byo-disabled-reason="getEffectiveGroupBYODisabledReason(row.group)"
                 />
                 <span v-else class="text-sm text-gray-400 dark:text-dark-500">{{
                   t('keys.noGroup')
@@ -453,6 +455,8 @@
                 :rate-multiplier="(option as unknown as GroupOption).rate"
                 :user-rate-multiplier="(option as unknown as GroupOption).userRate"
                 :capacity-source="(option as unknown as GroupOption).capacitySource"
+                :byo-enabled="(option as unknown as GroupOption).byoEnabled"
+                :byo-disabled-reason="(option as unknown as GroupOption).byoDisabledReason"
               />
               <span v-else class="text-gray-400">{{ t('keys.selectGroup') }}</span>
             </template>
@@ -473,11 +477,19 @@
                 :rate-multiplier="(option as unknown as GroupOption).rate"
                 :user-rate-multiplier="(option as unknown as GroupOption).userRate"
                 :capacity-source="(option as unknown as GroupOption).capacitySource"
+                :byo-enabled="(option as unknown as GroupOption).byoEnabled"
+                :byo-disabled-reason="(option as unknown as GroupOption).byoDisabledReason"
                 :description="(option as unknown as GroupOption).description"
                 :selected="selected"
               />
             </template>
           </Select>
+          <div
+            v-if="selectedFormGroupBYODisabled"
+            class="mt-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300"
+          >
+            {{ selectedFormGroupBYODisabledHint }}
+          </div>
         </div>
 
         <!-- Custom Key Section (only for create) -->
@@ -1221,6 +1233,8 @@
                 :user-rate-multiplier="option.userRate"
                 :description="option.description"
                 :capacity-source="option.capacitySource"
+                :byo-enabled="option.byoEnabled"
+                :byo-disabled-reason="option.byoDisabledReason"
                 :selected="
                   selectedKeyForGroup?.group_id === option.value ||
                   (!selectedKeyForGroup?.group_id && option.value === null)
@@ -1266,7 +1280,7 @@ import TablePageLayout from '@/components/layout/TablePageLayout.vue'
 	import EndpointPopover from '@/components/keys/EndpointPopover.vue'
 	import GroupBadge from '@/components/common/GroupBadge.vue'
 	import GroupOptionItem from '@/components/common/GroupOptionItem.vue'
-	import type { ApiKey, Group, PublicSettings, SubscriptionType, GroupPlatform, GroupCapacitySource } from '@/types'
+	import type { ApiKey, Group, PublicSettings, SubscriptionType, GroupPlatform, GroupCapacitySource, GroupBYODisabledReason } from '@/types'
 import type { Column } from '@/components/common/types'
 import type { BatchApiKeyUsageStats } from '@/api/usage'
 import { formatDateTime } from '@/utils/format'
@@ -1292,6 +1306,8 @@ interface GroupOption extends Record<string, unknown> {
   subscriptionType: SubscriptionType
   platform: GroupPlatform
   capacitySource: GroupCapacitySource
+  byoEnabled?: boolean | null
+  byoDisabledReason?: GroupBYODisabledReason | null
 }
 
 interface GroupHeaderOption extends Record<string, unknown> {
@@ -1338,6 +1354,7 @@ const now = ref(new Date())
 let resetTimer: ReturnType<typeof setInterval> | null = null
 const usageStats = ref<Record<string, BatchApiKeyUsageStats>>({})
 const userGroupRates = ref<Record<number, number>>({})
+const groupsById = computed(() => new Map(groups.value.map((group) => [group.id, group])))
 
 const pagination = ref({
   page: 1,
@@ -1472,7 +1489,9 @@ const groupOptions = computed(() =>
     userRate: userGroupRates.value[group.id] ?? null,
     subscriptionType: group.subscription_type,
     platform: group.platform,
-    capacitySource: getGroupCapacitySource(group)
+    capacitySource: getGroupCapacitySource(group),
+    byoEnabled: getGroupBYOEnabled(group),
+    byoDisabledReason: getGroupBYODisabledReason(group)
   }))
 )
 
@@ -1509,6 +1528,62 @@ const getGroupOptionDescription = (group: Group): string | null => {
   }
   return group.description
 }
+
+const getEffectiveGroup = (group: Group | null | undefined): Group | null => {
+  if (!group) return null
+  return groupsById.value.get(group.id) || group
+}
+
+const getGroupBYOEnabled = (group: Group | null | undefined): boolean | null => {
+  if (!group || getGroupCapacitySource(group) !== 'connected_account') return null
+  return typeof group.byo_enabled === 'boolean' ? group.byo_enabled : null
+}
+
+const getGroupBYODisabledReason = (group: Group | null | undefined): GroupBYODisabledReason | null => {
+  if (!group || getGroupCapacitySource(group) !== 'connected_account') return null
+  return group.byo_disabled_reason || null
+}
+
+const getEffectiveGroupBYOEnabled = (group: Group | null | undefined): boolean | null => {
+  return getGroupBYOEnabled(getEffectiveGroup(group))
+}
+
+const getEffectiveGroupBYODisabledReason = (group: Group | null | undefined): GroupBYODisabledReason | null => {
+  return getGroupBYODisabledReason(getEffectiveGroup(group))
+}
+
+const getBYODisabledHint = (reason: GroupBYODisabledReason | null | undefined): string => {
+  switch (reason) {
+    case 'subscription_inactive':
+      return t('keys.byoGroupDisabled.subscriptionInactive')
+    case 'account_missing':
+      return t('keys.byoGroupDisabled.accountMissing')
+    default:
+      return t('keys.byoGroupDisabled.accountDisabled')
+  }
+}
+
+const warnIfBYOSubscriptionRequired = (group: Group | null | undefined) => {
+  if (
+    getGroupBYOEnabled(group) === false &&
+    getGroupBYODisabledReason(group) === 'subscription_inactive'
+  ) {
+    appStore.showWarning(t('keys.byoSubscriptionRequiredAfterBind'))
+  }
+}
+
+const selectedFormGroup = computed(() => {
+  if (formData.value.group_id === null) return null
+  return groupsById.value.get(formData.value.group_id) || null
+})
+
+const selectedFormGroupBYODisabled = computed(() => {
+  return getGroupBYOEnabled(selectedFormGroup.value) === false
+})
+
+const selectedFormGroupBYODisabledHint = computed(() => {
+  return getBYODisabledHint(getGroupBYODisabledReason(selectedFormGroup.value))
+})
 
 const groupSectionDefinitions = computed<Record<GroupSectionKey, Omit<GroupOptionSection, 'options'>>>(() => ({
   tokengate: {
@@ -1797,6 +1872,7 @@ const changeGroup = async (key: ApiKey, newGroupId: number | null) => {
   try {
     await keysAPI.update(key.id, { group_id: newGroupId })
     appStore.showSuccess(t('keys.groupChangedSuccess'))
+    warnIfBYOSubscriptionRequired(newGroupId === null ? null : groupsById.value.get(newGroupId))
     loadApiKeys()
   } catch (error) {
     appStore.showError(t('keys.failedToChangeGroup'))
@@ -1905,6 +1981,7 @@ const handleSubmit = async () => {
         onboardingStore.nextStep(500)
       }
     }
+    warnIfBYOSubscriptionRequired(selectedFormGroup.value)
     closeModals()
     loadApiKeys()
   } catch (error: any) {

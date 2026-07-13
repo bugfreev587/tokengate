@@ -1332,20 +1332,198 @@ func (r *accountRepository) UpdateSessionWindow(ctx context.Context, id int64, s
 }
 
 func (r *accountRepository) SetSchedulable(ctx context.Context, id int64, schedulable bool) error {
-	_, err := r.client.Account.Update().
-		Where(dbaccount.IDEQ(id)).
-		SetSchedulable(schedulable).
-		Save(ctx)
+	var effectiveSchedulable bool
+	rows, err := r.sql.QueryContext(
+		ctx,
+		`UPDATE accounts
+		 SET extra = CASE
+		     WHEN COALESCE(extra->>$3, '') = $4
+		     THEN jsonb_set(COALESCE(extra, '{}'::jsonb), ARRAY[$5], to_jsonb($2::boolean), TRUE)
+		     ELSE extra
+		 END,
+		 schedulable = CASE
+		     WHEN COALESCE(extra->>$3, '') = $4 THEN FALSE
+		     ELSE $2
+		 END,
+		 updated_at = NOW()
+		 WHERE id = $1 AND deleted_at IS NULL
+		 RETURNING schedulable`,
+		id,
+		schedulable,
+		service.BYOAccountDisabledReasonKey,
+		service.BYOAccountDisabledReasonSubscriptionInactive,
+		service.BYOAccountOperationalSchedulableKey,
+	)
 	if err != nil {
+		return err
+	}
+	defer func() { _ = rows.Close() }()
+	if !rows.Next() {
+		if err := rows.Err(); err != nil {
+			return err
+		}
+		return service.ErrAccountNotFound
+	}
+	if err := rows.Scan(&effectiveSchedulable); err != nil {
 		return err
 	}
 	if err := enqueueSchedulerOutbox(ctx, r.sql, service.SchedulerOutboxEventAccountChanged, &id, nil, nil); err != nil {
 		logger.LegacyPrintf("repository.account", "[SchedulerOutbox] enqueue schedulable change failed: account=%d err=%v", id, err)
 	}
-	if !schedulable {
+	if !effectiveSchedulable {
 		r.syncSchedulerAccountSnapshot(ctx, id)
 	}
 	return nil
+}
+
+func (r *accountRepository) SetOwnerBYOAccountEntitlement(ctx context.Context, ownerUserID int64, enabled bool) (int64, error) {
+	if ownerUserID <= 0 {
+		return 0, nil
+	}
+	var query string
+	if enabled {
+		query = `
+			UPDATE accounts
+			SET schedulable = COALESCE((extra->>$4)::boolean, schedulable),
+				extra = COALESCE(extra, '{}'::jsonb) - $2 - $4,
+				updated_at = NOW()
+			WHERE deleted_at IS NULL
+				AND owner_user_id = $1
+				AND COALESCE(extra->>$2, '') = $3
+			RETURNING id
+		`
+	} else {
+		query = `
+			UPDATE accounts
+			SET schedulable = FALSE,
+				extra = jsonb_set(
+					jsonb_set(COALESCE(extra, '{}'::jsonb), ARRAY[$4], to_jsonb(schedulable), TRUE),
+					ARRAY[$2],
+					to_jsonb($3::text),
+					TRUE
+				),
+				updated_at = NOW()
+			WHERE deleted_at IS NULL
+				AND owner_user_id = $1
+				AND COALESCE(extra->>$2, '') <> $3
+			RETURNING id
+		`
+	}
+
+	rows, err := r.sql.QueryContext(
+		ctx,
+		query,
+		ownerUserID,
+		service.BYOAccountDisabledReasonKey,
+		service.BYOAccountDisabledReasonSubscriptionInactive,
+		service.BYOAccountOperationalSchedulableKey,
+	)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	accountIDs := make([]int64, 0)
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return 0, err
+		}
+		accountIDs = append(accountIDs, id)
+	}
+	if err := rows.Err(); err != nil {
+		return 0, err
+	}
+	if len(accountIDs) == 0 {
+		return 0, nil
+	}
+	payload := map[string]any{"account_ids": accountIDs}
+	if err := enqueueSchedulerOutbox(ctx, r.sql, service.SchedulerOutboxEventAccountBulkChanged, nil, nil, payload); err != nil {
+		logger.LegacyPrintf("repository.account", "[SchedulerOutbox] enqueue BYO entitlement update failed: err=%v", err)
+	}
+	r.syncSchedulerAccountSnapshots(ctx, accountIDs)
+	return int64(len(accountIDs)), nil
+}
+
+func (r *accountRepository) ReconcileBYOAccountEntitlements(ctx context.Context) ([]int64, error) {
+	rows, err := r.sql.QueryContext(
+		ctx,
+		`WITH byo_account_states AS (
+			SELECT DISTINCT a.id,
+				a.owner_user_id,
+				EXISTS (
+					SELECT 1
+					FROM user_subscriptions us
+					WHERE us.user_id = a.owner_user_id
+						AND us.deleted_at IS NULL
+						AND us.status = 'active'
+						AND us.expires_at > NOW()
+						AND COALESCE(us.stripe_subscription_id, '') <> ''
+				) AS enabled
+			FROM accounts a
+			JOIN account_groups ag ON ag.account_id = a.id
+			JOIN groups g ON g.id = ag.group_id
+			WHERE a.deleted_at IS NULL
+				AND g.deleted_at IS NULL
+				AND a.owner_user_id IS NOT NULL
+				AND g.owner_user_id = a.owner_user_id
+				AND g.capacity_source = 'connected_account'
+		), updated AS (
+			UPDATE accounts a
+			SET schedulable = CASE
+					WHEN states.enabled THEN COALESCE((a.extra->>$3)::boolean, a.schedulable)
+					ELSE FALSE
+				END,
+				extra = CASE
+					WHEN states.enabled THEN COALESCE(a.extra, '{}'::jsonb) - $1 - $3
+					ELSE jsonb_set(
+						jsonb_set(COALESCE(a.extra, '{}'::jsonb), ARRAY[$3], to_jsonb(a.schedulable), TRUE),
+						ARRAY[$1],
+						to_jsonb($2::text),
+						TRUE
+					)
+				END,
+				updated_at = NOW()
+			FROM byo_account_states states
+			WHERE a.id = states.id
+				AND (
+					(states.enabled AND COALESCE(a.extra->>$1, '') = $2)
+					OR (NOT states.enabled AND COALESCE(a.extra->>$1, '') <> $2)
+				)
+			RETURNING states.owner_user_id
+		)
+		SELECT owner_user_id FROM updated ORDER BY owner_user_id`,
+		service.BYOAccountDisabledReasonKey,
+		service.BYOAccountDisabledReasonSubscriptionInactive,
+		service.BYOAccountOperationalSchedulableKey,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	owners := make([]int64, 0)
+	var previous int64
+	for rows.Next() {
+		var ownerUserID int64
+		if err := rows.Scan(&ownerUserID); err != nil {
+			return nil, err
+		}
+		if ownerUserID <= 0 || ownerUserID == previous {
+			continue
+		}
+		owners = append(owners, ownerUserID)
+		previous = ownerUserID
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if len(owners) > 0 {
+		if err := enqueueSchedulerOutbox(ctx, r.sql, service.SchedulerOutboxEventFullRebuild, nil, nil, nil); err != nil {
+			logger.LegacyPrintf("repository.account", "[SchedulerOutbox] enqueue BYO reconciliation rebuild failed: err=%v", err)
+		}
+	}
+	return owners, nil
 }
 
 func (r *accountRepository) AutoPauseExpiredAccounts(ctx context.Context, now time.Time) (int64, error) {

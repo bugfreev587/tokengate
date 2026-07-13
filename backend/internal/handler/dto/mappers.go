@@ -174,6 +174,8 @@ func groupFromServiceBase(g *service.Group) Group {
 		IsExclusive:                     g.IsExclusive,
 		Status:                          g.Status,
 		CapacitySource:                  service.NormalizeCapacitySource(g.CapacitySource),
+		BYOEnabled:                      g.BYOEnabled,
+		BYODisabledReason:               g.BYODisabledReason,
 		SubscriptionType:                g.SubscriptionType,
 		DailyLimitUSD:                   g.DailyLimitUSD,
 		WeeklyLimitUSD:                  g.WeeklyLimitUSD,

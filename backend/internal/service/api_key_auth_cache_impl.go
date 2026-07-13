@@ -14,7 +14,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 )
 
-const apiKeyAuthSnapshotVersion = 9 // v9: added API Key name for audit logs
+const apiKeyAuthSnapshotVersion = 11 // v11: includes connected-account availability metadata
 
 type apiKeyAuthCacheConfig struct {
 	l1Size        int
@@ -181,8 +181,21 @@ func (s *APIKeyService) loadAuthCacheEntry(ctx context.Context, key, cacheKey st
 		return nil, fmt.Errorf("get api key: %w", ErrAPIKeyNotFound)
 	}
 	entry := &APIKeyAuthCacheEntry{Snapshot: snapshot}
-	s.setAuthCacheEntry(ctx, cacheKey, entry, s.authCfg.l2TTL)
+	// BYO admission depends on subscription state that changes independently of
+	// API-key data. Always hydrate BYO keys from the repository so a stale auth
+	// snapshot can never bypass SUBSCRIPTION_REQUIRED.
+	if !isBYOAuthSnapshot(snapshot) {
+		s.setAuthCacheEntry(ctx, cacheKey, entry, s.authCfg.l2TTL)
+	}
 	return entry, nil
+}
+
+func isBYOAuthSnapshot(snapshot *APIKeyAuthSnapshot) bool {
+	return snapshot != nil &&
+		snapshot.Group != nil &&
+		snapshot.Group.OwnerUserID != nil &&
+		*snapshot.Group.OwnerUserID == snapshot.UserID &&
+		snapshot.Group.CapacitySource == CapacitySourceConnectedAccount
 }
 
 func (s *APIKeyService) applyAuthCacheEntry(key string, entry *APIKeyAuthCacheEntry) (*APIKey, bool, error) {
@@ -251,6 +264,11 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 			Name:                            apiKey.Group.Name,
 			Platform:                        apiKey.Group.Platform,
 			Status:                          apiKey.Group.Status,
+			IsExclusive:                     apiKey.Group.IsExclusive,
+			OwnerUserID:                     apiKey.Group.OwnerUserID,
+			CapacitySource:                  apiKey.Group.CapacitySource,
+			BYOEnabled:                      apiKey.Group.BYOEnabled,
+			BYODisabledReason:               apiKey.Group.BYODisabledReason,
 			SubscriptionType:                apiKey.Group.SubscriptionType,
 			RateMultiplier:                  apiKey.Group.RateMultiplier,
 			DailyLimitUSD:                   apiKey.Group.DailyLimitUSD,
@@ -321,6 +339,11 @@ func (s *APIKeyService) snapshotToAPIKey(key string, snapshot *APIKeyAuthSnapsho
 			Platform:                        snapshot.Group.Platform,
 			Status:                          snapshot.Group.Status,
 			Hydrated:                        true,
+			IsExclusive:                     snapshot.Group.IsExclusive,
+			OwnerUserID:                     snapshot.Group.OwnerUserID,
+			CapacitySource:                  snapshot.Group.CapacitySource,
+			BYOEnabled:                      snapshot.Group.BYOEnabled,
+			BYODisabledReason:               snapshot.Group.BYODisabledReason,
 			SubscriptionType:                snapshot.Group.SubscriptionType,
 			RateMultiplier:                  snapshot.Group.RateMultiplier,
 			DailyLimitUSD:                   snapshot.Group.DailyLimitUSD,

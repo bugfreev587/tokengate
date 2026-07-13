@@ -34,12 +34,15 @@ type stripeBillingPlanStore interface {
 // StripeBillingService owns Stripe Billing subscription Checkout, Portal, and
 // webhook lifecycle synchronization.
 type StripeBillingService struct {
-	providerResolver    stripeBillingProviderResolver
-	planStore           stripeBillingPlanStore
-	userRepo            UserRepository
-	userSubRepo         UserSubscriptionRepository
-	billingCacheService *BillingCacheService
-	now                 func() time.Time
+	providerResolver      stripeBillingProviderResolver
+	planStore             stripeBillingPlanStore
+	userRepo              UserRepository
+	userSubRepo           UserSubscriptionRepository
+	byoEntitlementChecker BYOSubscriptionEntitlementChecker
+	byoAccountUpdater     BYOAccountEntitlementUpdater
+	authCacheInvalidator  APIKeyAuthCacheInvalidator
+	billingCacheService   *BillingCacheService
+	now                   func() time.Time
 }
 
 type CreateStripeSubscriptionCheckoutInput struct {
@@ -67,14 +70,23 @@ type CreateStripeBillingPortalOutput struct {
 	URL       string `json:"url"`
 }
 
-func NewStripeBillingService(paymentService *PaymentService, configService *PaymentConfigService, userRepo UserRepository, userSubRepo UserSubscriptionRepository, billingCacheService *BillingCacheService) *StripeBillingService {
+func NewStripeBillingService(paymentService *PaymentService, configService *PaymentConfigService, userRepo UserRepository, userSubRepo UserSubscriptionRepository, byoEntitlementChecker BYOSubscriptionEntitlementChecker, byoAccountUpdater BYOAccountEntitlementUpdater, billingCacheService *BillingCacheService, authCacheInvalidator APIKeyAuthCacheInvalidator) *StripeBillingService {
 	return &StripeBillingService{
-		providerResolver:    paymentService,
-		planStore:           configService,
-		userRepo:            userRepo,
-		userSubRepo:         userSubRepo,
-		billingCacheService: billingCacheService,
-		now:                 time.Now,
+		providerResolver:      paymentService,
+		planStore:             configService,
+		userRepo:              userRepo,
+		userSubRepo:           userSubRepo,
+		byoEntitlementChecker: byoEntitlementChecker,
+		byoAccountUpdater:     byoAccountUpdater,
+		authCacheInvalidator:  authCacheInvalidator,
+		billingCacheService:   billingCacheService,
+		now:                   time.Now,
+	}
+}
+
+func (s *StripeBillingService) SetAuthCacheInvalidator(invalidator APIKeyAuthCacheInvalidator) {
+	if s != nil {
+		s.authCacheInvalidator = invalidator
 	}
 }
 
@@ -220,7 +232,7 @@ func (s *StripeBillingService) handleSubscriptionNotification(ctx context.Contex
 		return err
 	}
 	s.invalidateSubscriptionCache(ctx, existing.UserID, existing.GroupID)
-	return nil
+	return s.syncBYOAccountEntitlement(ctx, existing.UserID)
 }
 
 func (s *StripeBillingService) handleInvoicePaymentSucceeded(ctx context.Context, n *payment.PaymentNotification) error {
@@ -235,7 +247,7 @@ func (s *StripeBillingService) handleInvoicePaymentSucceeded(ctx context.Context
 		return err
 	}
 	s.invalidateSubscriptionCache(ctx, sub.UserID, sub.GroupID)
-	return nil
+	return s.syncBYOAccountEntitlement(ctx, sub.UserID)
 }
 
 func (s *StripeBillingService) handleInvoicePaymentFailed(ctx context.Context, n *payment.PaymentNotification) error {
@@ -253,7 +265,7 @@ func (s *StripeBillingService) handleInvoicePaymentFailed(ctx context.Context, n
 		return err
 	}
 	s.invalidateSubscriptionCache(ctx, sub.UserID, sub.GroupID)
-	return nil
+	return s.syncBYOAccountEntitlement(ctx, sub.UserID)
 }
 
 func (s *StripeBillingService) provider(ctx context.Context, environment string) (payment.SubscriptionBillingProvider, *payment.InstanceSelection, error) {
@@ -361,6 +373,23 @@ func (s *StripeBillingService) invalidateSubscriptionCache(ctx context.Context, 
 		return
 	}
 	_ = s.billingCacheService.InvalidateSubscription(ctx, userID, groupID)
+}
+
+func (s *StripeBillingService) syncBYOAccountEntitlement(ctx context.Context, userID int64) error {
+	if s == nil || s.byoAccountUpdater == nil || s.byoEntitlementChecker == nil || userID <= 0 {
+		return nil
+	}
+	enabled, err := s.byoEntitlementChecker.HasActiveBYOSubscription(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if _, err = s.byoAccountUpdater.SetOwnerBYOAccountEntitlement(ctx, userID, enabled); err != nil {
+		return err
+	}
+	if s.authCacheInvalidator != nil {
+		s.authCacheInvalidator.InvalidateAuthCacheByUserID(ctx, userID)
+	}
+	return nil
 }
 
 func (s *StripeBillingService) currentTime() time.Time {

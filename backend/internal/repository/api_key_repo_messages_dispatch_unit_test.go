@@ -95,3 +95,47 @@ func TestAPIKeyRepository_GetByKeyForAuth_PreservesMessagesDispatchModelConfig_S
 	require.NotNil(t, got.Group)
 	require.Equal(t, group.MessagesDispatchModelConfig, got.Group.MessagesDispatchModelConfig)
 }
+
+func TestAPIKeyRepository_GetByKeyForAuth_PreservesBYOCapacityMetadata_SQLite(t *testing.T) {
+	repo, client := newAPIKeyRepoSQLite(t)
+	ctx := context.Background()
+	user := mustCreateAPIKeyRepoUser(t, ctx, client, "getbykey-auth-byo-unit@test.com")
+
+	group, err := client.Group.Create().
+		SetName("g-auth-byo-unit").
+		SetPlatform(service.PlatformOpenAI).
+		SetStatus(service.StatusActive).
+		SetSubscriptionType(service.SubscriptionTypeStandard).
+		SetRateMultiplier(1).
+		SetOwnerUserID(user.ID).
+		SetCapacitySource(service.CapacitySourceConnectedAccount).
+		Save(ctx)
+	require.NoError(t, err)
+
+	account, err := client.Account.Create().
+		SetName("BYO OpenAI Unit").
+		SetPlatform(service.PlatformOpenAI).
+		SetType("oauth").
+		SetStatus(service.StatusActive).
+		SetSchedulable(false).
+		SetExtra(map[string]any{service.BYOAccountDisabledReasonKey: service.BYOAccountDisabledReasonSubscriptionInactive}).
+		Save(ctx)
+	require.NoError(t, err)
+	_, err = client.AccountGroup.Create().SetAccountID(account.ID).SetGroupID(group.ID).Save(ctx)
+	require.NoError(t, err)
+
+	key := &service.APIKey{UserID: user.ID, Key: "sk-getbykey-auth-byo-unit", Name: "BYO Key Unit", GroupID: &group.ID, Status: service.StatusActive}
+	require.NoError(t, repo.Create(ctx, key))
+
+	got, err := repo.GetByKeyForAuth(ctx, key.Key)
+	require.NoError(t, err)
+	require.NotNil(t, got.User)
+	require.NotNil(t, got.Group)
+	require.NotNil(t, got.Group.OwnerUserID)
+	require.Equal(t, user.ID, *got.Group.OwnerUserID)
+	require.Equal(t, service.CapacitySourceConnectedAccount, got.Group.CapacitySource)
+	require.True(t, service.IsUserOwnedConnectedAccountCapacity(got.User, got.Group))
+	require.NotNil(t, got.Group.BYOEnabled)
+	require.False(t, *got.Group.BYOEnabled)
+	require.Equal(t, service.BYOAccountDisabledReasonSubscriptionInactive, got.Group.BYODisabledReason)
+}

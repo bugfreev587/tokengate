@@ -151,8 +151,8 @@ func ProvideAccountExpiryService(accountRepo AccountRepository) *AccountExpirySe
 }
 
 // ProvideSubscriptionExpiryService creates and starts SubscriptionExpiryService.
-func ProvideSubscriptionExpiryService(userSubRepo UserSubscriptionRepository) *SubscriptionExpiryService {
-	svc := NewSubscriptionExpiryService(userSubRepo, time.Minute)
+func ProvideSubscriptionExpiryService(userSubRepo UserSubscriptionRepository, byoAccountUpdater BYOAccountEntitlementUpdater) *SubscriptionExpiryService {
+	svc := NewSubscriptionExpiryService(userSubRepo, time.Minute, byoAccountUpdater)
 	svc.Start()
 	return svc
 }
@@ -451,9 +451,11 @@ var ProviderSet = wire.NewSet(
 	NewGatewayService,
 	NewOpenAIGatewayService,
 	NewOAuthService,
+	wire.Bind(new(ConnectedAnthropicOAuthService), new(*OAuthService)),
 	NewOpenAIOAuthService,
 	wire.Bind(new(ConnectedOpenAIOAuthService), new(*OpenAIOAuthService)),
 	NewGeminiOAuthService,
+	wire.Bind(new(ConnectedGeminiOAuthService), new(*GeminiOAuthService)),
 	NewGeminiQuotaService,
 	NewCompositeTokenCacheInvalidator,
 	wire.Bind(new(TokenCacheInvalidator), new(*CompositeTokenCacheInvalidator)),

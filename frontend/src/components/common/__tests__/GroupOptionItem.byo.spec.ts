@@ -1,42 +1,42 @@
-import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
-import GroupOptionItem from '@/components/common/GroupOptionItem.vue'
+import { mount } from '@vue/test-utils'
 
-vi.mock('vue-i18n', async () => {
-  const actual = await vi.importActual<typeof import('vue-i18n')>('vue-i18n')
-  return {
-    ...actual,
-    useI18n: () => ({
-      t: (key: string) => ({
+import GroupOptionItem from '../GroupOptionItem.vue'
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key: string) => {
+      const messages: Record<string, string> = {
+        'keys.byoGroupDisabledLabel': 'Needs subscription',
         'keys.byoGroupLabel': 'BYO account',
-        'keys.byoGroupDescription': 'Uses your connected AI account. TokenGate token balance is not charged.',
-      }[key] ?? key),
-    }),
-  }
-})
+        'keys.byoGroupDescription': 'Uses your connected account',
+        'keys.byoGroupDisabled.subscriptionInactive': 'Subscribe to enable this BYO account',
+        'keys.byoGroupDisabled.accountDisabled': 'Account disabled',
+        'keys.byoGroupDisabled.accountMissing': 'Account missing',
+      }
+      return messages[key] ?? key
+    },
+  }),
+}))
 
-describe('GroupOptionItem BYO capacity source', () => {
-  it('explains that connected-account groups do not use TokenGate balance billing', () => {
+describe('GroupOptionItem BYO status', () => {
+  it('shows a subscription warning for disabled BYO groups', () => {
     const wrapper = mount(GroupOptionItem, {
       props: {
-        name: 'My OpenAI',
+        name: 'byo-openai-u1-a2',
         platform: 'openai',
-        rateMultiplier: 2,
         capacitySource: 'connected_account',
+        byoEnabled: false,
+        byoDisabledReason: 'subscription_inactive',
       },
       global: {
         stubs: {
-          GroupBadge: {
-            props: ['name'],
-            template: '<span>{{ name }}</span>',
-          },
+          PlatformIcon: true,
         },
       },
     })
 
-    expect(wrapper.text()).toContain('My OpenAI')
-    expect(wrapper.text()).toContain('BYO account')
-    expect(wrapper.text()).toContain('TokenGate token balance is not charged')
-    expect(wrapper.text()).not.toContain('2x')
+    expect(wrapper.text()).toContain('Needs subscription')
+    expect(wrapper.text()).toContain('Subscribe to enable this BYO account')
   })
 })

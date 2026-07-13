@@ -36,6 +36,8 @@ interface Props {
   rateMultiplier?: number
   userRateMultiplier?: number | null // 用户专属倍率
   capacitySource?: string
+  byoEnabled?: boolean | null
+  byoDisabledReason?: string | null
   showRate?: boolean
   daysRemaining?: number | null // 剩余天数（订阅类型时使用）
   /**
@@ -58,6 +60,7 @@ const { t } = useI18n()
 
 const isSubscription = computed(() => props.subscriptionType === 'subscription')
 const isConnectedAccountCapacity = computed(() => props.capacitySource === 'connected_account')
+const isBYODisabled = computed(() => isConnectedAccountCapacity.value && props.byoEnabled === false)
 
 // 是否有专属倍率（且与默认倍率不同）
 const hasCustomRate = computed(() => {
@@ -83,6 +86,7 @@ const showLabel = computed(() => {
 // Label text
 const labelText = computed(() => {
   if (isConnectedAccountCapacity.value) {
+    if (isBYODisabled.value) return t('keys.byoGroupDisabledLabel')
     return t('keys.byoGroupLabel')
   }
   const rateLabel = props.rateMultiplier !== undefined ? `${props.rateMultiplier}x` : ''
@@ -105,6 +109,9 @@ const labelClass = computed(() => {
   const base = 'px-1.5 py-0.5 rounded text-[10px] font-semibold'
 
   if (isConnectedAccountCapacity.value) {
+    if (isBYODisabled.value) {
+      return `${base} bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300`
+    }
     return `${base} bg-emerald-200/70 text-emerald-800 dark:bg-emerald-800/50 dark:text-emerald-200`
   }
 
@@ -141,6 +148,9 @@ const labelClass = computed(() => {
 // Badge color based on platform and subscription type
 const badgeClass = computed(() => {
   if (isConnectedAccountCapacity.value) {
+    if (isBYODisabled.value) {
+      return 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'
+    }
     return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
   }
 

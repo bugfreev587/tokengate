@@ -36,19 +36,21 @@ func NewConnectedAccountHandler(
 }
 
 type ConnectedAccountSummary struct {
-	ID             int64      `json:"id"`
-	Name           string     `json:"name"`
-	Platform       string     `json:"platform"`
-	Type           string     `json:"type"`
-	Status         string     `json:"status"`
-	Email          string     `json:"email,omitempty"`
-	PlanType       string     `json:"plan_type,omitempty"`
-	GroupID        *int64     `json:"group_id,omitempty"`
-	GroupName      string     `json:"group_name,omitempty"`
-	CapacitySource string     `json:"capacity_source"`
-	LastUsedAt     *time.Time `json:"last_used_at,omitempty"`
-	CreatedAt      time.Time  `json:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at"`
+	ID                int64      `json:"id"`
+	Name              string     `json:"name"`
+	Platform          string     `json:"platform"`
+	Type              string     `json:"type"`
+	Status            string     `json:"status"`
+	Email             string     `json:"email,omitempty"`
+	PlanType          string     `json:"plan_type,omitempty"`
+	GroupID           *int64     `json:"group_id,omitempty"`
+	GroupName         string     `json:"group_name,omitempty"`
+	CapacitySource    string     `json:"capacity_source"`
+	BYOEnabled        *bool      `json:"byo_enabled,omitempty"`
+	BYODisabledReason string     `json:"byo_disabled_reason,omitempty"`
+	LastUsedAt        *time.Time `json:"last_used_at,omitempty"`
+	CreatedAt         time.Time  `json:"created_at"`
+	UpdatedAt         time.Time  `json:"updated_at"`
 }
 
 type connectedOpenAIAuthURLRequest struct {
@@ -463,18 +465,27 @@ func connectedAccountSummaryFromService(account *service.Account) ConnectedAccou
 	if account == nil {
 		return ConnectedAccountSummary{}
 	}
+	byoDisabledReason := credentialString(account.Extra, service.BYOAccountDisabledReasonKey)
+	byoEnabled := byoDisabledReason != service.BYOAccountDisabledReasonSubscriptionInactive && account.IsActive() && account.Schedulable
+	if byoEnabled {
+		byoDisabledReason = ""
+	} else if byoDisabledReason == "" {
+		byoDisabledReason = service.BYOAccountDisabledReasonAccountDisabled
+	}
 	out := ConnectedAccountSummary{
-		ID:             account.ID,
-		Name:           account.Name,
-		Platform:       account.Platform,
-		Type:           account.Type,
-		Status:         account.Status,
-		Email:          connectedAccountEmail(account),
-		PlanType:       credentialString(account.Credentials, "plan_type"),
-		CapacitySource: service.CapacitySourceConnectedAccount,
-		LastUsedAt:     account.LastUsedAt,
-		CreatedAt:      account.CreatedAt,
-		UpdatedAt:      account.UpdatedAt,
+		ID:                account.ID,
+		Name:              account.Name,
+		Platform:          account.Platform,
+		Type:              account.Type,
+		Status:            account.Status,
+		Email:             connectedAccountEmail(account),
+		PlanType:          credentialString(account.Credentials, "plan_type"),
+		CapacitySource:    service.CapacitySourceConnectedAccount,
+		BYOEnabled:        &byoEnabled,
+		BYODisabledReason: byoDisabledReason,
+		LastUsedAt:        account.LastUsedAt,
+		CreatedAt:         account.CreatedAt,
+		UpdatedAt:         account.UpdatedAt,
 	}
 	for _, group := range account.Groups {
 		if group == nil || !group.IsUserOwnedConnectedAccount() {

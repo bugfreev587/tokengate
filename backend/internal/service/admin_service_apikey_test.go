@@ -69,8 +69,12 @@ func (s *userRepoStubForGroupUpdate) UpdateConcurrency(context.Context, int64, i
 	panic("unexpected")
 }
 
-func (s *userRepoStubForGroupUpdate) BatchSetConcurrency(context.Context, []int64, int) (int, error) { return 0, nil }
-func (s *userRepoStubForGroupUpdate) BatchAddConcurrency(context.Context, []int64, int) (int, error) { return 0, nil }
+func (s *userRepoStubForGroupUpdate) BatchSetConcurrency(context.Context, []int64, int) (int, error) {
+	return 0, nil
+}
+func (s *userRepoStubForGroupUpdate) BatchAddConcurrency(context.Context, []int64, int) (int, error) {
+	return 0, nil
+}
 func (s *userRepoStubForGroupUpdate) ExistsByEmail(context.Context, string) (bool, error) {
 	panic("unexpected")
 }
@@ -325,6 +329,25 @@ func TestAdminService_AdminUpdateAPIKeyGroupID_BindActiveGroup(t *testing.T) {
 	// C1 fix: verify Group object is populated
 	require.NotNil(t, got.APIKey.Group)
 	require.Equal(t, "Pro", got.APIKey.Group.Name)
+}
+
+func TestAdminService_AdminUpdateAPIKeyGroupID_InactiveBYOGroupDoesNotRequireSubscription(t *testing.T) {
+	ownerID := int64(42)
+	byoEnabled := false
+	existing := &APIKey{ID: 1, UserID: ownerID, Key: "sk-test", GroupID: nil}
+	apiKeyRepo := &apiKeyRepoStubForGroupUpdate{key: existing}
+	groupRepo := &groupRepoStubForGroupUpdate{group: &Group{
+		ID: 10, Name: "byo-openai-u42-a1", Status: StatusActive, OwnerUserID: &ownerID,
+		CapacitySource: CapacitySourceConnectedAccount, SubscriptionType: SubscriptionTypeStandard,
+		BYOEnabled: &byoEnabled, BYODisabledReason: BYOAccountDisabledReasonSubscriptionInactive,
+	}}
+	userSubRepo := &userSubRepoStubForGroupUpdate{getActiveErr: ErrSubscriptionNotFound}
+	svc := &adminServiceImpl{apiKeyRepo: apiKeyRepo, groupRepo: groupRepo, userSubRepo: userSubRepo}
+
+	got, err := svc.AdminUpdateAPIKeyGroupID(context.Background(), 1, int64Ptr(10))
+	require.NoError(t, err)
+	require.Equal(t, int64(10), *got.APIKey.GroupID)
+	require.False(t, userSubRepo.called)
 }
 
 func TestAdminService_AdminUpdateAPIKeyGroupID_SameGroup_Idempotent(t *testing.T) {

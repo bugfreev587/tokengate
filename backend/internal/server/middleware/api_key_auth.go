@@ -152,6 +152,11 @@ func apiKeyAuthWithSubscription(apiKeyService *service.APIKeyService, subscripti
 		// ── 6. 计费执行（skipBilling 时整块跳过） ────────────────────
 
 		if !skipBilling {
+			if admissionErr := evaluateBYOAdmission(apiKey); admissionErr != nil {
+				AbortWithError(c, admissionErr.Status, admissionErr.Code, admissionErr.Message)
+				return
+			}
+
 			// Key 状态检查
 			switch apiKey.Status {
 			case service.StatusAPIKeyQuotaExhausted:
@@ -193,8 +198,8 @@ func apiKeyAuthWithSubscription(apiKeyService *service.APIKeyService, subscripti
 					maintenanceCopy := *subscription
 					subscriptionService.DoWindowMaintenance(&maintenanceCopy)
 				}
-			} else {
-				// 非订阅模式 或 订阅模式但 subscriptionService 未注入：回退到余额检查
+			} else if !service.IsUserOwnedConnectedAccountCapacity(apiKey.User, apiKey.Group) {
+				// Only TokenGate-managed capacity falls back to prepaid balance.
 				if apiKey.User.Balance <= 0 {
 					AbortWithError(c, 403, "INSUFFICIENT_BALANCE", "Insufficient account balance")
 					return

@@ -558,7 +558,7 @@ async function finishOAuth() {
   }
   exchangingCode.value = true
   try {
-    await exchangeConnectedAccountCode(selectedProvider.value, {
+    const account = await exchangeConnectedAccountCode(selectedProvider.value, {
       session_id: sessionId.value,
       code: normalizeOAuthCode(oauthCode.value),
       ...(oauthState.value.trim() ? { state: oauthState.value.trim() } : {}),
@@ -567,6 +567,9 @@ async function finishOAuth() {
       name: accountName.value.trim() || undefined,
     })
     appStore.showSuccess(t('userAccounts.connectedSuccess'))
+    if (account.byo_enabled === false && account.byo_disabled_reason === 'subscription_inactive') {
+      appStore.showWarning(t('userAccounts.subscriptionRequiredAfterConnect'))
+    }
     resetOAuthState()
     await loadAccounts()
   } catch (error) {

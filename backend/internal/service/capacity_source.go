@@ -22,6 +22,10 @@ func isUserOwnedConnectedAccountCapacity(user *User, group *Group) bool {
 		NormalizeCapacitySource(group.CapacitySource) == CapacitySourceConnectedAccount
 }
 
+func IsUserOwnedConnectedAccountCapacity(user *User, group *Group) bool {
+	return isUserOwnedConnectedAccountCapacity(user, group)
+}
+
 func resolveCapacitySourceForUserGroup(user *User, group *Group) string {
 	if isUserOwnedConnectedAccountCapacity(user, group) {
 		return CapacitySourceConnectedAccount

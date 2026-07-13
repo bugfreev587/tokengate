@@ -9,18 +9,24 @@ import (
 
 // SubscriptionExpiryService periodically updates expired subscription status.
 type SubscriptionExpiryService struct {
-	userSubRepo UserSubscriptionRepository
-	interval    time.Duration
-	stopCh      chan struct{}
-	stopOnce    sync.Once
-	wg          sync.WaitGroup
+	userSubRepo       UserSubscriptionRepository
+	byoAccountUpdater BYOAccountEntitlementUpdater
+	interval          time.Duration
+	stopCh            chan struct{}
+	stopOnce          sync.Once
+	wg                sync.WaitGroup
 }
 
-func NewSubscriptionExpiryService(userSubRepo UserSubscriptionRepository, interval time.Duration) *SubscriptionExpiryService {
+func NewSubscriptionExpiryService(userSubRepo UserSubscriptionRepository, interval time.Duration, byoAccountUpdater ...BYOAccountEntitlementUpdater) *SubscriptionExpiryService {
+	var updater BYOAccountEntitlementUpdater
+	if len(byoAccountUpdater) > 0 {
+		updater = byoAccountUpdater[0]
+	}
 	return &SubscriptionExpiryService{
-		userSubRepo: userSubRepo,
-		interval:    interval,
-		stopCh:      make(chan struct{}),
+		userSubRepo:       userSubRepo,
+		byoAccountUpdater: updater,
+		interval:          interval,
+		stopCh:            make(chan struct{}),
 	}
 }
 
@@ -57,15 +63,23 @@ func (s *SubscriptionExpiryService) Stop() {
 }
 
 func (s *SubscriptionExpiryService) runOnce() {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	updated, err := s.userSubRepo.BatchUpdateExpiredStatus(ctx)
+	statusCtx, statusCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	updated, err := s.userSubRepo.BatchUpdateExpiredStatus(statusCtx)
+	statusCancel()
 	if err != nil {
 		log.Printf("[SubscriptionExpiry] Update expired subscriptions failed: %v", err)
+	} else if updated > 0 {
+		log.Printf("[SubscriptionExpiry] Updated %d expired subscriptions", updated)
+	}
+
+	if s == nil || s.byoAccountUpdater == nil {
 		return
 	}
-	if updated > 0 {
-		log.Printf("[SubscriptionExpiry] Updated %d expired subscriptions", updated)
+	reconcileCtx, reconcileCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	_, err = s.byoAccountUpdater.ReconcileBYOAccountEntitlements(reconcileCtx)
+	reconcileCancel()
+	if err != nil {
+		log.Printf("[SubscriptionExpiry] Reconcile BYO entitlements failed: %v", err)
+		return
 	}
 }

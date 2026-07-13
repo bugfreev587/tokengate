@@ -227,6 +227,35 @@ func TestAPIKeyService_GetByKey_UsesL2Cache(t *testing.T) {
 	require.Equal(t, map[string][]int64{"claude-opus-*": {1, 2}}, apiKey.Group.ModelRouting)
 }
 
+func TestAPIKeyService_GetByKey_DoesNotCacheBYOAdmissionState(t *testing.T) {
+	cache := &authCacheStub{}
+	var repoCalls int32
+	ownerID := int64(22)
+	groupID := int64(33)
+	repo := &authRepoStub{getByKeyForAuth: func(context.Context, string) (*APIKey, error) {
+		atomic.AddInt32(&repoCalls, 1)
+		enabled := true
+		return &APIKey{
+			ID: 44, UserID: ownerID, GroupID: &groupID, Status: StatusActive,
+			User: &User{ID: ownerID, Status: StatusActive, Role: RoleUser, Balance: 0, Concurrency: 2},
+			Group: &Group{
+				ID: groupID, Name: "byo", Platform: PlatformOpenAI, Status: StatusActive,
+				OwnerUserID: &ownerID, CapacitySource: CapacitySourceConnectedAccount, BYOEnabled: &enabled,
+			},
+		}, nil
+	}}
+	cfg := &config.Config{APIKeyAuth: config.APIKeyAuthCacheConfig{L2TTLSeconds: 60}}
+	svc := NewAPIKeyService(repo, nil, nil, nil, nil, cache, cfg)
+
+	_, err := svc.GetByKey(context.Background(), "k-byo")
+	require.NoError(t, err)
+	_, err = svc.GetByKey(context.Background(), "k-byo")
+	require.NoError(t, err)
+
+	require.Equal(t, int32(2), atomic.LoadInt32(&repoCalls))
+	require.Empty(t, cache.setAuthKeys)
+}
+
 func TestAPIKeyService_SnapshotRoundTrip_PreservesMessagesDispatchModelConfig(t *testing.T) {
 	svc := NewAPIKeyService(nil, nil, nil, nil, nil, nil, &config.Config{})
 	groupID := int64(9)
@@ -271,6 +300,35 @@ func TestAPIKeyService_SnapshotRoundTrip_PreservesMessagesDispatchModelConfig(t 
 	require.Equal(t, apiKey.Name, roundTrip.Name)
 	require.NotNil(t, roundTrip.Group)
 	require.Equal(t, apiKey.Group.MessagesDispatchModelConfig, roundTrip.Group.MessagesDispatchModelConfig)
+}
+
+func TestAPIKeyService_SnapshotRoundTrip_PreservesConnectedAccountCapacityMetadata(t *testing.T) {
+	svc := NewAPIKeyService(nil, nil, nil, nil, nil, nil, &config.Config{})
+	ownerID := int64(22)
+	groupID := int64(33)
+	apiKey := &APIKey{
+		ID: 44, UserID: ownerID, GroupID: &groupID, Key: "k-byo-roundtrip", Status: StatusActive,
+		User: &User{ID: ownerID, Status: StatusActive, Role: RoleUser, Balance: 0, Concurrency: 2},
+		Group: &Group{
+			ID: groupID, Name: "byo", Platform: PlatformOpenAI, Status: StatusActive,
+			IsExclusive: true, OwnerUserID: &ownerID, CapacitySource: CapacitySourceConnectedAccount,
+			BYOEnabled: boolPtr(false), BYODisabledReason: BYOAccountDisabledReasonSubscriptionInactive,
+		},
+	}
+
+	snapshot := svc.snapshotFromAPIKey(context.Background(), apiKey)
+	roundTrip := svc.snapshotToAPIKey(apiKey.Key, snapshot)
+
+	require.NotNil(t, roundTrip)
+	require.NotNil(t, roundTrip.Group)
+	require.True(t, roundTrip.Group.IsExclusive)
+	require.NotNil(t, roundTrip.Group.OwnerUserID)
+	require.Equal(t, ownerID, *roundTrip.Group.OwnerUserID)
+	require.Equal(t, CapacitySourceConnectedAccount, roundTrip.Group.CapacitySource)
+	require.True(t, IsUserOwnedConnectedAccountCapacity(roundTrip.User, roundTrip.Group))
+	require.NotNil(t, roundTrip.Group.BYOEnabled)
+	require.False(t, *roundTrip.Group.BYOEnabled)
+	require.Equal(t, BYOAccountDisabledReasonSubscriptionInactive, roundTrip.Group.BYODisabledReason)
 }
 
 func TestAPIKeyService_GetByKey_IgnoresLegacyAuthCacheSnapshotWithoutMessagesDispatchConfig(t *testing.T) {

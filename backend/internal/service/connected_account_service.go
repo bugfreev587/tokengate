@@ -52,11 +52,12 @@ type ConnectedGeminiOAuthService interface {
 }
 
 type ConnectedAccountService struct {
-	accountRepo    ConnectedAccountRepository
-	groupRepo      ConnectedGroupRepository
-	openaiOAuth    ConnectedOpenAIOAuthService
-	anthropicOAuth ConnectedAnthropicOAuthService
-	geminiOAuth    ConnectedGeminiOAuthService
+	accountRepo        ConnectedAccountRepository
+	groupRepo          ConnectedGroupRepository
+	openaiOAuth        ConnectedOpenAIOAuthService
+	anthropicOAuth     ConnectedAnthropicOAuthService
+	geminiOAuth        ConnectedGeminiOAuthService
+	entitlementChecker BYOSubscriptionEntitlementChecker
 }
 
 func NewConnectedAccountService(
@@ -65,13 +66,15 @@ func NewConnectedAccountService(
 	openaiOAuth ConnectedOpenAIOAuthService,
 	anthropicOAuth ConnectedAnthropicOAuthService,
 	geminiOAuth ConnectedGeminiOAuthService,
+	entitlementChecker BYOSubscriptionEntitlementChecker,
 ) *ConnectedAccountService {
 	return &ConnectedAccountService{
-		accountRepo:    accountRepo,
-		groupRepo:      groupRepo,
-		openaiOAuth:    openaiOAuth,
-		anthropicOAuth: anthropicOAuth,
-		geminiOAuth:    geminiOAuth,
+		accountRepo:        accountRepo,
+		groupRepo:          groupRepo,
+		openaiOAuth:        openaiOAuth,
+		anthropicOAuth:     anthropicOAuth,
+		geminiOAuth:        geminiOAuth,
+		entitlementChecker: entitlementChecker,
 	}
 }
 
@@ -146,8 +149,12 @@ func (s *ConnectedAccountService) CreateOpenAIAccountFromOAuth(ctx context.Conte
 	if err := validateConnectedAccountUser(input.UserID); err != nil {
 		return nil, err
 	}
-	if s == nil || s.accountRepo == nil || s.groupRepo == nil || s.openaiOAuth == nil {
+	if s == nil || s.accountRepo == nil || s.groupRepo == nil || s.openaiOAuth == nil || s.entitlementChecker == nil {
 		return nil, ErrConnectedAccountUnsupported
+	}
+	byoEnabled, err := s.entitlementChecker.HasActiveBYOSubscription(ctx, input.UserID)
+	if err != nil {
+		return nil, err
 	}
 
 	tokenInfo, err := s.openaiOAuth.ExchangeCode(ctx, &OpenAIExchangeCodeInput{
@@ -184,6 +191,7 @@ func (s *ConnectedAccountService) CreateOpenAIAccountFromOAuth(ctx context.Conte
 		ProxyID:     input.ProxyID,
 		Concurrency: input.Concurrency,
 		Priority:    input.Priority,
+		BYOEnabled:  byoEnabled,
 	})
 }
 
@@ -191,8 +199,12 @@ func (s *ConnectedAccountService) CreateAnthropicAccountFromOAuth(ctx context.Co
 	if err := validateConnectedAccountUser(input.UserID); err != nil {
 		return nil, err
 	}
-	if s == nil || s.accountRepo == nil || s.groupRepo == nil || s.anthropicOAuth == nil {
+	if s == nil || s.accountRepo == nil || s.groupRepo == nil || s.anthropicOAuth == nil || s.entitlementChecker == nil {
 		return nil, ErrConnectedAccountUnsupported
+	}
+	byoEnabled, err := s.entitlementChecker.HasActiveBYOSubscription(ctx, input.UserID)
+	if err != nil {
+		return nil, err
 	}
 
 	tokenInfo, err := s.anthropicOAuth.ExchangeCode(ctx, &ExchangeCodeInput{
@@ -224,6 +236,7 @@ func (s *ConnectedAccountService) CreateAnthropicAccountFromOAuth(ctx context.Co
 		ProxyID:     input.ProxyID,
 		Concurrency: input.Concurrency,
 		Priority:    input.Priority,
+		BYOEnabled:  byoEnabled,
 	})
 }
 
@@ -231,8 +244,12 @@ func (s *ConnectedAccountService) CreateGeminiAccountFromOAuth(ctx context.Conte
 	if err := validateConnectedAccountUser(input.UserID); err != nil {
 		return nil, err
 	}
-	if s == nil || s.accountRepo == nil || s.groupRepo == nil || s.geminiOAuth == nil {
+	if s == nil || s.accountRepo == nil || s.groupRepo == nil || s.geminiOAuth == nil || s.entitlementChecker == nil {
 		return nil, ErrConnectedAccountUnsupported
+	}
+	byoEnabled, err := s.entitlementChecker.HasActiveBYOSubscription(ctx, input.UserID)
+	if err != nil {
+		return nil, err
 	}
 
 	oauthType := normalizeConnectedGeminiOAuthType(input.OAuthType)
@@ -273,6 +290,7 @@ func (s *ConnectedAccountService) CreateGeminiAccountFromOAuth(ctx context.Conte
 		ProxyID:     input.ProxyID,
 		Concurrency: input.Concurrency,
 		Priority:    input.Priority,
+		BYOEnabled:  byoEnabled,
 	})
 }
 
@@ -413,6 +431,7 @@ type createConnectedAccountParams struct {
 	ProxyID     *int64
 	Concurrency int
 	Priority    int
+	BYOEnabled  bool
 }
 
 func (s *ConnectedAccountService) createConnectedAccount(ctx context.Context, params createConnectedAccountParams) (*Account, error) {
@@ -445,7 +464,7 @@ func (s *ConnectedAccountService) createConnectedAccount(ctx context.Context, pa
 		Concurrency:          concurrency,
 		Priority:             priority,
 		Status:               StatusActive,
-		Schedulable:          true,
+		Schedulable:          params.BYOEnabled,
 		AutoPauseOnExpired:   true,
 	}
 	if account.Credentials == nil {
@@ -453,6 +472,10 @@ func (s *ConnectedAccountService) createConnectedAccount(ctx context.Context, pa
 	}
 	if account.Extra == nil {
 		account.Extra = map[string]any{}
+	}
+	if !params.BYOEnabled {
+		account.Extra[BYOAccountDisabledReasonKey] = BYOAccountDisabledReasonSubscriptionInactive
+		account.Extra[BYOAccountOperationalSchedulableKey] = true
 	}
 	if err := s.accountRepo.Create(ctx, account); err != nil {
 		return nil, err

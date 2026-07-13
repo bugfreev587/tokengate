@@ -283,12 +283,7 @@ func (r *groupRepository) ListWithFilters(ctx context.Context, params pagination
 
 	counts, err := r.loadAccountCounts(ctx, groupIDs)
 	if err == nil {
-		for i := range outGroups {
-			c := counts[outGroups[i].ID]
-			outGroups[i].AccountCount = c.Total
-			outGroups[i].ActiveAccountCount = c.Active
-			outGroups[i].RateLimitedAccountCount = c.RateLimited
-		}
+		applyGroupAccountCounts(outGroups, counts)
 	}
 
 	return outGroups, paginationResultFromTotal(int64(total), params), nil
@@ -314,12 +309,7 @@ func (r *groupRepository) listWithAccountCountSort(ctx context.Context, q *dbent
 	if err != nil {
 		return nil, nil, err
 	}
-	for i := range outGroups {
-		c := counts[outGroups[i].ID]
-		outGroups[i].AccountCount = c.Total
-		outGroups[i].ActiveAccountCount = c.Active
-		outGroups[i].RateLimitedAccountCount = c.RateLimited
-	}
+	applyGroupAccountCounts(outGroups, counts)
 
 	sortOrder := params.NormalizedSortOrder(pagination.SortOrderDesc)
 	sort.SliceStable(outGroups, func(i, j int) bool {
@@ -411,12 +401,7 @@ func (r *groupRepository) ListActive(ctx context.Context) ([]service.Group, erro
 
 	counts, err := r.loadAccountCounts(ctx, groupIDs)
 	if err == nil {
-		for i := range outGroups {
-			c := counts[outGroups[i].ID]
-			outGroups[i].AccountCount = c.Total
-			outGroups[i].ActiveAccountCount = c.Active
-			outGroups[i].RateLimitedAccountCount = c.RateLimited
-		}
+		applyGroupAccountCounts(outGroups, counts)
 	}
 
 	return outGroups, nil
@@ -441,12 +426,7 @@ func (r *groupRepository) ListActiveByPlatform(ctx context.Context, platform str
 
 	counts, err := r.loadAccountCounts(ctx, groupIDs)
 	if err == nil {
-		for i := range outGroups {
-			c := counts[outGroups[i].ID]
-			outGroups[i].AccountCount = c.Total
-			outGroups[i].ActiveAccountCount = c.Active
-			outGroups[i].RateLimitedAccountCount = c.RateLimited
-		}
+		applyGroupAccountCounts(outGroups, counts)
 	}
 
 	return outGroups, nil
@@ -644,9 +624,10 @@ func (r *groupRepository) DeleteCascade(ctx context.Context, id int64) ([]int64,
 }
 
 type groupAccountCounts struct {
-	Total       int64
-	Active      int64
-	RateLimited int64
+	Total                int64
+	Active               int64
+	RateLimited          int64
+	SubscriptionInactive bool
 }
 
 func (r *groupRepository) loadAccountCounts(ctx context.Context, groupIDs []int64) (counts map[int64]groupAccountCounts, err error) {
@@ -664,12 +645,14 @@ func (r *groupRepository) loadAccountCounts(ctx context.Context, groupIDs []int6
 				a.rate_limit_reset_at > NOW() OR
 				a.overload_until > NOW() OR
 				a.temp_unschedulable_until > NOW()
-			)) AS rate_limited
+			)) AS rate_limited,
+			COALESCE(BOOL_OR(COALESCE(a.extra->>'byo_disabled_reason', '') = $2), false) AS subscription_inactive
 		FROM account_groups ag
-		JOIN accounts a ON a.id = ag.account_id
+		JOIN accounts a ON a.id = ag.account_id AND a.deleted_at IS NULL
 		WHERE ag.group_id = ANY($1)
 		GROUP BY ag.group_id`,
 		pq.Array(groupIDs),
+		service.BYOAccountDisabledReasonSubscriptionInactive,
 	)
 	if err != nil {
 		return nil, err
@@ -684,7 +667,7 @@ func (r *groupRepository) loadAccountCounts(ctx context.Context, groupIDs []int6
 	for rows.Next() {
 		var groupID int64
 		var c groupAccountCounts
-		if err = rows.Scan(&groupID, &c.Total, &c.Active, &c.RateLimited); err != nil {
+		if err = rows.Scan(&groupID, &c.Total, &c.Active, &c.RateLimited, &c.SubscriptionInactive); err != nil {
 			return nil, err
 		}
 		counts[groupID] = c
@@ -694,6 +677,38 @@ func (r *groupRepository) loadAccountCounts(ctx context.Context, groupIDs []int6
 	}
 
 	return counts, nil
+}
+
+func applyGroupAccountCounts(groups []service.Group, counts map[int64]groupAccountCounts) {
+	for i := range groups {
+		c := counts[groups[i].ID]
+		groups[i].AccountCount = c.Total
+		groups[i].ActiveAccountCount = c.Active
+		groups[i].RateLimitedAccountCount = c.RateLimited
+		applyBYOAccountAvailability(&groups[i], c)
+	}
+}
+
+func applyBYOAccountAvailability(group *service.Group, c groupAccountCounts) {
+	if group == nil || !group.IsUserOwnedConnectedAccount() {
+		return
+	}
+
+	enabled := !c.SubscriptionInactive && c.Active > 0
+	group.BYOEnabled = &enabled
+	if c.SubscriptionInactive {
+		group.BYODisabledReason = service.BYOAccountDisabledReasonSubscriptionInactive
+		return
+	}
+	if enabled {
+		group.BYODisabledReason = ""
+		return
+	}
+	if c.Total == 0 {
+		group.BYODisabledReason = service.BYOAccountDisabledReasonNoAccount
+		return
+	}
+	group.BYODisabledReason = service.BYOAccountDisabledReasonAccountDisabled
 }
 
 // GetAccountIDsByGroupIDs 获取多个分组的所有账号 ID（去重）

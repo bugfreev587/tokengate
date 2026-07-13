@@ -12,6 +12,7 @@ const {
   refreshConnectedAccountModels,
   showError,
   showSuccess,
+  showWarning,
 } = vi.hoisted(() => ({
   deleteConnectedAccount: vi.fn(),
   exchangeConnectedAccountCode: vi.fn(),
@@ -22,6 +23,7 @@ const {
   refreshConnectedAccountModels: vi.fn(),
   showError: vi.fn(),
   showSuccess: vi.fn(),
+  showWarning: vi.fn(),
 }))
 
 vi.mock('@/api/user', () => ({
@@ -38,6 +40,7 @@ vi.mock('@/stores/app', () => ({
   useAppStore: () => ({
     showError,
     showSuccess,
+    showWarning,
   }),
 }))
 
@@ -164,6 +167,8 @@ describe('User AccountsView', () => {
       type: 'oauth',
       status: 'active',
       capacity_source: 'connected_account',
+      byo_enabled: false,
+      byo_disabled_reason: 'subscription_inactive',
       created_at: '2026-07-01T09:00:00Z',
       updated_at: '2026-07-01T09:00:00Z',
     })
@@ -220,6 +225,7 @@ describe('User AccountsView', () => {
       name: 'Gemini Main',
     })
     expect(showSuccess).toHaveBeenCalled()
+    expect(showWarning).toHaveBeenCalledWith('userAccounts.subscriptionRequiredAfterConnect')
     expect(listConnectedAccounts).toHaveBeenCalledTimes(2)
   })
 

@@ -648,7 +648,14 @@ export default {
     noGroup: 'No group',
     searchGroup: 'Search groups...',
     byoGroupLabel: 'BYO account',
+    byoGroupDisabledLabel: 'Needs subscription',
     byoGroupDescription: 'Uses your connected AI account. TokenGate token balance is not charged.',
+    byoGroupDisabled: {
+      subscriptionInactive: 'This BYO account is linked but disabled. Subscribe to enable API traffic through this group.',
+      accountDisabled: 'This BYO account is linked but currently disabled. API keys can bind to it, but traffic will not route until it is enabled.',
+      accountMissing: 'This BYO group has no connected account attached yet. API keys can bind to it after an account is connected.',
+    },
+    byoSubscriptionRequiredAfterBind: 'API key saved, but this BYO route stays inactive until you subscribe.',
     noGroupFound: 'No groups found',
     created: 'Created',
     copyToClipboard: 'Copy to clipboard',
@@ -6483,6 +6490,7 @@ export default {
     exchangeFailed: 'Failed to finish OAuth connection',
     oauthFieldsRequired: 'Fill in the required OAuth fields',
     connectedSuccess: 'Account connected',
+    subscriptionRequiredAfterConnect: 'Account connected but inactive. Subscribe to BYO to enable API traffic.',
     providers: {
       openaiDescription: 'Use an OpenAI account as a private upstream.',
       anthropicDescription: 'Use an Anthropic account as a private upstream.',

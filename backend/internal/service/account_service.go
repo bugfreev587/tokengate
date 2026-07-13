@@ -14,6 +14,23 @@ var (
 	ErrAccountNilInput = infraerrors.BadRequest("ACCOUNT_NIL_INPUT", "account input cannot be nil")
 )
 
+const (
+	BYOAccountDisabledReasonKey                  = "byo_disabled_reason"
+	BYOAccountOperationalSchedulableKey          = "byo_operational_schedulable"
+	BYOAccountDisabledReasonSubscriptionInactive = "subscription_inactive"
+	BYOAccountDisabledReasonAccountDisabled      = "account_disabled"
+	BYOAccountDisabledReasonNoAccount            = "account_missing"
+)
+
+type BYOAccountEntitlementUpdater interface {
+	SetOwnerBYOAccountEntitlement(ctx context.Context, ownerUserID int64, enabled bool) (int64, error)
+	ReconcileBYOAccountEntitlements(ctx context.Context) ([]int64, error)
+}
+
+type BYOSubscriptionEntitlementChecker interface {
+	HasActiveBYOSubscription(ctx context.Context, ownerUserID int64) (bool, error)
+}
+
 const AccountListGroupUngrouped int64 = -1
 const AccountPrivacyModeUnsetFilter = "__unset__"
 

@@ -47,7 +47,7 @@ func TestConnectedAccountHandlerListRedactsCredentials(t *testing.T) {
 		CreatedAt: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 	}
-	svc := service.NewConnectedAccountService(accountRepo, groupRepo, &handlerConnectedOpenAIOAuthFake{}, nil, nil)
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, &handlerConnectedOpenAIOAuthFake{}, nil, nil, handlerBYOEntitlementChecker{})
 	h := NewConnectedAccountHandler(svc, nil, nil)
 	router := gin.New()
 	router.GET("/api/v1/user/accounts", func(c *gin.Context) {
@@ -90,7 +90,7 @@ func TestConnectedAccountHandlerExchangeOpenAICodeCreatesAccount(t *testing.T) {
 			Email:        "owner@example.com",
 		},
 	}
-	svc := service.NewConnectedAccountService(accountRepo, groupRepo, oauth, nil, nil)
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, oauth, nil, nil, handlerBYOEntitlementChecker{})
 	h := NewConnectedAccountHandler(svc, nil, nil)
 	router := gin.New()
 	router.POST("/api/v1/user/accounts/openai/exchange-code", func(c *gin.Context) {
@@ -113,6 +113,8 @@ func TestConnectedAccountHandlerExchangeOpenAICodeCreatesAccount(t *testing.T) {
 	require.Equal(t, "owner@example.com", item["email"])
 	require.Equal(t, service.CapacitySourceConnectedAccount, item["capacity_source"])
 	require.Equal(t, float64(1), item["group_id"])
+	require.Equal(t, false, item["byo_enabled"])
+	require.Equal(t, service.BYOAccountDisabledReasonSubscriptionInactive, item["byo_disabled_reason"])
 	require.NotContains(t, w.Body.String(), "access-secret")
 	require.Len(t, accountRepo.accounts, 1)
 	require.Len(t, groupRepo.groups, 1)
@@ -131,7 +133,7 @@ func TestConnectedAccountHandlerExchangeAnthropicCodeCreatesAccount(t *testing.T
 			EmailAddress: "claude-owner@example.com",
 		},
 	}
-	svc := service.NewConnectedAccountService(accountRepo, groupRepo, nil, oauth, nil)
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, nil, oauth, nil, handlerBYOEntitlementChecker{})
 	h := NewConnectedAccountHandler(svc, nil, nil)
 	router := gin.New()
 	router.POST("/api/v1/user/accounts/anthropic/exchange-code", func(c *gin.Context) {
@@ -176,7 +178,7 @@ func TestConnectedAccountHandlerExchangeGeminiCodeCreatesAccount(t *testing.T) {
 			TierID:       service.GeminiTierGoogleAIPro,
 		},
 	}
-	svc := service.NewConnectedAccountService(accountRepo, groupRepo, nil, nil, oauth)
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, nil, nil, oauth, handlerBYOEntitlementChecker{})
 	h := NewConnectedAccountHandler(svc, nil, nil)
 	router := gin.New()
 	router.POST("/api/v1/user/accounts/gemini/exchange-code", func(c *gin.Context) {
@@ -218,7 +220,7 @@ func TestConnectedAccountHandlerGetAvailableModelsRequiresOwnership(t *testing.T
 		Status:      service.StatusActive,
 		OwnerUserID: &otherOwnerID,
 	}
-	svc := service.NewConnectedAccountService(accountRepo, groupRepo, &handlerConnectedOpenAIOAuthFake{}, nil, nil)
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, &handlerConnectedOpenAIOAuthFake{}, nil, nil, handlerBYOEntitlementChecker{})
 	h := NewConnectedAccountHandler(svc, nil, nil)
 	router := gin.New()
 	router.GET("/api/v1/user/accounts/:id/models", func(c *gin.Context) {
@@ -263,7 +265,7 @@ func TestConnectedAccountHandlerRefreshAvailableModelsStoresOwnedCatalog(t *test
 	restore := service.SetAnthropicModelsHTTPClientForTest(upstream.Client(), upstream.URL)
 	defer restore()
 
-	svc := service.NewConnectedAccountService(accountRepo, groupRepo, nil, nil, nil)
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, nil, nil, nil, handlerBYOEntitlementChecker{})
 	h := NewConnectedAccountHandler(svc, nil, nil)
 	router := gin.New()
 	router.POST("/api/v1/user/accounts/:id/models/refresh", func(c *gin.Context) {
@@ -301,7 +303,7 @@ func TestConnectedAccountHandlerTestRequiresOwnership(t *testing.T) {
 		Status:      service.StatusActive,
 		OwnerUserID: &otherOwnerID,
 	}
-	svc := service.NewConnectedAccountService(accountRepo, groupRepo, &handlerConnectedOpenAIOAuthFake{}, nil, nil)
+	svc := service.NewConnectedAccountService(accountRepo, groupRepo, &handlerConnectedOpenAIOAuthFake{}, nil, nil, handlerBYOEntitlementChecker{})
 	h := NewConnectedAccountHandler(svc, nil, nil)
 	router := gin.New()
 	router.POST("/api/v1/user/accounts/:id/test", func(c *gin.Context) {
@@ -426,6 +428,12 @@ func (r *handlerConnectedGroupRepoFake) DeleteCascade(_ context.Context, id int6
 
 type handlerConnectedOpenAIOAuthFake struct {
 	tokenInfo *service.OpenAITokenInfo
+}
+
+type handlerBYOEntitlementChecker struct{}
+
+func (handlerBYOEntitlementChecker) HasActiveBYOSubscription(context.Context, int64) (bool, error) {
+	return false, nil
 }
 
 func (f *handlerConnectedOpenAIOAuthFake) GenerateAuthURL(context.Context, *int64, string, string) (*service.OpenAIAuthURLResult, error) {

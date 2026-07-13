@@ -69,6 +69,11 @@ func APIKeyAuthWithSubscriptionGoogle(apiKeyService *service.APIKeyService, subs
 			return
 		}
 
+		if admissionErr := evaluateBYOAdmission(apiKey); admissionErr != nil {
+			abortWithGoogleCodedError(c, admissionErr)
+			return
+		}
+
 		isSubscriptionType := apiKey.Group != nil && apiKey.Group.IsSubscriptionType()
 		if isSubscriptionType && subscriptionService != nil {
 			subscription, err := subscriptionService.GetActiveSubscription(
@@ -99,7 +104,7 @@ func APIKeyAuthWithSubscriptionGoogle(apiKeyService *service.APIKeyService, subs
 				maintenanceCopy := *subscription
 				subscriptionService.DoWindowMaintenance(&maintenanceCopy)
 			}
-		} else {
+		} else if !service.IsUserOwnedConnectedAccountCapacity(apiKey.User, apiKey.Group) {
 			if apiKey.User.Balance <= 0 {
 				abortWithGoogleError(c, 403, "Insufficient account balance")
 				return
@@ -163,6 +168,25 @@ func abortWithGoogleError(c *gin.Context, status int, message string) {
 			"code":    status,
 			"message": message,
 			"status":  googleapi.HTTPStatusToGoogleStatus(status),
+		},
+	})
+	c.Abort()
+}
+
+func abortWithGoogleCodedError(c *gin.Context, admissionErr *byoAdmissionError) {
+	if admissionErr == nil {
+		return
+	}
+	c.JSON(admissionErr.Status, gin.H{
+		"error": gin.H{
+			"code":    admissionErr.Status,
+			"message": admissionErr.Message,
+			"status":  googleapi.HTTPStatusToGoogleStatus(admissionErr.Status),
+			"details": []gin.H{{
+				"@type":  "type.googleapis.com/google.rpc.ErrorInfo",
+				"reason": admissionErr.Code,
+				"domain": "tokengate.to",
+			}},
 		},
 	})
 	c.Abort()

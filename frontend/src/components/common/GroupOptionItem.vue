@@ -11,6 +11,8 @@
         :platform="platform"
         :subscription-type="subscriptionType"
         :capacity-source="capacitySource"
+        :byo-enabled="byoEnabled"
+        :byo-disabled-reason="byoDisabledReason"
         :show-rate="false"
         class="groupOptionItemBadge"
       />
@@ -22,10 +24,16 @@
         {{ description }}
       </span>
       <span
-        v-if="isConnectedAccountCapacity"
+        v-if="isConnectedAccountCapacity && !isBYODisabled"
         class="mt-1.5 w-full text-left text-xs leading-relaxed text-emerald-700 dark:text-emerald-300"
       >
         {{ t('keys.byoGroupDescription') }}
+      </span>
+      <span
+        v-if="isBYODisabled"
+        class="mt-1.5 w-full text-left text-xs font-medium leading-relaxed text-red-600 dark:text-red-300"
+      >
+        {{ byoDisabledHint }}
       </span>
     </div>
 
@@ -33,9 +41,14 @@
     <div class="flex shrink-0 items-center gap-2 pt-0.5">
       <span
         v-if="isConnectedAccountCapacity"
-        class="inline-flex items-center whitespace-nowrap rounded-md bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300"
+        :class="[
+          'inline-flex items-center whitespace-nowrap rounded-md px-3 py-1 text-xs font-semibold',
+          isBYODisabled
+            ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'
+            : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+        ]"
       >
-        {{ t('keys.byoGroupLabel') }}
+        {{ isBYODisabled ? t('keys.byoGroupDisabledLabel') : t('keys.byoGroupLabel') }}
       </span>
       <!-- Rate pill (platform color) -->
       <span v-else-if="rateMultiplier !== undefined" :class="['inline-flex items-center whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold', ratePillClass]">
@@ -78,6 +91,8 @@ interface Props {
   selected?: boolean
   showCheckmark?: boolean
   capacitySource?: GroupCapacitySource
+  byoEnabled?: boolean | null
+  byoDisabledReason?: string | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -90,6 +105,17 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { t } = useI18n()
 const isConnectedAccountCapacity = computed(() => props.capacitySource === 'connected_account')
+const isBYODisabled = computed(() => isConnectedAccountCapacity.value && props.byoEnabled === false)
+const byoDisabledHint = computed(() => {
+  switch (props.byoDisabledReason) {
+    case 'subscription_inactive':
+      return t('keys.byoGroupDisabled.subscriptionInactive')
+    case 'account_missing':
+      return t('keys.byoGroupDisabled.accountMissing')
+    default:
+      return t('keys.byoGroupDisabled.accountDisabled')
+  }
+})
 
 // Whether user has a custom rate different from default
 const hasCustomRate = computed(() => {

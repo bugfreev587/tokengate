@@ -81,14 +81,16 @@ type APIKey struct {
 }
 
 type Group struct {
-	ID             int64   `json:"id"`
-	Name           string  `json:"name"`
-	Description    string  `json:"description"`
-	Platform       string  `json:"platform"`
-	RateMultiplier float64 `json:"rate_multiplier"`
-	IsExclusive    bool    `json:"is_exclusive"`
-	Status         string  `json:"status"`
-	CapacitySource string  `json:"capacity_source"`
+	ID                int64   `json:"id"`
+	Name              string  `json:"name"`
+	Description       string  `json:"description"`
+	Platform          string  `json:"platform"`
+	RateMultiplier    float64 `json:"rate_multiplier"`
+	IsExclusive       bool    `json:"is_exclusive"`
+	Status            string  `json:"status"`
+	CapacitySource    string  `json:"capacity_source"`
+	BYOEnabled        *bool   `json:"byo_enabled,omitempty"`
+	BYODisabledReason string  `json:"byo_disabled_reason,omitempty"`
 
 	SubscriptionType string   `json:"subscription_type"`
 	DailyLimitUSD    *float64 `json:"daily_limit_usd"`

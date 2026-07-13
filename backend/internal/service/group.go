@@ -76,6 +76,11 @@ type Group struct {
 	AccountCount            int64
 	ActiveAccountCount      int64
 	RateLimitedAccountCount int64
+
+	// BYOEnabled is a read projection for user-owned connected-account groups.
+	// Nil means availability was not loaded for this response.
+	BYOEnabled        *bool
+	BYODisabledReason string
 }
 
 func (g *Group) IsActive() bool {

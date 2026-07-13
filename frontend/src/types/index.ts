@@ -490,6 +490,12 @@ export type SubscriptionType = 'standard' | 'subscription'
 
 export type GroupCapacitySource = 'tokengate' | 'connected_account'
 
+export type GroupBYODisabledReason =
+  | 'subscription_inactive'
+  | 'account_disabled'
+  | 'account_missing'
+  | string
+
 export interface OpenAIMessagesDispatchModelConfig {
   opus_mapped_model?: string
   sonnet_mapped_model?: string
@@ -508,6 +514,8 @@ export interface Group {
   status: 'active' | 'inactive'
   subscription_type: SubscriptionType
   capacity_source?: GroupCapacitySource
+  byo_enabled?: boolean
+  byo_disabled_reason?: GroupBYODisabledReason
   daily_limit_usd: number | null
   weekly_limit_usd: number | null
   monthly_limit_usd: number | null

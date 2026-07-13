@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -24,7 +25,7 @@ func TestConnectedAccountServiceCreateOpenAIAccountCreatesPrivateGroup(t *testin
 			ClientID:     "client-id",
 		},
 	}
-	svc := NewConnectedAccountService(accountRepo, groupRepo, oauth, nil, nil)
+	svc := NewConnectedAccountService(accountRepo, groupRepo, oauth, nil, nil, &byoEntitlementCheckerStub{})
 
 	account, err := svc.CreateOpenAIAccountFromOAuth(ctx, CreateConnectedOpenAIAccountInput{
 		UserID:    42,
@@ -38,9 +39,12 @@ func TestConnectedAccountServiceCreateOpenAIAccountCreatesPrivateGroup(t *testin
 	require.Equal(t, PlatformOpenAI, account.Platform)
 	require.Equal(t, AccountTypeOAuth, account.Type)
 	require.True(t, account.CredentialsEncrypted)
+	require.False(t, account.Schedulable)
 	require.NotNil(t, account.OwnerUserID)
 	require.Equal(t, int64(42), *account.OwnerUserID)
 	require.Equal(t, "access-secret", account.Credentials["access_token"])
+	require.Equal(t, BYOAccountDisabledReasonSubscriptionInactive, account.Extra[BYOAccountDisabledReasonKey])
+	require.Equal(t, true, account.Extra[BYOAccountOperationalSchedulableKey])
 
 	require.Len(t, groupRepo.groups, 1)
 	var group *Group
@@ -61,6 +65,55 @@ func TestConnectedAccountServiceCreateOpenAIAccountCreatesPrivateGroup(t *testin
 	require.Equal(t, group.ID, account.Groups[0].ID)
 }
 
+func TestConnectedAccountServiceCreatesSchedulableAccountForActiveBYOSubscriber(t *testing.T) {
+	accountRepo := newConnectedAccountRepoFake()
+	oauth := &connectedOpenAIOAuthFake{tokenInfo: &OpenAITokenInfo{
+		AccessToken: "access-secret",
+		ExpiresAt:   time.Now().Add(time.Hour).Unix(),
+	}}
+	svc := NewConnectedAccountService(
+		accountRepo,
+		newConnectedGroupRepoFake(),
+		oauth,
+		nil,
+		nil,
+		&byoEntitlementCheckerStub{active: true},
+	)
+
+	account, err := svc.CreateOpenAIAccountFromOAuth(context.Background(), CreateConnectedOpenAIAccountInput{
+		UserID: 42, SessionID: "session", Code: "code", State: "state",
+	})
+	require.NoError(t, err)
+	require.True(t, account.Schedulable)
+	_, markedInactive := account.Extra[BYOAccountDisabledReasonKey]
+	require.False(t, markedInactive)
+	_, savedOperationalState := account.Extra[BYOAccountOperationalSchedulableKey]
+	require.False(t, savedOperationalState)
+}
+
+func TestConnectedAccountServiceDoesNotCreateAccountWhenEntitlementLookupFails(t *testing.T) {
+	accountRepo := newConnectedAccountRepoFake()
+	oauth := &connectedOpenAIOAuthFake{tokenInfo: &OpenAITokenInfo{
+		AccessToken: "access-secret",
+		ExpiresAt:   time.Now().Add(time.Hour).Unix(),
+	}}
+	lookupErr := errors.New("subscription lookup failed")
+	svc := NewConnectedAccountService(
+		accountRepo,
+		newConnectedGroupRepoFake(),
+		oauth,
+		nil,
+		nil,
+		&byoEntitlementCheckerStub{err: lookupErr},
+	)
+
+	_, err := svc.CreateOpenAIAccountFromOAuth(context.Background(), CreateConnectedOpenAIAccountInput{
+		UserID: 42, SessionID: "session", Code: "code", State: "state",
+	})
+	require.ErrorIs(t, err, lookupErr)
+	require.Empty(t, accountRepo.accounts)
+}
+
 func TestConnectedAccountServiceOpenAIUsesCallbackRedirectURI(t *testing.T) {
 	ctx := context.Background()
 	accountRepo := newConnectedAccountRepoFake()
@@ -73,7 +126,7 @@ func TestConnectedAccountServiceOpenAIUsesCallbackRedirectURI(t *testing.T) {
 			Email:        "owner@example.com",
 		},
 	}
-	svc := NewConnectedAccountService(accountRepo, groupRepo, oauth, nil, nil)
+	svc := NewConnectedAccountService(accountRepo, groupRepo, oauth, nil, nil, &byoEntitlementCheckerStub{})
 
 	_, err := svc.GenerateOpenAIAuthURL(ctx, 42, nil, "https://api.tokengate.to/auth/callback")
 	require.NoError(t, err)
@@ -108,7 +161,7 @@ func TestConnectedAccountServiceCreateAnthropicAccountCreatesPrivateGroup(t *tes
 			EmailAddress: "claude-owner@example.com",
 		},
 	}
-	svc := NewConnectedAccountService(accountRepo, groupRepo, nil, oauth, nil)
+	svc := NewConnectedAccountService(accountRepo, groupRepo, nil, oauth, nil, &byoEntitlementCheckerStub{})
 
 	account, err := svc.CreateAnthropicAccountFromOAuth(ctx, CreateConnectedAnthropicAccountInput{
 		UserID:    42,
@@ -159,7 +212,7 @@ func TestConnectedAccountServiceCreateGeminiAccountCreatesPrivateGroup(t *testin
 			},
 		},
 	}
-	svc := NewConnectedAccountService(accountRepo, groupRepo, nil, nil, oauth)
+	svc := NewConnectedAccountService(accountRepo, groupRepo, nil, nil, oauth, &byoEntitlementCheckerStub{})
 
 	account, err := svc.CreateGeminiAccountFromOAuth(ctx, CreateConnectedGeminiAccountInput{
 		UserID:      42,
@@ -202,7 +255,7 @@ func TestConnectedAccountServiceCreateGeminiAccountCreatesPrivateGroup(t *testin
 func TestConnectedAccountServiceListUsesOwnerScope(t *testing.T) {
 	ctx := context.Background()
 	accountRepo := newConnectedAccountRepoFake()
-	svc := NewConnectedAccountService(accountRepo, newConnectedGroupRepoFake(), &connectedOpenAIOAuthFake{}, nil, nil)
+	svc := NewConnectedAccountService(accountRepo, newConnectedGroupRepoFake(), &connectedOpenAIOAuthFake{}, nil, nil, &byoEntitlementCheckerStub{})
 	ownerID := int64(42)
 	otherOwnerID := int64(77)
 	require.NoError(t, accountRepo.Create(ctx, &Account{Name: "mine", OwnerUserID: &ownerID, Platform: PlatformOpenAI, Type: AccountTypeOAuth, Status: StatusActive}))
@@ -219,7 +272,7 @@ func TestConnectedAccountServiceDeleteRemovesOnlyOwnedConnectedGroup(t *testing.
 	ctx := context.Background()
 	accountRepo := newConnectedAccountRepoFake()
 	groupRepo := newConnectedGroupRepoFake()
-	svc := NewConnectedAccountService(accountRepo, groupRepo, &connectedOpenAIOAuthFake{}, nil, nil)
+	svc := NewConnectedAccountService(accountRepo, groupRepo, &connectedOpenAIOAuthFake{}, nil, nil, &byoEntitlementCheckerStub{})
 	ownerID := int64(42)
 	group := &Group{
 		ID:             10,
@@ -335,6 +388,15 @@ type connectedAccountRepoFake struct {
 	accounts          map[int64]*Account
 	boundGroups       map[int64][]int64
 	deletedAccountIDs []int64
+}
+
+type byoEntitlementCheckerStub struct {
+	active bool
+	err    error
+}
+
+func (s *byoEntitlementCheckerStub) HasActiveBYOSubscription(context.Context, int64) (bool, error) {
+	return s.active, s.err
 }
 
 func newConnectedAccountRepoFake() *connectedAccountRepoFake {

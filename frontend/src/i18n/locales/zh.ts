@@ -645,7 +645,14 @@ export default {
     noGroup: '无分组',
     searchGroup: '搜索分组...',
     byoGroupLabel: '自带账号',
+    byoGroupDisabledLabel: '需订阅启用',
     byoGroupDescription: '使用您连接的 AI 账号，不消耗 TokenGate 余额。',
+    byoGroupDisabled: {
+      subscriptionInactive: '这个 BYO 账号已绑定但未启用。订阅后，API 请求才会通过此分组路由。',
+      accountDisabled: '这个 BYO 账号已绑定但当前处于禁用状态。API 密钥可以绑定，但启用账号前不会路由请求。',
+      accountMissing: '这个 BYO 分组尚未绑定连接账号。绑定账号后，API 密钥才能通过它路由请求。',
+    },
+    byoSubscriptionRequiredAfterBind: 'API Key 已保存，但订阅 BYO 前该路由不会处理 API 请求。',
     noGroupFound: '未找到匹配的分组',
     created: '创建时间',
     copyToClipboard: '复制到剪贴板',
@@ -6639,6 +6646,7 @@ export default {
     exchangeFailed: '完成 OAuth 绑定失败',
     oauthFieldsRequired: '请填写必需的 OAuth 字段',
     connectedSuccess: '账号已连接',
+    subscriptionRequiredAfterConnect: '账号已绑定但尚未启用。订阅 BYO 后才可用于 API 请求。',
     providers: {
       openaiDescription: '使用 OpenAI 账号作为私有上游。',
       anthropicDescription: '使用 Anthropic 账号作为私有上游。',

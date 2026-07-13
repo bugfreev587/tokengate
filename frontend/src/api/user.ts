@@ -20,6 +20,7 @@ import type {
   UserAffiliateDetail,
   AffiliateTransferResponse,
   PaginatedResponse,
+  GroupBYODisabledReason,
 } from '@/types'
 
 export interface ConnectedAccountSummary {
@@ -33,6 +34,8 @@ export interface ConnectedAccountSummary {
   group_id?: number
   group_name?: string
   capacity_source: 'connected_account' | 'tokengate' | string
+  byo_enabled?: boolean
+  byo_disabled_reason?: GroupBYODisabledReason
   last_used_at?: string | null
   created_at: string
   updated_at: string

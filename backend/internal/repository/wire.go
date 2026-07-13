@@ -31,6 +31,10 @@ func ProvideGitHubReleaseClient(cfg *config.Config) service.GitHubReleaseClient 
 	return NewGitHubReleaseClient(cfg.Update.ProxyURL, cfg.Security.ProxyFallback.AllowDirectOnError)
 }
 
+func ProvideBYOSubscriptionEntitlementChecker(repo service.UserSubscriptionRepository) service.BYOSubscriptionEntitlementChecker {
+	return repo.(service.BYOSubscriptionEntitlementChecker)
+}
+
 // ProvidePricingRemoteClient 创建定价数据远程客户端
 // 从配置中读取代理设置，支持国内服务器通过代理访问 GitHub 上的定价数据
 func ProvidePricingRemoteClient(cfg *config.Config) service.PricingRemoteClient {
@@ -72,6 +76,7 @@ var ProviderSet = wire.NewSet(
 	NewAccountRepositoryConcrete,
 	wire.Bind(new(service.AccountRepository), new(*accountRepository)),
 	wire.Bind(new(service.ConnectedAccountRepository), new(*accountRepository)),
+	wire.Bind(new(service.BYOAccountEntitlementUpdater), new(*accountRepository)),
 	NewScheduledTestPlanRepository,   // 定时测试计划仓储
 	NewScheduledTestResultRepository, // 定时测试结果仓储
 	NewProxyRepository,
@@ -87,6 +92,7 @@ var ProviderSet = wire.NewSet(
 	NewSettingRepository,
 	NewOpsRepository,
 	NewUserSubscriptionRepository,
+	ProvideBYOSubscriptionEntitlementChecker,
 	NewUserAttributeDefinitionRepository,
 	NewUserAttributeValueRepository,
 	NewUserGroupRateRepository,

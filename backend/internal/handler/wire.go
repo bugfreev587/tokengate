@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/Wei-Shaw/sub2api/internal/handler/admin"
+	"github.com/Wei-Shaw/sub2api/internal/payment"
 	"github.com/Wei-Shaw/sub2api/internal/service"
 
 	"github.com/google/wire"
@@ -76,6 +77,14 @@ func ProvideAdminHandlers(
 	}
 }
 
+func ProvidePaymentHandler(paymentService *service.PaymentService, configService *service.PaymentConfigService, channelService *service.ChannelService, stripeBillingService *service.StripeBillingService) *PaymentHandler {
+	return NewPaymentHandler(paymentService, configService, channelService, stripeBillingService)
+}
+
+func ProvidePaymentWebhookHandler(paymentService *service.PaymentService, registry *payment.Registry, stripeBillingService *service.StripeBillingService) *PaymentWebhookHandler {
+	return NewPaymentWebhookHandler(paymentService, registry, stripeBillingService)
+}
+
 // ProvideSystemHandler creates admin.SystemHandler with UpdateService
 func ProvideSystemHandler(updateService *service.UpdateService, lockService *service.SystemOperationLockService) *admin.SystemHandler {
 	return admin.NewSystemHandler(updateService, lockService)
@@ -145,8 +154,8 @@ var ProviderSet = wire.NewSet(
 	NewOpenAIGatewayHandler,
 	NewTotpHandler,
 	ProvideSettingHandler,
-	NewPaymentHandler,
-	NewPaymentWebhookHandler,
+	ProvidePaymentHandler,
+	ProvidePaymentWebhookHandler,
 	NewAvailableChannelHandler,
 
 	// Admin handlers
