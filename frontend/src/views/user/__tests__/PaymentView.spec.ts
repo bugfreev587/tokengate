@@ -7,6 +7,9 @@ const routeState = vi.hoisted(() => ({
   path: '/purchase',
   query: {} as Record<string, unknown>,
 }))
+const reactiveRoute = vi.hoisted(() => ({
+  current: null as null | { path: string; query: Record<string, unknown> },
+}))
 
 const routerReplace = vi.hoisted(() => vi.fn())
 const routerPush = vi.hoisted(() => vi.fn())
@@ -23,9 +26,11 @@ const bridgeInvoke = vi.hoisted(() => vi.fn())
 
 vi.mock('vue-router', async () => {
   const actual = await vi.importActual<typeof import('vue-router')>('vue-router')
+  const { reactive } = await vi.importActual<typeof import('vue')>('vue')
+  reactiveRoute.current = reactive(routeState)
   return {
     ...actual,
-    useRoute: () => routeState,
+    useRoute: () => reactiveRoute.current!,
     useRouter: () => ({
       replace: routerReplace,
       push: routerPush,
@@ -307,8 +312,8 @@ describe('PaymentView WeChat JSAPI flow', () => {
     expect(wrapper.text()).toContain('payment.paymentAmount¥72.00')
   })
 
-  it('separates usage-based billing from BYO subscription mode', async () => {
-    routeState.query = {}
+  it('shows Usage Based content without rendering page-level mode tabs', async () => {
+    routeState.query = { tab: 'recharge' }
     getCheckoutInfo.mockResolvedValue(checkoutInfoWithPlansFixture())
 
     const wrapper = shallowMount(PaymentView, {
@@ -323,17 +328,34 @@ describe('PaymentView WeChat JSAPI flow', () => {
     await flushPromises()
     await flushPromises()
 
-    expect(wrapper.text()).toContain('payment.modeTabs.usageBased.label')
-    expect(wrapper.text()).toContain('payment.modeTabs.byoSubscription.label')
+    expect(wrapper.find('[data-testid="mode-tab-recharge"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="mode-tab-subscription"]').exists()).toBe(false)
     expect(wrapper.text()).toContain('payment.modeDescriptions.usageBased.title')
-    expect(wrapper.text()).toContain('payment.modeDescriptions.usageBased.desc')
     expect(wrapper.find('amount-input-stub').exists()).toBe(true)
+  })
 
-    await wrapper.find('[data-testid="mode-tab-subscription"]').trigger('click')
+  it('switches to BYO Sub content when the route query changes', async () => {
+    routeState.query = { tab: 'recharge' }
+    getCheckoutInfo.mockResolvedValue(checkoutInfoWithPlansFixture())
+
+    const wrapper = shallowMount(PaymentView, {
+      global: {
+        stubs: {
+          AppLayout: { template: '<div><slot /></div>' },
+          Teleport: true,
+          Transition: false,
+        },
+      },
+    })
+    await flushPromises()
     await flushPromises()
 
+    reactiveRoute.current!.query = { tab: 'subscription' }
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="mode-tab-recharge"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="mode-tab-subscription"]').exists()).toBe(false)
     expect(wrapper.text()).toContain('payment.modeDescriptions.byoSubscription.title')
-    expect(wrapper.text()).toContain('payment.modeDescriptions.byoSubscription.desc')
     expect(wrapper.find('amount-input-stub').exists()).toBe(false)
     expect(wrapper.find('subscription-plan-card-stub').exists()).toBe(true)
   })

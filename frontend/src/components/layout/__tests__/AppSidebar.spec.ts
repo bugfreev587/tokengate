@@ -36,3 +36,21 @@ describe('AppSidebar user account navigation', () => {
     expect(componentSource).toContain("{ path: '/accounts', label: t('nav.accounts'), icon: GlobeIcon }")
   })
 })
+
+describe('AppSidebar Billing navigation', () => {
+  it('defines Billing as an expand-only group with query-backed mode children', () => {
+    expect(componentSource).toContain("path: '/purchase',")
+    expect(componentSource).toContain("label: t('nav.buySubscription')")
+    expect(componentSource).toContain('expandOnly: true')
+    expect(componentSource).toContain("label: t('nav.usageBasedMode')")
+    expect(componentSource).toContain("query: { tab: 'recharge' }")
+    expect(componentSource).toContain("label: t('nav.byoSubMode')")
+    expect(componentSource).toContain("query: { tab: 'subscription' }")
+  })
+
+  it('renders collapsible groups in regular-user and personal navigation', () => {
+    expect(componentSource.match(/v-if="item\.children\?\.length"/g)?.length).toBe(3)
+    expect(componentSource).toContain(':to="navTarget(child)"')
+    expect(componentSource).toContain("'sidebar-link-active': isNavItemActive(child)")
+  })
+})

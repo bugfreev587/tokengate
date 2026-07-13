@@ -5,17 +5,6 @@
         <div class="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"></div>
       </div>
       <template v-else>
-        <div v-if="tabs.length > 1 && paymentPhase === 'select' && !selectedPlan" class="grid gap-2 rounded-xl bg-gray-100 p-1 dark:bg-dark-800 sm:grid-cols-2">
-          <button v-for="tab in tabs" :key="tab.key"
-            :data-testid="`mode-tab-${tab.key}`"
-            class="rounded-lg px-4 py-3 text-left transition-all active:scale-[0.99]"
-            :class="activeTab === tab.key ? 'bg-white text-gray-900 shadow dark:bg-dark-700 dark:text-white' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
-            @click="activeTab = tab.key">
-            <span class="block text-sm font-semibold">{{ tab.label }}</span>
-            <span class="mt-0.5 block text-xs opacity-75">{{ tab.description }}</span>
-          </button>
-        </div>
-
         <div v-if="paymentPhase === 'select' && !selectedPlan" class="card p-5">
           <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ modeDescription.title }}</p>
           <p class="mt-1 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{{ modeDescription.desc }}</p>
@@ -365,7 +354,14 @@ const loading = ref(true)
 const submitting = ref(false)
 const errorMessage = ref('')
 const errorHintMessage = ref('')
-const activeTab = ref<'recharge' | 'subscription'>('recharge')
+type BillingTab = 'recharge' | 'subscription'
+
+function resolveBillingTab(tab: unknown, balanceDisabled: boolean): BillingTab {
+  if (balanceDisabled) return 'subscription'
+  return tab === 'subscription' ? 'subscription' : 'recharge'
+}
+
+const activeTab = ref<BillingTab>(resolveBillingTab(route.query.tab, false))
 const amount = ref<number | null>(null)
 const selectedMethod = ref('')
 const selectedPlan = ref<SubscriptionPlan | null>(null)
@@ -545,22 +541,13 @@ const checkout = ref<CheckoutInfoResponse>({
 	  plans: [], balance_disabled: false, balance_recharge_multiplier: 1, usd_cny_rate: 7.2, recharge_fee_rate: 0, help_text: '', help_image_url: '', stripe_publishable_key: '',
 	})
 
-const tabs = computed(() => {
-  const result: { key: 'recharge' | 'subscription'; label: string; description: string }[] = []
-  if (!checkout.value.balance_disabled) {
-    result.push({
-      key: 'recharge',
-      label: t('payment.modeTabs.usageBased.label'),
-      description: t('payment.modeTabs.usageBased.description'),
-    })
-  }
-  result.push({
-    key: 'subscription',
-    label: t('payment.modeTabs.byoSubscription.label'),
-    description: t('payment.modeTabs.byoSubscription.description'),
-  })
-  return result
-})
+watch(
+  () => route.query.tab,
+  (tab) => {
+    activeTab.value = resolveBillingTab(tab, checkout.value.balance_disabled)
+    selectedPlan.value = null
+  },
+)
 
 const modeDescription = computed(() => {
   if (activeTab.value === 'subscription') {
@@ -1234,12 +1221,9 @@ onMounted(async () => {
       }
     }
     await resumeWechatPaymentFromQuery()
-    if (checkout.value.balance_disabled) {
-      activeTab.value = 'subscription'
-    }
+    activeTab.value = resolveBillingTab(route.query.tab, checkout.value.balance_disabled)
     // Handle renewal navigation: ?tab=subscription&group=123
     if (route.query.tab === 'subscription') {
-      activeTab.value = 'subscription'
       if (route.query.group) {
         const groupId = Number(route.query.group)
         const groupPlans = checkout.value.plans.filter(p => p.group_id === groupId)

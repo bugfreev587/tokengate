@@ -353,6 +353,8 @@ export default {
     github: 'GitHub',
     mySubscriptions: 'Plans',
     buySubscription: 'Billing',
+    usageBasedMode: 'Usage Based Mode',
+    byoSubMode: 'BYO Sub Mode',
     docs: 'Docs',
     myOrders: 'My Orders',
     orderManagement: 'Orders',

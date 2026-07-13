@@ -353,6 +353,8 @@ export default {
     github: 'GitHub',
     mySubscriptions: '套餐',
     buySubscription: '账务中心',
+    usageBasedMode: '按量使用模式',
+    byoSubMode: 'BYO 订阅模式',
     docs: '文档',
     myOrders: '我的订单',
     orderManagement: '订单管理',
