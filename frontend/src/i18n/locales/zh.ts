@@ -8,6 +8,97 @@ export default {
     switchToDark: '切换到深色模式',
     dashboard: '控制台',
     login: '登录',
+    nav: {
+      product: '产品',
+      pricing: '价格',
+      docs: '文档',
+      support: '支持',
+      privacy: '隐私'
+    },
+    hero: {
+      eyebrow: '一个网关，两种使用方式。',
+      title: 'AI 接入方式，由你决定。',
+      description: '使用 TokenGate 管理的模型容量，或连接你已有的 AI 服务账号；两种方式共用同一套 API 接入层。',
+      explorePricing: '查看价格',
+      readDocs: '阅读文档'
+    },
+    modes: {
+      caption: '选择容量来源',
+      equalHint: '两种模式可以同时使用',
+      usageBased: {
+        index: '01 / 按量付费',
+        label: '按量付费',
+        title: '先充值，再开始。',
+        description: '使用 TokenGate 管理的模型容量，按请求实际消耗的模型用量付费。',
+        points: {
+          balance: '预付余额',
+          capacity: 'TokenGate 管理的模型容量',
+          commitment: '无需周期订阅'
+        },
+        cta: '查看按量付费价格'
+      },
+      byo: {
+        index: '02 / BYO',
+        label: 'BYO',
+        title: '带上你自己的账号。',
+        description: '连接自己的 AI 服务账号，把 TokenGate 作为已有模型容量之上的托管 API 网关。',
+        points: {
+          account: '使用你的 provider 账号',
+          gateway: 'TokenGate 路由与用量日志',
+          balance: '不会扣除 TokenGate 预付余额'
+        },
+        providerNote: '你的 provider 仍可能收费、消耗额度或实施速率限制。',
+        cta: '查看 BYO 价格'
+      }
+    },
+    shared: {
+      title: '共用一套 TokenGate 控制层',
+      apiKeys: {
+        title: 'API 密钥',
+        description: '在同一个地方创建和管理访问权限。'
+      },
+      compatibleApis: {
+        title: '兼容接口',
+        description: '使用 OpenAI 兼容与 Anthropic 兼容端点。'
+      },
+      usageLogs: {
+        title: '用量日志',
+        description: '查看模型、token、延迟与请求状态。'
+      },
+      explicitRouting: {
+        title: '明确路由',
+        description: '容量来源彼此隔离，不在两种模式之间静默回退。'
+      }
+    },
+    flow: {
+      eyebrow: '使用方式',
+      title: '三步，从容量来源到 API。',
+      description: '先决定 TokenGate 从哪里获得模型容量，其余接入流程保持一致；具体客户端配置统一放在文档中。',
+      choose: {
+        title: '选择模式',
+        description: '充值 TokenGate 余额，或连接你自己的受支持 provider 账号。'
+      },
+      key: {
+        title: '创建 API 密钥',
+        description: '将密钥绑定到 TokenGate 容量或你的连接账号。'
+      },
+      connect: {
+        title: '接入工具',
+        description: '按照文档，将编程 Agent、SDK 或应用连接到统一端点。'
+      }
+    },
+    clients: {
+      worksWith: '支持接入',
+      claude: 'Claude Code',
+      codex: 'Codex CLI',
+      openai: 'OpenAI SDK',
+      anthropic: 'Anthropic SDK',
+      custom: '自定义应用'
+    },
+    closing: {
+      title: '选择最适合你现有工作方式的容量模式。',
+      button: '在 Pricing 对比两种模式'
+    },
     getStarted: '立即开始',
     goToDashboard: '进入控制台',
     viewPricing: '查看账务方式',
