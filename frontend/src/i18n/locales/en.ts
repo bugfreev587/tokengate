@@ -8,6 +8,97 @@ export default {
     switchToDark: 'Switch to Dark Mode',
     dashboard: 'Dashboard',
     login: 'Login',
+    nav: {
+      product: 'Product',
+      pricing: 'Pricing',
+      docs: 'Docs',
+      support: 'Support',
+      privacy: 'Privacy'
+    },
+    hero: {
+      eyebrow: 'One gateway. Two ways to run.',
+      title: 'Your AI stack, on your terms.',
+      description: 'Use TokenGate-managed capacity or connect the provider accounts you already own. Keep one API layer across both.',
+      explorePricing: 'Explore pricing',
+      readDocs: 'Read the docs'
+    },
+    modes: {
+      caption: 'Choose your capacity source',
+      equalHint: 'Both work side by side',
+      usageBased: {
+        index: '01 / USAGE-BASED',
+        label: 'Usage-based',
+        title: 'Top up. Build.',
+        description: 'Use TokenGate-managed capacity and pay only for the model usage your requests consume.',
+        points: {
+          balance: 'Prepaid balance',
+          capacity: 'TokenGate-managed capacity',
+          commitment: 'No recurring subscription required'
+        },
+        cta: 'See Usage-based pricing'
+      },
+      byo: {
+        index: '02 / BYO',
+        label: 'BYO',
+        title: 'Bring your own access.',
+        description: 'Connect your own supported AI provider account and use TokenGate as the hosted API layer around capacity you already own.',
+        points: {
+          account: 'Your provider account',
+          gateway: 'TokenGate routing and logs',
+          balance: 'No TokenGate prepaid balance deduction'
+        },
+        providerNote: 'Your provider may still charge its account or consume its quota.',
+        cta: 'See BYO pricing'
+      }
+    },
+    shared: {
+      title: 'One TokenGate control layer',
+      apiKeys: {
+        title: 'API keys',
+        description: 'Issue and manage access from one place.'
+      },
+      compatibleApis: {
+        title: 'Compatible APIs',
+        description: 'Use OpenAI-compatible and Anthropic-compatible endpoints.'
+      },
+      usageLogs: {
+        title: 'Usage logs',
+        description: 'See model, tokens, latency, and request status.'
+      },
+      explicitRouting: {
+        title: 'Explicit routing',
+        description: 'Keep capacity sources isolated with no silent fallback.'
+      }
+    },
+    flow: {
+      eyebrow: 'How it works',
+      title: 'Three steps from capacity to API.',
+      description: 'Choose how TokenGate should source capacity. The rest of the workflow stays familiar, with exact client configuration in Docs.',
+      choose: {
+        title: 'Choose a mode',
+        description: 'Top up TokenGate balance or connect your own supported provider account.'
+      },
+      key: {
+        title: 'Create an API key',
+        description: 'Bind the key to TokenGate capacity or your connected account.'
+      },
+      connect: {
+        title: 'Connect your tools',
+        description: 'Use the documented endpoint with a coding agent, SDK, or application.'
+      }
+    },
+    clients: {
+      worksWith: 'Works with',
+      claude: 'Claude Code',
+      codex: 'Codex CLI',
+      openai: 'OpenAI SDK',
+      anthropic: 'Anthropic SDK',
+      custom: 'Custom apps'
+    },
+    closing: {
+      title: 'Pick the capacity model that fits how you already work.',
+      button: 'Compare modes on Pricing'
+    },
     getStarted: 'Get Started',
     goToDashboard: 'Go to Dashboard',
     viewPricing: 'See Billing',
