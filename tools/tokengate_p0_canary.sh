@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 BASE_URL="${TOKENGATE_BASE_URL:-}"
 API_KEY="${TOKENGATE_API_KEY:-}"
-OPENAI_MODEL="${TOKENGATE_OPENAI_MODEL:-gpt-5.4}"
+OPENAI_MODEL="${TOKENGATE_OPENAI_MODEL:-gpt-5.5}"
 CANARY_NAME="${TOKENGATE_P0_CANARY_NAME:-tokengate-p0-canary}"
 STATE_DIR="${TOKENGATE_P0_CANARY_STATE_DIR:-${TMPDIR:-/tmp}/tokengate-p0-canary}"
 SUITE="${TOKENGATE_P0_CANARY_SUITE:-$ROOT_DIR/tools/tokengate_p0_compatibility_suite.sh}"
@@ -24,7 +24,7 @@ Usage:
   tools/tokengate_p0_canary.sh
 
 Optional:
-  TOKENGATE_OPENAI_MODEL="gpt-5.4"
+  TOKENGATE_OPENAI_MODEL="gpt-5.5"
   TOKENGATE_P0_CANARY_NAME="tokengate-p0-canary"
   TOKENGATE_P0_CANARY_STATE_DIR="/tmp/tokengate-p0-canary"
   TOKENGATE_P0_CANARY_NOTIFY_WEBHOOK_URL="https://hooks.example/..."
