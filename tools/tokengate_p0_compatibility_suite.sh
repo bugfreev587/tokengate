@@ -3,7 +3,7 @@ set -euo pipefail
 
 BASE_URL="${TOKENGATE_BASE_URL:-}"
 API_KEY="${TOKENGATE_API_KEY:-}"
-OPENAI_MODEL="${TOKENGATE_OPENAI_MODEL:-gpt-5.4}"
+OPENAI_MODEL="${TOKENGATE_OPENAI_MODEL:-gpt-5.5}"
 RUN_MODELS="${TOKENGATE_RUN_P0_MODELS:-1}"
 RUN_CHAT="${TOKENGATE_RUN_P0_CHAT:-1}"
 RUN_CHAT_STREAM="${TOKENGATE_RUN_P0_CHAT_STREAM:-1}"
@@ -21,7 +21,7 @@ usage() {
 Usage:
   TOKENGATE_BASE_URL="https://your-backend-domain" \
   TOKENGATE_API_KEY="sk-..." \
-  TOKENGATE_OPENAI_MODEL="gpt-5.4" \
+  TOKENGATE_OPENAI_MODEL="gpt-5.5" \
   tools/tokengate_p0_compatibility_suite.sh
 
 Optional:
