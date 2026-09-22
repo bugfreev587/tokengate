@@ -7,6 +7,11 @@ import (
 )
 
 var codexModelMap = map[string]string{
+	"gpt-6-astra":                "gpt-6-astra",
+	"gpt-5.6":                    "gpt-5.6-sol",
+	"gpt-5.6-sol":                "gpt-5.6-sol",
+	"gpt-5.6-terra":              "gpt-5.6-terra",
+	"gpt-5.6-luna":               "gpt-5.6-luna",
 	"gpt-5.5":                    "gpt-5.5",
 	"gpt-5.4":                    "gpt-5.4",
 	"gpt-5.4-mini":               "gpt-5.4-mini",
@@ -54,6 +59,11 @@ var codexVersionModelPrefixes = []struct {
 	prefix string
 	target string
 }{
+	{prefix: "gpt-6-astra", target: "gpt-6-astra"},
+	{prefix: "gpt-5.6-terra", target: "gpt-5.6-terra"},
+	{prefix: "gpt-5.6-luna", target: "gpt-5.6-luna"},
+	{prefix: "gpt-5.6-sol", target: "gpt-5.6-sol"},
+	{prefix: "gpt-5.6", target: "gpt-5.6-sol"},
 	{prefix: "gpt-5.3-codex-spark", target: "gpt-5.3-codex-spark"},
 	{prefix: "gpt-5.3-codex", target: "gpt-5.3-codex"},
 	{prefix: "gpt-5.4-mini", target: "gpt-5.4-mini"},
@@ -526,7 +536,7 @@ func normalizeKnownCodexModel(model string) (string, bool) {
 			return item.target, true
 		}
 		suffix, ok := strings.CutPrefix(key, item.prefix+"-")
-		if ok && isKnownCodexModelSuffix(suffix) {
+		if ok && isKnownCodexModelSuffixForModel(item.prefix, suffix) {
 			return item.target, true
 		}
 	}
@@ -551,6 +561,28 @@ func isKnownCodexModelSuffix(suffix string) bool {
 		return true
 	}
 	return isCodexDateSuffix(suffix)
+}
+
+func isKnownCodexModelSuffixForModel(model, suffix string) bool {
+	if isCodexDateSuffix(suffix) {
+		return true
+	}
+	switch model {
+	case "gpt-6-astra":
+		switch suffix {
+		case "low", "medium", "high", "xhigh", "max":
+			return true
+		}
+		return false
+	case "gpt-5.6", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna":
+		switch suffix {
+		case "none", "minimal", "low", "medium", "high", "xhigh", "max":
+			return true
+		}
+		return false
+	default:
+		return isKnownCodexModelSuffix(suffix)
+	}
 }
 
 func isCodexDateSuffix(suffix string) bool {

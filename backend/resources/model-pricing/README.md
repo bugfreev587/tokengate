@@ -3,7 +3,7 @@
 This directory contains a local copy of the mirrored model pricing data as a fallback mechanism.
 
 ## Source
-The original file is maintained by the LiteLLM project and mirrored into the `price-mirror` branch of this repository via GitHub Actions:
+The base file is maintained by the LiteLLM project and mirrored into the `price-mirror` branch of this repository via GitHub Actions. TokenGate also carries curated entries for newly released models until the mirror catches up:
 - Mirror branch (configurable via `PRICE_MIRROR_REPO`): https://raw.githubusercontent.com/<your-repo>/price-mirror/model_prices_and_context_window.json
 - Upstream source: https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json
 
@@ -34,4 +34,4 @@ The file contains JSON data with model pricing information including:
 - Context window sizes
 - Model capabilities
 
-Last updated: 2025-08-10
+Last updated: 2026-09-21

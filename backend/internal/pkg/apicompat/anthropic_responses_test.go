@@ -8,6 +8,57 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestAnthropicToResponsesResponse_CacheTokenRoundTrip(t *testing.T) {
+	resp := AnthropicToResponsesResponse(&AnthropicResponse{
+		ID: "msg_cache", Model: "claude-opus-5", StopReason: "end_turn",
+		Content: []AnthropicContentBlock{{Type: "text", Text: "ok"}},
+		Usage: AnthropicUsage{
+			InputTokens: 12, OutputTokens: 7,
+			CacheReadInputTokens: 9, CacheCreationInputTokens: 3,
+		},
+	})
+
+	require.NotNil(t, resp.Usage)
+	require.Equal(t, 24, resp.Usage.InputTokens)
+	require.Equal(t, 31, resp.Usage.TotalTokens)
+	require.NotNil(t, resp.Usage.InputTokensDetails)
+	require.Equal(t, 9, resp.Usage.InputTokensDetails.CachedTokens)
+	require.Equal(t, 3, resp.Usage.InputTokensDetails.CacheWriteTokens)
+
+	roundTrip := ResponsesToAnthropic(resp, "claude-opus-5")
+	require.Equal(t, 12, roundTrip.Usage.InputTokens)
+	require.Equal(t, 9, roundTrip.Usage.CacheReadInputTokens)
+	require.Equal(t, 3, roundTrip.Usage.CacheCreationInputTokens)
+	require.Equal(t, 7, roundTrip.Usage.OutputTokens)
+}
+
+func TestAnthropicEventToResponsesEvents_CacheTokenRoundTrip(t *testing.T) {
+	state := NewAnthropicEventToResponsesState()
+	AnthropicEventToResponsesEvents(&AnthropicStreamEvent{
+		Type: "message_start",
+		Message: &AnthropicResponse{ID: "msg_stream_cache", Model: "claude-opus-5", Usage: AnthropicUsage{
+			InputTokens: 12, CacheReadInputTokens: 9, CacheCreationInputTokens: 3,
+		}},
+	}, state)
+	AnthropicEventToResponsesEvents(&AnthropicStreamEvent{
+		Type: "message_delta", Usage: &AnthropicUsage{OutputTokens: 7},
+	}, state)
+	events := AnthropicEventToResponsesEvents(&AnthropicStreamEvent{Type: "message_stop"}, state)
+
+	var completed *ResponsesResponse
+	for i := range events {
+		if events[i].Type == "response.completed" {
+			completed = events[i].Response
+		}
+	}
+	require.NotNil(t, completed)
+	require.NotNil(t, completed.Usage)
+	require.Equal(t, 24, completed.Usage.InputTokens)
+	require.Equal(t, 31, completed.Usage.TotalTokens)
+	require.Equal(t, 9, completed.Usage.InputTokensDetails.CachedTokens)
+	require.Equal(t, 3, completed.Usage.InputTokensDetails.CacheWriteTokens)
+}
+
 // ---------------------------------------------------------------------------
 // AnthropicToResponses tests
 // ---------------------------------------------------------------------------
@@ -234,14 +285,16 @@ func TestResponsesToAnthropic_CachedTokensUseAnthropicInputSemantics(t *testing.
 			OutputTokens: 123,
 			TotalTokens:  54129,
 			InputTokensDetails: &ResponsesInputTokensDetails{
-				CachedTokens: 50688,
+				CachedTokens:     50688,
+				CacheWriteTokens: 1000,
 			},
 		},
 	}
 
 	anth := ResponsesToAnthropic(resp, "claude-sonnet-4-5-20250929")
-	assert.Equal(t, 3318, anth.Usage.InputTokens)
+	assert.Equal(t, 2318, anth.Usage.InputTokens)
 	assert.Equal(t, 50688, anth.Usage.CacheReadInputTokens)
+	assert.Equal(t, 1000, anth.Usage.CacheCreationInputTokens)
 	assert.Equal(t, 123, anth.Usage.OutputTokens)
 }
 

@@ -118,9 +118,15 @@ var DefaultAntigravityModelMapping = map[string]string{
 
 // DefaultBedrockModelMapping 是 AWS Bedrock 平台的默认模型映射
 // 将 Anthropic 标准模型名映射到 Bedrock 模型 ID
-// 注意：此处的 "us." 前缀仅为默认值，ResolveBedrockModelID 会根据账号配置的
-// aws_region 自动调整为匹配的区域前缀（如 eu.、apac.、jp. 等）
+// 带 "us." 前缀的旧式跨区域推理配置会由 ResolveBedrockModelID 根据账号区域调整。
+// Claude 4.8/5.x 使用 Bedrock Messages API 公布的无区域前缀模型 ID。
 var DefaultBedrockModelMapping = map[string]string{
+	// Current Claude models exposed by the Bedrock Messages API
+	"claude-fable-5-1": "anthropic.claude-fable-5-1",
+	"claude-opus-5":    "anthropic.claude-opus-5",
+	"claude-opus-4-8":  "anthropic.claude-opus-4-8",
+	"claude-sonnet-5":  "anthropic.claude-sonnet-5",
+	"claude-fable-5":   "anthropic.claude-fable-5",
 	// Claude Opus
 	"claude-opus-4-7":          "us.anthropic.claude-opus-4-7-v1",
 	"claude-opus-4-6-thinking": "us.anthropic.claude-opus-4-6-v1",

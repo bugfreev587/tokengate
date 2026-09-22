@@ -35,6 +35,147 @@ var (
 		Mode:                            "chat",
 		SupportsPromptCaching:           true,
 	}
+	openAIGPT55FallbackPricing = &LiteLLMModelPricing{
+		InputCostPerToken:               5e-06,
+		InputCostPerTokenPriority:       12.5e-06,
+		OutputCostPerToken:              30e-06,
+		OutputCostPerTokenPriority:      75e-06,
+		CacheReadInputTokenCost:         0.5e-06,
+		CacheReadInputTokenCostPriority: 1.25e-06,
+		LongContextInputTokenThreshold:  272000,
+		LongContextInputCostMultiplier:  2.0,
+		LongContextOutputCostMultiplier: 1.5,
+		LiteLLMProvider:                 "openai",
+		Mode:                            "chat",
+		SupportsPromptCaching:           true,
+		SupportsServiceTier:             true,
+		MaxInputTokens:                  1050000,
+		MaxOutputTokens:                 128000,
+	}
+	openAIGPT56SolFallbackPricing = &LiteLLMModelPricing{
+		InputCostPerToken:                   4e-06,
+		InputCostPerTokenPriority:           8e-06,
+		OutputCostPerToken:                  20e-06,
+		OutputCostPerTokenPriority:          40e-06,
+		CacheCreationInputTokenCost:         5e-06,
+		CacheCreationInputTokenCostPriority: 10e-06,
+		CacheReadInputTokenCost:             0.4e-06,
+		CacheReadInputTokenCostPriority:     0.8e-06,
+		LongContextInputTokenThreshold:      272000,
+		LongContextInputCostMultiplier:      2.0,
+		LongContextOutputCostMultiplier:     1.5,
+		LiteLLMProvider:                     "openai",
+		Mode:                                "chat",
+		SupportsPromptCaching:               true,
+		SupportsServiceTier:                 true,
+		MaxInputTokens:                      1050000,
+		MaxOutputTokens:                     128000,
+	}
+	openAIGPT56TerraFallbackPricing = &LiteLLMModelPricing{
+		InputCostPerToken:                   2e-06,
+		InputCostPerTokenPriority:           4e-06,
+		OutputCostPerToken:                  12e-06,
+		OutputCostPerTokenPriority:          24e-06,
+		CacheCreationInputTokenCost:         2.5e-06,
+		CacheCreationInputTokenCostPriority: 5e-06,
+		CacheReadInputTokenCost:             0.2e-06,
+		CacheReadInputTokenCostPriority:     0.4e-06,
+		LongContextInputTokenThreshold:      272000,
+		LongContextInputCostMultiplier:      2.0,
+		LongContextOutputCostMultiplier:     1.5,
+		LiteLLMProvider:                     "openai",
+		Mode:                                "chat",
+		SupportsPromptCaching:               true,
+		SupportsServiceTier:                 true,
+		MaxInputTokens:                      1050000,
+		MaxOutputTokens:                     128000,
+	}
+	openAIGPT56LunaFallbackPricing = &LiteLLMModelPricing{
+		InputCostPerToken:                   0.2e-06,
+		InputCostPerTokenPriority:           0.4e-06,
+		OutputCostPerToken:                  1.2e-06,
+		OutputCostPerTokenPriority:          2.4e-06,
+		CacheCreationInputTokenCost:         0.25e-06,
+		CacheCreationInputTokenCostPriority: 0.5e-06,
+		CacheReadInputTokenCost:             0.02e-06,
+		CacheReadInputTokenCostPriority:     0.04e-06,
+		LongContextInputTokenThreshold:      272000,
+		LongContextInputCostMultiplier:      2.0,
+		LongContextOutputCostMultiplier:     1.5,
+		LiteLLMProvider:                     "openai",
+		Mode:                                "chat",
+		SupportsPromptCaching:               true,
+		SupportsServiceTier:                 true,
+		MaxInputTokens:                      1050000,
+		MaxOutputTokens:                     128000,
+	}
+	openAIGPT6AstraFallbackPricing = &LiteLLMModelPricing{
+		InputCostPerToken:                   10e-06,
+		InputCostPerTokenPriority:           20e-06,
+		OutputCostPerToken:                  50e-06,
+		OutputCostPerTokenPriority:          100e-06,
+		CacheCreationInputTokenCost:         12.5e-06,
+		CacheCreationInputTokenCostPriority: 25e-06,
+		CacheReadInputTokenCost:             1e-06,
+		CacheReadInputTokenCostPriority:     2e-06,
+		LongContextInputTokenThreshold:      272000,
+		LongContextInputCostMultiplier:      2.0,
+		LongContextOutputCostMultiplier:     1.5,
+		LiteLLMProvider:                     "openai",
+		Mode:                                "chat",
+		SupportsPromptCaching:               true,
+		SupportsServiceTier:                 true,
+		MaxInputTokens:                      1050000,
+		MaxOutputTokens:                     128000,
+	}
+	claudeFable51FallbackPricing = &LiteLLMModelPricing{
+		InputCostPerToken:                   10e-06,
+		OutputCostPerToken:                  50e-06,
+		CacheCreationInputTokenCost:         12.5e-06,
+		CacheCreationInputTokenCostAbove1hr: 20e-06,
+		CacheReadInputTokenCost:             0.25e-06,
+		LiteLLMProvider:                     "anthropic",
+		Mode:                                "chat",
+		SupportsPromptCaching:               true,
+		MaxInputTokens:                      1000000,
+		MaxOutputTokens:                     128000,
+	}
+	claudeFable5FallbackPricing = &LiteLLMModelPricing{
+		InputCostPerToken:                   10e-06,
+		OutputCostPerToken:                  50e-06,
+		CacheCreationInputTokenCost:         12.5e-06,
+		CacheCreationInputTokenCostAbove1hr: 20e-06,
+		CacheReadInputTokenCost:             1e-06,
+		LiteLLMProvider:                     "anthropic",
+		Mode:                                "chat",
+		SupportsPromptCaching:               true,
+		MaxInputTokens:                      1000000,
+		MaxOutputTokens:                     128000,
+	}
+	claudeOpus5FallbackPricing = &LiteLLMModelPricing{
+		InputCostPerToken:                   5e-06,
+		OutputCostPerToken:                  25e-06,
+		CacheCreationInputTokenCost:         6.25e-06,
+		CacheCreationInputTokenCostAbove1hr: 10e-06,
+		CacheReadInputTokenCost:             0.5e-06,
+		LiteLLMProvider:                     "anthropic",
+		Mode:                                "chat",
+		SupportsPromptCaching:               true,
+		MaxInputTokens:                      1000000,
+		MaxOutputTokens:                     128000,
+	}
+	claudeSonnet5FallbackPricing = &LiteLLMModelPricing{
+		InputCostPerToken:                   2e-06,
+		OutputCostPerToken:                  10e-06,
+		CacheCreationInputTokenCost:         2.5e-06,
+		CacheCreationInputTokenCostAbove1hr: 4e-06,
+		CacheReadInputTokenCost:             0.2e-06,
+		LiteLLMProvider:                     "anthropic",
+		Mode:                                "chat",
+		SupportsPromptCaching:               true,
+		MaxInputTokens:                      1000000,
+		MaxOutputTokens:                     128000,
+	}
 	openAIGPT54MiniFallbackPricing = &LiteLLMModelPricing{
 		InputCostPerToken:       7.5e-07,
 		OutputCostPerToken:      4.5e-06,
@@ -61,12 +202,15 @@ type LiteLLMModelPricing struct {
 	OutputCostPerToken                  float64 `json:"output_cost_per_token"`
 	OutputCostPerTokenPriority          float64 `json:"output_cost_per_token_priority"`
 	CacheCreationInputTokenCost         float64 `json:"cache_creation_input_token_cost"`
+	CacheCreationInputTokenCostPriority float64 `json:"cache_creation_input_token_cost_priority"`
 	CacheCreationInputTokenCostAbove1hr float64 `json:"cache_creation_input_token_cost_above_1hr"`
 	CacheReadInputTokenCost             float64 `json:"cache_read_input_token_cost"`
 	CacheReadInputTokenCostPriority     float64 `json:"cache_read_input_token_cost_priority"`
 	LongContextInputTokenThreshold      int     `json:"long_context_input_token_threshold,omitempty"`
 	LongContextInputCostMultiplier      float64 `json:"long_context_input_cost_multiplier,omitempty"`
 	LongContextOutputCostMultiplier     float64 `json:"long_context_output_cost_multiplier,omitempty"`
+	MaxInputTokens                      int     `json:"max_input_tokens,omitempty"`
+	MaxOutputTokens                     int     `json:"max_output_tokens,omitempty"`
 	SupportsServiceTier                 bool    `json:"supports_service_tier"`
 	LiteLLMProvider                     string  `json:"litellm_provider"`
 	Mode                                string  `json:"mode"`
@@ -93,9 +237,15 @@ type LiteLLMRawEntry struct {
 	OutputCostPerToken                  *float64 `json:"output_cost_per_token"`
 	OutputCostPerTokenPriority          *float64 `json:"output_cost_per_token_priority"`
 	CacheCreationInputTokenCost         *float64 `json:"cache_creation_input_token_cost"`
+	CacheCreationInputTokenCostPriority *float64 `json:"cache_creation_input_token_cost_priority"`
 	CacheCreationInputTokenCostAbove1hr *float64 `json:"cache_creation_input_token_cost_above_1hr"`
 	CacheReadInputTokenCost             *float64 `json:"cache_read_input_token_cost"`
 	CacheReadInputTokenCostPriority     *float64 `json:"cache_read_input_token_cost_priority"`
+	LongContextInputTokenThreshold      *int     `json:"long_context_input_token_threshold"`
+	LongContextInputCostMultiplier      *float64 `json:"long_context_input_cost_multiplier"`
+	LongContextOutputCostMultiplier     *float64 `json:"long_context_output_cost_multiplier"`
+	MaxInputTokens                      *int     `json:"max_input_tokens"`
+	MaxOutputTokens                     *int     `json:"max_output_tokens"`
 	SupportsServiceTier                 bool     `json:"supports_service_tier"`
 	LiteLLMProvider                     string   `json:"litellm_provider"`
 	Mode                                string   `json:"mode"`
@@ -404,6 +554,9 @@ func (s *PricingService) parsePricingData(body []byte) (map[string]*LiteLLMModel
 		if entry.CacheCreationInputTokenCost != nil {
 			pricing.CacheCreationInputTokenCost = *entry.CacheCreationInputTokenCost
 		}
+		if entry.CacheCreationInputTokenCostPriority != nil {
+			pricing.CacheCreationInputTokenCostPriority = *entry.CacheCreationInputTokenCostPriority
+		}
 		if entry.CacheCreationInputTokenCostAbove1hr != nil {
 			pricing.CacheCreationInputTokenCostAbove1hr = *entry.CacheCreationInputTokenCostAbove1hr
 		}
@@ -412,6 +565,21 @@ func (s *PricingService) parsePricingData(body []byte) (map[string]*LiteLLMModel
 		}
 		if entry.CacheReadInputTokenCostPriority != nil {
 			pricing.CacheReadInputTokenCostPriority = *entry.CacheReadInputTokenCostPriority
+		}
+		if entry.LongContextInputTokenThreshold != nil {
+			pricing.LongContextInputTokenThreshold = *entry.LongContextInputTokenThreshold
+		}
+		if entry.LongContextInputCostMultiplier != nil {
+			pricing.LongContextInputCostMultiplier = *entry.LongContextInputCostMultiplier
+		}
+		if entry.LongContextOutputCostMultiplier != nil {
+			pricing.LongContextOutputCostMultiplier = *entry.LongContextOutputCostMultiplier
+		}
+		if entry.MaxInputTokens != nil {
+			pricing.MaxInputTokens = *entry.MaxInputTokens
+		}
+		if entry.MaxOutputTokens != nil {
+			pricing.MaxOutputTokens = *entry.MaxOutputTokens
 		}
 		if entry.OutputCostPerImage != nil {
 			pricing.OutputCostPerImage = *entry.OutputCostPerImage
@@ -555,6 +723,14 @@ func (s *PricingService) GetModelPricing(modelName string) *LiteLLMModelPricing 
 	for _, candidate := range lookupCandidates {
 		normalized := strings.ReplaceAll(candidate, "-4-5-", "-4.5-")
 		if pricing, ok := s.pricingData[normalized]; ok {
+			return pricing
+		}
+	}
+
+	// 当前 Claude 型号必须先用精确定价兜底，避免旧版远程价格表把
+	// Opus 5 / Sonnet 5 粗略归类成 Opus 4 / Sonnet 4。
+	for _, candidate := range lookupCandidates {
+		if pricing := matchCurrentClaudeStaticPricing(candidate); pricing != nil {
 			return pricing
 		}
 	}
@@ -789,15 +965,62 @@ func (s *PricingService) matchByModelFamily(model string) *LiteLLMModelPricing {
 	return nil
 }
 
+func matchCurrentClaudeStaticPricing(model string) *LiteLLMModelPricing {
+	model = strings.ToLower(strings.TrimSpace(model))
+	if idx := strings.LastIndex(model, "anthropic."); idx >= 0 {
+		model = model[idx+len("anthropic."):]
+	}
+
+	switch model {
+	case "claude-fable-5-1":
+		return claudeFable51FallbackPricing
+	case "claude-fable-5":
+		return claudeFable5FallbackPricing
+	case "claude-opus-5", "claude-opus-4-8":
+		return claudeOpus5FallbackPricing
+	case "claude-sonnet-5":
+		return claudeSonnet5FallbackPricing
+	default:
+		return nil
+	}
+}
+
+func matchCurrentOpenAIStaticPricing(model string) *LiteLLMModelPricing {
+	switch normalizeKnownOpenAICodexModel(model) {
+	case "gpt-6-astra":
+		return openAIGPT6AstraFallbackPricing
+	case "gpt-5.6-sol":
+		return openAIGPT56SolFallbackPricing
+	case "gpt-5.6-terra":
+		return openAIGPT56TerraFallbackPricing
+	case "gpt-5.6-luna":
+		return openAIGPT56LunaFallbackPricing
+	case "gpt-5.5":
+		return openAIGPT55FallbackPricing
+	default:
+		return nil
+	}
+}
+
 // matchOpenAIModel OpenAI 模型回退匹配策略
 // 回退顺序：
-// 1. gpt-5.3-codex-spark* -> gpt-5.1-codex（按业务要求固定计费）
-// 2. gpt-5.2-codex -> gpt-5.2（去掉后缀如 -codex, -mini, -max 等）
-// 3. gpt-5.2-20251222 -> gpt-5.2（去掉日期版本号）
-// 4. gpt-5.3-codex -> gpt-5.2-codex
-// 5. gpt-5.4* -> 业务静态兜底价
-// 6. 最终回退到 DefaultTestModel (gpt-5.1-codex)
+// 1. 当前 GPT-6/GPT-5.6/GPT-5.5 -> 业务静态兜底价
+// 2. gpt-5.3-codex-spark* -> gpt-5.1-codex（按业务要求固定计费）
+// 3. gpt-5.2-codex -> gpt-5.2（去掉后缀如 -codex, -mini, -max 等）
+// 4. gpt-5.2-20251222 -> gpt-5.2（去掉日期版本号）
+// 5. gpt-5.3-codex -> gpt-5.2-codex
+// 6. gpt-5.4* -> 业务静态兜底价
+// 7. 最终回退到 DefaultTestModel
 func (s *PricingService) matchOpenAIModel(model string) *LiteLLMModelPricing {
+	if pricing := matchCurrentOpenAIStaticPricing(model); pricing != nil {
+		return pricing
+	}
+	// Do not collapse adjacent or specialized 5.6/6.x IDs (for example
+	// gpt-5.6-cyber) into a public general-purpose model's price.
+	if strings.HasPrefix(model, "gpt-5.6") || strings.HasPrefix(model, "gpt-6") {
+		return nil
+	}
+
 	if strings.HasPrefix(model, "gpt-5.3-codex-spark") {
 		if pricing, ok := s.pricingData["gpt-5.1-codex"]; ok {
 			logger.LegacyPrintf("service.pricing", "[Pricing][SparkBilling] %s -> %s billing", model, "gpt-5.1-codex")
@@ -824,13 +1047,6 @@ func (s *PricingService) matchOpenAIModel(model string) *LiteLLMModelPricing {
 				Info(fmt.Sprintf("[Pricing] OpenAI fallback matched %s -> %s", model, "gpt-5.2-codex"))
 			return pricing
 		}
-	}
-
-	// GPT-5.5 回退到 GPT-5.4 定价
-	if strings.HasPrefix(model, "gpt-5.5") {
-		logger.With(zap.String("component", "service.pricing")).
-			Info(fmt.Sprintf("[Pricing] OpenAI fallback matched %s -> %s", model, "gpt-5.4(static)"))
-		return openAIGPT54FallbackPricing
 	}
 
 	if strings.HasPrefix(model, "gpt-5.4-mini") {

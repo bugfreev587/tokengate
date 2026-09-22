@@ -4,16 +4,40 @@ vi.mock('@/api/admin/accounts', () => ({
   getAntigravityDefaultModelMapping: vi.fn()
 }))
 
-import { buildModelMappingObject, getModelsByPlatform } from '../useModelWhitelist'
+import { buildModelMappingObject, getModelsByPlatform, getPresetMappingsByPlatform } from '../useModelWhitelist'
 
 describe('useModelWhitelist', () => {
-  it('openai 模型列表包含 GPT-5.4 官方快照', () => {
+  it('openai 模型列表包含当前 Codex 模型', () => {
     const models = getModelsByPlatform('openai')
 
+    expect(models).toContain('gpt-6-astra')
+    expect(models).toContain('gpt-5.6')
+    expect(models).toContain('gpt-5.6-sol')
+    expect(models).toContain('gpt-5.6-terra')
+    expect(models).toContain('gpt-5.6-luna')
     expect(models).toContain('gpt-5.4')
     expect(models).toContain('gpt-5.4-mini')
     expect(models).toContain('gpt-5.4-2026-03-05')
     expect(models).toContain('codex-auto-review')
+  })
+
+  it('anthropic 模型列表包含当前 Claude Code 模型', () => {
+    const models = getModelsByPlatform('claude')
+
+    expect(models).toContain('claude-fable-5-1')
+    expect(models).toContain('claude-opus-5')
+    expect(models).toContain('claude-sonnet-5')
+  })
+
+  it('bedrock 预设覆盖当前及仍支持的 Claude 5/4.8 模型', () => {
+    const mappings = getPresetMappingsByPlatform('bedrock')
+    const pairs = mappings.map(({ from, to }) => [from, to])
+
+    expect(pairs).toContainEqual(['claude-fable-5-1', 'anthropic.claude-fable-5-1'])
+    expect(pairs).toContainEqual(['claude-opus-5', 'anthropic.claude-opus-5'])
+    expect(pairs).toContainEqual(['claude-sonnet-5', 'anthropic.claude-sonnet-5'])
+    expect(pairs).toContainEqual(['claude-fable-5', 'anthropic.claude-fable-5'])
+    expect(pairs).toContainEqual(['claude-opus-4-8', 'anthropic.claude-opus-4-8'])
   })
 
   it('openai 模型列表不再暴露已下线的 ChatGPT 登录 Codex 模型', () => {

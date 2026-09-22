@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/Wei-Shaw/sub2api/internal/config"
+	"github.com/Wei-Shaw/sub2api/internal/pkg/apicompat"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/openai"
 	"github.com/cespare/xxhash/v2"
 	"github.com/gin-gonic/gin"
@@ -2155,25 +2156,47 @@ func TestExtractOpenAISSEDataLine(t *testing.T) {
 
 func TestParseSSEUsage_SelectiveParsing(t *testing.T) {
 	svc := &OpenAIGatewayService{}
-	usage := &OpenAIUsage{InputTokens: 9, OutputTokens: 8, CacheReadInputTokens: 7}
+	usage := &OpenAIUsage{InputTokens: 9, OutputTokens: 8, CacheReadInputTokens: 7, CacheCreationInputTokens: 6}
 
 	// 非 completed 事件，不应覆盖 usage
 	svc.parseSSEUsage(`{"type":"response.in_progress","response":{"usage":{"input_tokens":1,"output_tokens":2}}}`, usage)
 	require.Equal(t, 9, usage.InputTokens)
 	require.Equal(t, 8, usage.OutputTokens)
 	require.Equal(t, 7, usage.CacheReadInputTokens)
+	require.Equal(t, 6, usage.CacheCreationInputTokens)
 
 	// completed 事件，应提取 usage
-	svc.parseSSEUsage(`{"type":"response.completed","response":{"usage":{"input_tokens":3,"output_tokens":5,"input_tokens_details":{"cached_tokens":2}}}}`, usage)
+	svc.parseSSEUsage(`{"type":"response.completed","response":{"usage":{"input_tokens":3,"output_tokens":5,"input_tokens_details":{"cached_tokens":2,"cache_write_tokens":1}}}}`, usage)
 	require.Equal(t, 3, usage.InputTokens)
 	require.Equal(t, 5, usage.OutputTokens)
 	require.Equal(t, 2, usage.CacheReadInputTokens)
+	require.Equal(t, 1, usage.CacheCreationInputTokens)
 
 	// done 事件同样可能携带最终 usage
-	svc.parseSSEUsage(`{"type":"response.done","response":{"usage":{"input_tokens":13,"output_tokens":15,"input_tokens_details":{"cached_tokens":4}}}}`, usage)
+	svc.parseSSEUsage(`{"type":"response.done","response":{"usage":{"input_tokens":13,"output_tokens":15,"input_tokens_details":{"cached_tokens":4,"cache_write_tokens":3}}}}`, usage)
 	require.Equal(t, 13, usage.InputTokens)
 	require.Equal(t, 15, usage.OutputTokens)
 	require.Equal(t, 4, usage.CacheReadInputTokens)
+	require.Equal(t, 3, usage.CacheCreationInputTokens)
+}
+
+func TestExtractOpenAIUsageFromJSONBytes_IncludesCacheWriteTokens(t *testing.T) {
+	usage, ok := extractOpenAIUsageFromJSONBytes([]byte(`{"usage":{"input_tokens":20,"output_tokens":5,"input_tokens_details":{"cached_tokens":7,"cache_write_tokens":4}}}`))
+	require.True(t, ok)
+	require.Equal(t, 20, usage.InputTokens)
+	require.Equal(t, 7, usage.CacheReadInputTokens)
+	require.Equal(t, 4, usage.CacheCreationInputTokens)
+}
+
+func TestCopyOpenAIUsageFromResponsesUsage_IncludesCacheWriteTokens(t *testing.T) {
+	usage := copyOpenAIUsageFromResponsesUsage(&apicompat.ResponsesUsage{
+		InputTokens: 20,
+		InputTokensDetails: &apicompat.ResponsesInputTokensDetails{
+			CachedTokens: 7, CacheWriteTokens: 4,
+		},
+	})
+	require.Equal(t, 7, usage.CacheReadInputTokens)
+	require.Equal(t, 4, usage.CacheCreationInputTokens)
 }
 
 func TestExtractCodexFinalResponse_SampleReplay(t *testing.T) {

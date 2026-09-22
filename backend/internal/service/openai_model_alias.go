@@ -29,6 +29,9 @@ func canonicalizeOpenAIModelAliasSpelling(model string) string {
 	if strings.HasPrefix(normalized, "gpt5") {
 		normalized = "gpt-5" + strings.TrimPrefix(normalized, "gpt5")
 	}
+	if strings.HasPrefix(normalized, "gpt6") {
+		normalized = "gpt-6" + strings.TrimPrefix(normalized, "gpt6")
+	}
 	if !strings.HasPrefix(normalized, "gpt-") && !strings.Contains(normalized, "codex") {
 		return ""
 	}
@@ -37,6 +40,10 @@ func canonicalizeOpenAIModelAliasSpelling(model string) string {
 		from string
 		to   string
 	}{
+		{"gpt-6astra", "gpt-6-astra"},
+		{"gpt-5.6sol", "gpt-5.6-sol"},
+		{"gpt-5.6terra", "gpt-5.6-terra"},
+		{"gpt-5.6luna", "gpt-5.6-luna"},
 		{"gpt-5.4mini", "gpt-5.4-mini"},
 		{"gpt-5.4nano", "gpt-5.4-nano"},
 		{"gpt-5.3-codexspark", "gpt-5.3-codex-spark"},
@@ -65,22 +72,40 @@ func normalizeKnownOpenAICodexModel(model string) string {
 	}
 
 	switch {
-	case strings.Contains(normalized, "gpt-5.5"):
+	case matchesCanonicalOpenAIModel(normalized, "gpt-6-astra"):
+		return "gpt-6-astra"
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.6-terra"):
+		return "gpt-5.6-terra"
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.6-luna"):
+		return "gpt-5.6-luna"
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.6-sol"):
+		return "gpt-5.6-sol"
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.6"):
+		return "gpt-5.6-sol"
+	case strings.HasPrefix(normalized, "gpt-5.6"):
+		return ""
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.5"):
 		return "gpt-5.5"
-	case strings.Contains(normalized, "gpt-5.4-mini"):
+	case strings.HasPrefix(normalized, "gpt-5.5-"):
+		return ""
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.4-mini"):
 		return "gpt-5.4-mini"
-	case strings.Contains(normalized, "gpt-5.4-nano"):
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.4-nano"):
 		return "gpt-5.4-nano"
-	case strings.Contains(normalized, "gpt-5.4"):
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.4"):
 		return "gpt-5.4"
-	case strings.Contains(normalized, "gpt-5.2"):
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.2"):
 		return "gpt-5.2"
-	case strings.Contains(normalized, "gpt-5.3-codex-spark"):
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.3-codex-spark"):
 		return "gpt-5.3-codex-spark"
-	case strings.Contains(normalized, "gpt-5.3-codex"):
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.3-codex"):
 		return "gpt-5.3-codex"
-	case strings.Contains(normalized, "gpt-5.3"):
+	case matchesCanonicalOpenAIModel(normalized, "gpt-5.3"):
 		return "gpt-5.3-codex"
+	case strings.HasPrefix(normalized, "gpt-5.4-"),
+		strings.HasPrefix(normalized, "gpt-5.3-"),
+		strings.HasPrefix(normalized, "gpt-5.2-"):
+		return ""
 	case strings.Contains(normalized, "codex"):
 		return "gpt-5.3-codex"
 	case strings.Contains(normalized, "gpt-5"):
@@ -88,6 +113,17 @@ func normalizeKnownOpenAICodexModel(model string) string {
 	default:
 		return ""
 	}
+}
+
+func matchesCanonicalOpenAIModel(model, canonical string) bool {
+	if model == canonical {
+		return true
+	}
+	suffix, ok := strings.CutPrefix(model, canonical+"-")
+	if !ok {
+		return false
+	}
+	return isKnownCodexModelSuffixForModel(canonical, suffix) || suffix == "chat-latest" || suffix == "latest"
 }
 
 func appendUsageBillingModelCandidate(candidates []string, seen map[string]struct{}, model string) []string {

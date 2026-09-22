@@ -88,7 +88,7 @@ func TestForwardAsRawChatCompletions_ForcesStreamUsageUpstreamAndPassesUsageDown
 	upstreamBody := strings.Join([]string{
 		`data: {"id":"chatcmpl_1","object":"chat.completion.chunk","model":"gpt-5.4","choices":[{"index":0,"delta":{"content":"ok"}}]}`,
 		"",
-		`data: {"id":"chatcmpl_1","object":"chat.completion.chunk","model":"gpt-5.4","choices":[],"usage":{"prompt_tokens":9,"completion_tokens":4,"total_tokens":13,"prompt_tokens_details":{"cached_tokens":3}}}`,
+		`data: {"id":"chatcmpl_1","object":"chat.completion.chunk","model":"gpt-5.4","choices":[],"usage":{"prompt_tokens":9,"completion_tokens":4,"total_tokens":13,"prompt_tokens_details":{"cached_tokens":3,"cache_write_tokens":2}}}`,
 		"",
 		"data: [DONE]",
 		"",
@@ -111,6 +111,7 @@ func TestForwardAsRawChatCompletions_ForcesStreamUsageUpstreamAndPassesUsageDown
 	require.Equal(t, 9, result.Usage.InputTokens)
 	require.Equal(t, 4, result.Usage.OutputTokens)
 	require.Equal(t, 3, result.Usage.CacheReadInputTokens)
+	require.Equal(t, 2, result.Usage.CacheCreationInputTokens)
 	require.NotNil(t, upstream.lastReq)
 	require.NoError(t, upstream.lastReq.Context().Err())
 	require.True(t, gjson.GetBytes(upstream.lastBody, "stream_options.include_usage").Bool())
@@ -214,6 +215,14 @@ func TestEnsureOpenAIChatStreamUsage(t *testing.T) {
 	require.True(t, gjson.GetBytes(body, "stream_options.include_usage").Bool())
 }
 
+func TestExtractCCStreamUsage_IncludesCacheWriteTokens(t *testing.T) {
+	usage := extractCCStreamUsage(`{"usage":{"prompt_tokens":12,"completion_tokens":3,"prompt_tokens_details":{"cached_tokens":4,"cache_write_tokens":2}}}`)
+	require.NotNil(t, usage)
+	require.Equal(t, 12, usage.InputTokens)
+	require.Equal(t, 4, usage.CacheReadInputTokens)
+	require.Equal(t, 2, usage.CacheCreationInputTokens)
+}
+
 func TestBufferRawChatCompletions_RejectsOversizedResponse(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -232,6 +241,27 @@ func TestBufferRawChatCompletions_RejectsOversizedResponse(t *testing.T) {
 	require.ErrorIs(t, err, ErrUpstreamResponseBodyTooLarge)
 	require.Nil(t, result)
 	require.Equal(t, http.StatusBadGateway, rec.Code)
+}
+
+func TestBufferRawChatCompletions_IncludesCacheWriteTokens(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/chat/completions", nil)
+	resp := &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"application/json"}},
+		Body: io.NopCloser(strings.NewReader(
+			`{"usage":{"prompt_tokens":20,"completion_tokens":5,"prompt_tokens_details":{"cached_tokens":7,"cache_write_tokens":4}}}`,
+		)),
+	}
+
+	result, err := (&OpenAIGatewayService{cfg: rawChatCompletionsTestConfig()}).bufferRawChatCompletions(
+		c, resp, "gpt-5.6", "gpt-5.6-sol", "gpt-5.6-sol", nil, nil, time.Now(),
+	)
+	require.NoError(t, err)
+	require.Equal(t, 7, result.Usage.CacheReadInputTokens)
+	require.Equal(t, 4, result.Usage.CacheCreationInputTokens)
 }
 
 func rawChatCompletionsTestConfig() *config.Config {
