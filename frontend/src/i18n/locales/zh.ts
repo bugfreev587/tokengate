@@ -814,19 +814,19 @@ export default {
     useKey: '使用密钥',
     useKeyModal: {
       title: '使用 API 密钥',
-      description: '将以下环境变量添加到您的终端配置文件或直接在终端中运行。',
+      description: '将以下环境变量添加到终端配置或直接运行，然后使用 /v1/models 返回的模型启动 Claude Code（例如 claude-sonnet-5）。',
       copy: '复制',
       copied: '已复制',
-      note: '这些环境变量将在当前终端会话中生效。如需永久配置，请将其添加到 ~/.bashrc、~/.zshrc 或相应的配置文件中。',
+      note: '这些变量仅在当前终端会话生效；如需永久使用，请写入 shell 配置并在修改后重启 Claude Code。使用 claude-fable-5-1 需要 Claude Code 2.1.257 或更高版本。',
       noGroupTitle: '请先分配分组',
       noGroupDescription:
         '此 API 密钥尚未分配分组，请先在密钥列表中点击分组列进行分配，然后才能查看使用配置。',
       openai: {
-        description: '将以下配置文件添加到 Codex CLI 配置目录中。',
+        description: '将以下文件添加到 Codex CLI 配置目录。示例默认使用 gpt-5.6-terra；切换模型前请先查询 /v1/models。',
         configTomlHint: '请确保以下内容位于 config.toml 文件的开头部分',
-        note: '请确保配置目录存在。macOS/Linux 用户可运行 mkdir -p ~/.codex 创建目录。',
+        note: '请确保 ~/.codex 目录存在，保存后重启 Codex。当前模型 ID 包括 gpt-6-astra、gpt-5.6-sol、gpt-5.6-terra 和 gpt-5.6-luna。',
         noteWindows:
-          '按 Win+R，输入 %userprofile%\\.codex 打开配置目录。如目录不存在，请先手动创建。'
+          '打开 %userprofile%\\.codex（不存在则创建），保存后重启 Codex。请查询 /v1/models 确认此密钥可用的当前模型 ID。'
       },
       cliTabs: {
         claudeCode: 'Claude Code',

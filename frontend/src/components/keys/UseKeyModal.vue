@@ -552,13 +552,13 @@ function generateOpenAIFiles(baseUrl: string, apiKey: string): FileConfig[] {
 
   // config.toml content
   const configContent = `model_provider = "OpenAI"
-model = "gpt-5.4"
-review_model = "gpt-5.4"
+model = "gpt-5.6-terra"
+review_model = "gpt-5.6-terra"
 model_reasoning_effort = "xhigh"
 disable_response_storage = true
 network_access = "enabled"
 windows_wsl_setup_acknowledged = true
-model_context_window = 1000000
+model_context_window = 1050000
 model_auto_compact_token_limit = 900000
 
 [model_providers.OpenAI]
@@ -591,13 +591,13 @@ function generateOpenAIWsFiles(baseUrl: string, apiKey: string): FileConfig[] {
 
   // config.toml content with WebSocket v2
   const configContent = `model_provider = "OpenAI"
-model = "gpt-5.4"
-review_model = "gpt-5.4"
+model = "gpt-5.6-terra"
+review_model = "gpt-5.6-terra"
 model_reasoning_effort = "xhigh"
 disable_response_storage = true
 network_access = "enabled"
 windows_wsl_setup_acknowledged = true
-model_context_window = 1000000
+model_context_window = 1050000
 model_auto_compact_token_limit = 900000
 
 [model_providers.OpenAI]
@@ -637,25 +637,71 @@ function generateOpenCodeConfig(platform: string, baseUrl: string, apiKey: strin
       }
     }
   }
+  const currentOpenAIVariants = {
+    low: {},
+    medium: {},
+    high: {},
+    xhigh: {},
+    max: {}
+  }
   const openaiModels = {
-    'gpt-5.2': {
-      name: 'GPT-5.2',
+    'gpt-6-astra': {
+      name: 'GPT-6 Astra',
       limit: {
-        context: 400000,
+        context: 1050000,
         output: 128000
       },
       options: {
         store: false
       },
-      variants: {
-        low: {},
-        medium: {},
-        high: {},
-        xhigh: {}
-      }
+      variants: currentOpenAIVariants
+    },
+    'gpt-5.6': {
+      name: 'GPT-5.6 (Sol alias)',
+      limit: {
+        context: 1050000,
+        output: 128000
+      },
+      options: {
+        store: false
+      },
+      variants: currentOpenAIVariants
+    },
+    'gpt-5.6-sol': {
+      name: 'GPT-5.6 Sol',
+      limit: {
+        context: 1050000,
+        output: 128000
+      },
+      options: {
+        store: false
+      },
+      variants: currentOpenAIVariants
+    },
+    'gpt-5.6-terra': {
+      name: 'GPT-5.6 Terra',
+      limit: {
+        context: 1050000,
+        output: 128000
+      },
+      options: {
+        store: false
+      },
+      variants: currentOpenAIVariants
+    },
+    'gpt-5.6-luna': {
+      name: 'GPT-5.6 Luna',
+      limit: {
+        context: 1050000,
+        output: 128000
+      },
+      options: {
+        store: false
+      },
+      variants: currentOpenAIVariants
     },
     'gpt-5.5': {
-      name: 'GPT-5.5',
+      name: 'GPT-5.5 (legacy)',
       limit: {
         context: 1050000,
         output: 128000
@@ -663,91 +709,7 @@ function generateOpenCodeConfig(platform: string, baseUrl: string, apiKey: strin
       options: {
         store: false
       },
-      variants: {
-        low: {},
-        medium: {},
-        high: {},
-        xhigh: {}
-      }
-    },
-    'gpt-5.4': {
-      name: 'GPT-5.4',
-      limit: {
-        context: 1050000,
-        output: 128000
-      },
-      options: {
-        store: false
-      },
-      variants: {
-        low: {},
-        medium: {},
-        high: {},
-        xhigh: {}
-      }
-    },
-    'gpt-5.4-mini': {
-      name: 'GPT-5.4 Mini',
-      limit: {
-        context: 400000,
-        output: 128000
-      },
-      options: {
-        store: false
-      },
-      variants: {
-        low: {},
-        medium: {},
-        high: {},
-        xhigh: {}
-      }
-    },
-    'gpt-5.3-codex-spark': {
-      name: 'GPT-5.3 Codex Spark',
-      limit: {
-        context: 128000,
-        output: 32000
-      },
-      options: {
-        store: false
-      },
-      variants: {
-        low: {},
-        medium: {},
-        high: {},
-        xhigh: {}
-      }
-    },
-    'gpt-5.3-codex': {
-      name: 'GPT-5.3 Codex',
-      limit: {
-        context: 400000,
-        output: 128000
-      },
-      options: {
-        store: false
-      },
-      variants: {
-        low: {},
-        medium: {},
-        high: {},
-        xhigh: {}
-      }
-    },
-    'codex-mini-latest': {
-      name: 'Codex Mini',
-      limit: {
-        context: 200000,
-        output: 100000
-      },
-      options: {
-        store: false
-      },
-      variants: {
-        low: {},
-        medium: {},
-        high: {}
-      }
+      variants: currentOpenAIVariants
     }
   }
   const geminiModels = {
@@ -976,6 +938,39 @@ function generateOpenCodeConfig(platform: string, baseUrl: string, apiKey: strin
     }
   }
   const claudeModels = {
+    'claude-fable-5-1': {
+      name: 'Claude Fable 5.1',
+      limit: {
+        context: 1000000,
+        output: 128000
+      },
+      modalities: {
+        input: ['text', 'image', 'pdf'],
+        output: ['text']
+      }
+    },
+    'claude-opus-5': {
+      name: 'Claude Opus 5',
+      limit: {
+        context: 1000000,
+        output: 128000
+      },
+      modalities: {
+        input: ['text', 'image', 'pdf'],
+        output: ['text']
+      }
+    },
+    'claude-sonnet-5': {
+      name: 'Claude Sonnet 5',
+      limit: {
+        context: 1000000,
+        output: 128000
+      },
+      modalities: {
+        input: ['text', 'image', 'pdf'],
+        output: ['text']
+      }
+    },
     'claude-opus-4-6-thinking': {
       name: 'Claude 4.6 Opus (Thinking)',
       limit: {
@@ -1017,6 +1012,7 @@ function generateOpenCodeConfig(platform: string, baseUrl: string, apiKey: strin
     provider[platform].models = geminiModels
   } else if (platform === 'anthropic') {
     provider[platform].npm = '@ai-sdk/anthropic'
+    provider[platform].models = claudeModels
   } else if (platform === 'antigravity-claude') {
     provider[platform].npm = '@ai-sdk/anthropic'
     provider[platform].name = 'Antigravity (Claude)'

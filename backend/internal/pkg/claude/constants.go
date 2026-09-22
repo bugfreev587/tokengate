@@ -117,22 +117,34 @@ type Model struct {
 // DefaultModels Claude Code 客户端支持的默认模型列表
 var DefaultModels = []Model{
 	{
+		ID:          "claude-fable-5-1",
+		Type:        "model",
+		DisplayName: "Claude Fable 5.1",
+		CreatedAt:   "2026-09-01T00:00:00Z",
+	},
+	{
+		ID:          "claude-opus-5",
+		Type:        "model",
+		DisplayName: "Claude Opus 5",
+		CreatedAt:   "2026-07-24T00:00:00Z",
+	},
+	{
 		ID:          "claude-sonnet-5",
 		Type:        "model",
 		DisplayName: "Claude Sonnet 5",
-		CreatedAt:   "2026-07-01T00:00:00Z",
+		CreatedAt:   "2026-06-30T00:00:00Z",
 	},
 	{
 		ID:          "claude-opus-4-8",
 		Type:        "model",
 		DisplayName: "Claude Opus 4.8",
-		CreatedAt:   "2026-07-01T00:00:00Z",
+		CreatedAt:   "2026-05-28T00:00:00Z",
 	},
 	{
 		ID:          "claude-fable-5",
 		Type:        "model",
 		DisplayName: "Claude Fable 5",
-		CreatedAt:   "2026-07-01T00:00:00Z",
+		CreatedAt:   "2026-06-09T00:00:00Z",
 	},
 	{
 		ID:          "claude-opus-4-5-20251101",

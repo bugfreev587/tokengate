@@ -112,6 +112,8 @@ TOKENGATE_API_KEY="tg_live_or_sub2api_key" \
 tools/tokengate_model_visibility.sh
 ```
 
+用户 API Key、Codex CLI 和 Claude Code 的接入示例统一维护在[快速开始](docs/TOKENGATE_QUICKSTART.md)。选择当前模型 ID 前，请始终先查询 `/v1/models`，确认该密钥所属分组实际可见的模型。
+
 ## 本地开发
 
 后端：

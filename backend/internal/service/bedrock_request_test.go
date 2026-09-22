@@ -420,6 +420,29 @@ func TestBedrockCrossRegionPrefix(t *testing.T) {
 }
 
 func TestResolveBedrockModelID(t *testing.T) {
+	t.Run("current Claude aliases use Bedrock Messages API model IDs", func(t *testing.T) {
+		account := &Account{
+			Platform: PlatformAnthropic,
+			Type:     AccountTypeBedrock,
+			Credentials: map[string]any{
+				"aws_region": "us-east-1",
+			},
+		}
+
+		models := map[string]string{
+			"claude-fable-5-1": "anthropic.claude-fable-5-1",
+			"claude-opus-5":    "anthropic.claude-opus-5",
+			"claude-opus-4-8":  "anthropic.claude-opus-4-8",
+			"claude-sonnet-5":  "anthropic.claude-sonnet-5",
+			"claude-fable-5":   "anthropic.claude-fable-5",
+		}
+		for requested, expected := range models {
+			modelID, ok := ResolveBedrockModelID(account, requested)
+			require.True(t, ok, requested)
+			assert.Equal(t, expected, modelID, requested)
+		}
+	})
+
 	t.Run("default alias resolves and adjusts region", func(t *testing.T) {
 		account := &Account{
 			Platform: PlatformAnthropic,

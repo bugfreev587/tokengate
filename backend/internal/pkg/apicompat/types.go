@@ -308,7 +308,8 @@ type ResponsesUsage struct {
 
 // ResponsesInputTokensDetails breaks down input token usage.
 type ResponsesInputTokensDetails struct {
-	CachedTokens int `json:"cached_tokens,omitempty"`
+	CachedTokens     int `json:"cached_tokens,omitempty"`
+	CacheWriteTokens int `json:"cache_write_tokens,omitempty"`
 }
 
 // ResponsesOutputTokensDetails breaks down output token usage.
@@ -470,7 +471,8 @@ type ChatUsage struct {
 
 // ChatTokenDetails provides a breakdown of token usage.
 type ChatTokenDetails struct {
-	CachedTokens int `json:"cached_tokens,omitempty"`
+	CachedTokens     int `json:"cached_tokens,omitempty"`
+	CacheWriteTokens int `json:"cache_write_tokens,omitempty"`
 }
 
 // ChatCompletionsChunk is a single streaming chunk from POST /v1/chat/completions.

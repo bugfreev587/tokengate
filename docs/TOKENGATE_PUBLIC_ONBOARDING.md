@@ -37,10 +37,14 @@ Every public quickstart must include:
 
 - A backend base URL, not the Vercel frontend URL.
 - A bearer API key example.
+- A `/v1/models` request before any hard-coded model example, with a note that model visibility is group-specific.
 - One OpenAI-compatible request to `/v1/chat/completions`.
 - One Anthropic-compatible request to `/v1/messages`.
+- Copyable Codex CLI and Claude Code setup using current model IDs, plus a reminder to restart the client after changing configuration.
 - The expected success indicators in the UI: `Last Used`, **Usage**, dashboard totals, and balance deduction.
 - A short troubleshooting section for `401`, `403`, `404`, `405`, and upstream account errors.
+
+Current examples should default to `gpt-5.6-terra` for Codex/OpenAI-compatible access and `claude-sonnet-5` for Claude Code/Anthropic-compatible access. Do not introduce retired `gpt-5.4` examples. Keep the complete model list and dated retirement notes in the quickstart rather than duplicating them across product surfaces.
 
 Reference implementation: [TOKENGATE_QUICKSTART.md](TOKENGATE_QUICKSTART.md).
 

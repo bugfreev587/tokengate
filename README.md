@@ -112,6 +112,8 @@ TOKENGATE_API_KEY="tg_live_or_sub2api_key" \
 tools/tokengate_model_visibility.sh
 ```
 
+The user API-key and CLI setup examples are maintained in the [Quickstart](docs/TOKENGATE_QUICKSTART.md). Always use `/v1/models` to confirm group-specific availability before selecting a current Codex or Claude Code model ID.
+
 ## Local Development
 
 Backend:

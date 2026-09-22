@@ -836,6 +836,14 @@ func TestApplyCodexOAuthTransform_EmptyInput(t *testing.T) {
 
 func TestNormalizeCodexModel_Gpt53(t *testing.T) {
 	cases := map[string]string{
+		"gpt-6-astra":               "gpt-6-astra",
+		"gpt6astra":                 "gpt-6-astra",
+		"openai/gpt-6-astra-high":   "gpt-6-astra",
+		"gpt-5.6":                   "gpt-5.6-sol",
+		"gpt5.6":                    "gpt-5.6-sol",
+		"gpt-5.6-sol-xhigh":         "gpt-5.6-sol",
+		"openai/gpt5.6terra-high":   "gpt-5.6-terra",
+		"gpt-5.6-luna-max":          "gpt-5.6-luna",
 		"gpt-5.4":                   "gpt-5.4",
 		"gpt5.5":                    "gpt-5.5",
 		"openai/gpt5.5":             "gpt-5.5",
@@ -865,6 +873,17 @@ func TestNormalizeCodexModel_Gpt53(t *testing.T) {
 	for input, expected := range cases {
 		require.Equal(t, expected, normalizeCodexModel(input))
 	}
+}
+
+func TestNormalizeKnownOpenAICodexModelRejectsUnknownGPT56Variant(t *testing.T) {
+	require.Equal(t, "gpt-5.6-sol", normalizeKnownOpenAICodexModel("gpt-5.6-high"))
+	require.Equal(t, "gpt-5.6-sol", normalizeKnownOpenAICodexModel("gpt-5.6-max"))
+	require.Equal(t, "gpt-6-astra", normalizeKnownOpenAICodexModel("gpt-6-astra-max"))
+	require.Empty(t, normalizeKnownOpenAICodexModel("gpt-6-astra-none"))
+	require.Empty(t, normalizeKnownOpenAICodexModel("gpt-5.5-max"))
+	require.Empty(t, normalizeKnownOpenAICodexModel("gpt-5.4-max"))
+	require.Empty(t, normalizeKnownOpenAICodexModel("gpt-5.6-cyber"))
+	require.Empty(t, normalizeKnownOpenAICodexModel("gpt-5.60"))
 }
 
 func TestNormalizeCodexModel_RemovedModelsFallbackToSupportedTargets(t *testing.T) {
