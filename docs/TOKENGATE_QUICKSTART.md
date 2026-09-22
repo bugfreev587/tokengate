@@ -23,7 +23,32 @@ export TOKENGATE_BASE_URL="https://tokengate-production.up.railway.app"
 
 For the current Railway deployment shape, the base URL should be the backend domain, not the Vercel frontend domain.
 
-## 2. Anthropic-Compatible Request
+Before copying a model ID into a client, list the models visible to this key:
+
+```bash
+curl "$TOKENGATE_BASE_URL/v1/models" \
+  -H "Authorization: Bearer $TOKENGATE_API_KEY"
+```
+
+Model visibility depends on the group assigned to the key. As of 2026-09-21, the current TokenGate IDs are:
+
+| Client family | Current model IDs |
+| --- | --- |
+| Codex | `gpt-6-astra`, `gpt-5.6` (Sol alias), `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna` |
+| Claude Code | `claude-fable-5-1`, `claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5-20251001` |
+
+`gpt-5.4` is no longer available to ChatGPT-sign-in Codex users. `gpt-5.5` remains supported for API-backed accounts, but ChatGPT-sign-in access is scheduled to retire on 2026-10-14. Claude Fable 5.1 requires Claude Code 2.1.257 or newer.
+
+## 2. Claude Code And Anthropic-Compatible Requests
+
+Configure Claude Code for the current shell:
+
+```bash
+export ANTHROPIC_BASE_URL="$TOKENGATE_BASE_URL"
+export ANTHROPIC_AUTH_TOKEN="$TOKENGATE_API_KEY"
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
+claude --model claude-sonnet-5
+```
 
 Use `/v1/messages` for Claude-compatible requests.
 
@@ -33,7 +58,7 @@ curl "$TOKENGATE_BASE_URL/v1/messages" \
   -H "Content-Type: application/json" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-haiku-4-5-20251001",
+    "model": "claude-sonnet-5",
     "max_tokens": 64,
     "messages": [
       {
@@ -51,7 +76,35 @@ Expected result:
 - a new row appears in **Usage**
 - the cost is deducted from the user balance
 
-## 3. OpenAI-Compatible Request
+## 3. Codex CLI And OpenAI-Compatible Requests
+
+Create `~/.codex/config.toml` (or `%userprofile%\\.codex\\config.toml` on Windows):
+
+```toml
+model_provider = "OpenAI"
+model = "gpt-5.6-terra"
+review_model = "gpt-5.6-terra"
+model_reasoning_effort = "xhigh"
+disable_response_storage = true
+model_context_window = 1050000
+model_auto_compact_token_limit = 900000
+
+[model_providers.OpenAI]
+name = "OpenAI"
+base_url = "https://tokengate-production.up.railway.app/v1"
+wire_api = "responses"
+requires_openai_auth = true
+```
+
+Then create `~/.codex/auth.json` (or `%userprofile%\\.codex\\auth.json`):
+
+```json
+{
+  "OPENAI_API_KEY": "replace-with-your-TokenGate-key"
+}
+```
+
+Replace the example base URL if your TokenGate deployment uses a different backend domain, then restart Codex.
 
 Use `/v1/chat/completions` for OpenAI-compatible chat requests.
 
@@ -60,7 +113,7 @@ curl "$TOKENGATE_BASE_URL/v1/chat/completions" \
   -H "Authorization: Bearer $TOKENGATE_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-5.4",
+    "model": "gpt-5.6-terra",
     "messages": [
       {
         "role": "user",
@@ -87,7 +140,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: "gpt-5.4",
+  model: "gpt-5.6-terra",
   messages: [{ role: "user", content: "Say hi in one short sentence." }],
 });
 
@@ -155,7 +208,7 @@ Before calling the OpenAI-compatible surface production-ready, run the P0 compat
 ```bash
 TOKENGATE_BASE_URL="https://your-backend-domain" \
 TOKENGATE_API_KEY="sk-..." \
-TOKENGATE_OPENAI_MODEL="gpt-5.4" \
+TOKENGATE_OPENAI_MODEL="gpt-5.6-terra" \
 tools/tokengate_p0_compatibility_suite.sh
 ```
 

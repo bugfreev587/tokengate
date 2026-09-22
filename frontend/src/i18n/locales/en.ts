@@ -818,17 +818,17 @@ export default {
     useKeyModal: {
       title: 'Use API Key',
       description:
-        'Add the following environment variables to your terminal profile or run directly in terminal to configure API access.',
+        'Add these environment variables to your terminal profile or run them directly, then start Claude Code with a model returned by /v1/models (for example claude-sonnet-5).',
       copy: 'Copy',
       copied: 'Copied',
-      note: 'These environment variables will be active in the current terminal session. For permanent configuration, add them to ~/.bashrc, ~/.zshrc, or the appropriate configuration file.',
+      note: 'These variables apply to the current shell. Add them to your shell profile for permanent use, restart Claude Code after changes, and use Claude Code 2.1.257 or newer for claude-fable-5-1.',
       noGroupTitle: 'Please assign a group first',
       noGroupDescription: 'This API key has not been assigned to a group. Please click the group column in the key list to assign one before viewing the configuration.',
       openai: {
-        description: 'Add the following configuration files to your Codex CLI config directory.',
+        description: 'Add these files to your Codex CLI config directory. The example uses gpt-5.6-terra; query /v1/models before choosing another model.',
         configTomlHint: 'Make sure the following content is at the beginning of the config.toml file',
-        note: 'Make sure the config directory exists. macOS/Linux users can run mkdir -p ~/.codex to create it.',
-        noteWindows: 'Press Win+R and enter %userprofile%\\.codex to open the config directory. Create it manually if it does not exist.',
+        note: 'Make sure ~/.codex exists, then restart Codex after saving. Current IDs include gpt-6-astra, gpt-5.6-sol, gpt-5.6-terra, and gpt-5.6-luna.',
+        noteWindows: 'Open %userprofile%\\.codex, create it if needed, and restart Codex after saving. Query /v1/models to confirm which current model IDs this key can use.',
       },
       cliTabs: {
         claudeCode: 'Claude Code',
