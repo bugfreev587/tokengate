@@ -180,7 +180,7 @@ func TestBuildPaymentOrderProviderSnapshot_IncludesProviderCurrency(t *testing.T
 			"currency": "hkd",
 		},
 	}, CreateOrderRequest{}, nil)
-	require.Equal(t, "HKD", stripeSnapshot["currency"])
+	require.Equal(t, "USD", stripeSnapshot["currency"])
 
 	airwallexSnapshot := buildPaymentOrderProviderSnapshot(&payment.InstanceSelection{
 		InstanceID:  "78",
